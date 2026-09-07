@@ -103,7 +103,7 @@
             background-clip: text;
         }
 
-        /* ─── TODAY'S DATE (added) ─── */
+        /* ─── TODAY'S DATE ─── */
         .today-date {
             margin-top: 14px;
             font-size: 0.8rem;
@@ -213,8 +213,6 @@
             margin-top: 8px;
             letter-spacing: 0.04em;
         }
-
-        /* removed fixed nth-child rotations — now random via JS */
 
         /* ─── TIMELINE ─── */
         .timeline-section {
@@ -680,6 +678,35 @@
             background: linear-gradient(135deg, #f8a4b8, #c78bdb);
             border-radius: 10px;
         }
+
+        /* ─── AUDIO TOAST (subtle hint) ─── */
+        .audio-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            padding: 10px 24px;
+            border-radius: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            font-size: 0.75rem;
+            color: #7a6a88;
+            font-weight: 400;
+            letter-spacing: 0.04em;
+            opacity: 0;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            transform: translateX(-50%) translateY(12px);
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .audio-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -695,6 +722,15 @@
         <div class="counter" id="lightboxCounter"></div>
     </div>
 
+    <!-- ─── AUDIO (hidden) ─── -->
+    <audio id="bgAudio" preload="auto" loop>
+        <source src="audio_01.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- ─── TOAST (subtle hint) ─── -->
+    <div class="audio-toast" id="audioToast">♫ tap anywhere to start the music</div>
+
     <!-- ─── MAIN ─── -->
     <div class="scrapbook">
 
@@ -705,7 +741,6 @@
             <div class="age-badge">
                 <strong>21</strong> &nbsp;·&nbsp; born 18 · 09 · 2005
             </div>
-            <!-- ─── TODAY'S DATE (added) ─── -->
             <div class="today-date" id="todayDate"></div>
         </header>
 
@@ -735,31 +770,37 @@
                 <div class="img-wrap">
                     <img src="ruth1.jpg" alt="Ruth 1" loading="lazy" />
                 </div>
-                <div class="caption">✦ 1/5</div>
+                <div class="caption">✦ 1/6</div>
             </div>
             <div class="polaroid" data-index="1">
                 <div class="img-wrap">
                     <img src="ruth2.jpg" alt="Ruth 2" loading="lazy" />
                 </div>
-                <div class="caption">✦ 2/5</div>
+                <div class="caption">✦ 2/6</div>
             </div>
             <div class="polaroid" data-index="2">
                 <div class="img-wrap">
                     <img src="ruth3.jpg" alt="Ruth 3" loading="lazy" />
                 </div>
-                <div class="caption">✦ 3/5</div>
+                <div class="caption">✦ 3/6</div>
             </div>
             <div class="polaroid" data-index="3">
                 <div class="img-wrap">
                     <img src="ruth4.jpg" alt="Ruth 4" loading="lazy" />
                 </div>
-                <div class="caption">✦ 4/5</div>
+                <div class="caption">✦ 4/6</div>
             </div>
             <div class="polaroid" data-index="4">
                 <div class="img-wrap">
                     <img src="ruth5.jpg" alt="Ruth 5" loading="lazy" />
                 </div>
-                <div class="caption">✦ 5/5</div>
+                <div class="caption">✦ 5/6</div>
+            </div>
+            <div class="polaroid" data-index="5">
+                <div class="img-wrap">
+                    <img src="ruth6.jpg" alt="Ruth 6" loading="lazy" />
+                </div>
+                <div class="caption">✦ 6/6</div>
             </div>
         </div>
 
@@ -796,7 +837,6 @@
                 'HAPPY BIRTHDAY! 🎉'
             ];
 
-            // ─── EXPANDED WISHES (more messages) ───
             const WISHES = [
                 'Ruth, you are pure magic ✨',
                 '21 looks stunning on you 💖',
@@ -838,8 +878,33 @@
             const lightboxCounter = document.getElementById('lightboxCounter');
             const todayDateEl = document.getElementById('todayDate');
 
-            let lightboxIndex = 0;
-            const galleryImages = [];
+            // ─── AUDIO ───
+            const audio = document.getElementById('bgAudio');
+            const toast = document.getElementById('audioToast');
+            let audioStarted = false;
+
+            function startAudio() {
+                if (audioStarted) return;
+                audioStarted = true;
+                audio.play().catch(() => { /* ignore autoplay errors */ });
+                toast.classList.remove('show');
+                // hide toast permanently after first touch
+                setTimeout(() => { toast.style.display = 'none'; }, 800);
+            }
+
+            // ─── SHOW TOAST ───
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 600);
+
+            // ─── LISTEN FOR FIRST TOUCH/CLICK ───
+            const startEvents = ['touchstart', 'click'];
+            const starter = function(e) {
+                startAudio();
+                // remove listeners after first trigger
+                startEvents.forEach(ev => document.removeEventListener(ev, starter));
+            };
+            startEvents.forEach(ev => document.addEventListener(ev, starter, { passive: true }));
 
             // ─── TODAY'S DATE ───
             const now = new Date();
@@ -852,6 +917,7 @@
             todayDateEl.textContent = '✨ ' + dateStr;
 
             // ─── GATHER IMAGES ───
+            const galleryImages = [];
             polaroids.forEach((p, i) => {
                 const img = p.querySelector('img');
                 if (img && img.src) {
@@ -859,7 +925,7 @@
                 }
             });
 
-            // ─── RANDOM POLAROID ROTATIONS (kept) ───
+            // ─── RANDOM POLAROID ROTATIONS ───
             polaroids.forEach(el => {
                 const rot = (Math.random() - 0.5) * 4;
                 el.style.setProperty('--rot', rot + 'deg');
@@ -881,7 +947,7 @@
             updateCountdown();
             setInterval(updateCountdown, 1000);
 
-            // ─── TIMELINE (original links to day_XX.html) ───
+            // ─── TIMELINE ───
             function renderTimeline() {
                 timelineEl.innerHTML = '';
                 DAYS.forEach((day, idx) => {
@@ -916,7 +982,6 @@
                     step.appendChild(content);
                     step.appendChild(dot);
 
-                    // sparkle burst on click (original behaviour)
                     content.addEventListener('click', function(e) {
                         e.preventDefault();
                         sparkleBurst(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight /
@@ -995,6 +1060,8 @@
                 document.body.style.overflow = '';
             }
 
+            let lightboxIndex = 0;
+
             function prevImage() {
                 if (galleryImages.length) {
                     openLightbox((lightboxIndex - 1 + galleryImages.length) % galleryImages.length);
@@ -1051,7 +1118,6 @@
                     badge.style.background = '';
                 }, 3000);
 
-                // ─── EXTENDED DURATION: 4000 → 6000ms ───
                 setTimeout(() => {
                     wishMsg.className = 'wish-message';
                 }, 6000);
@@ -1067,6 +1133,8 @@
             });
 
             console.log('✨ Ruth · 21 · A celebration of you 💖');
+            console.log('🎵 Tap anywhere to start the music.');
+
         })();
     </script>
 
