@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Day 10 · Ruth's 21st</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
   <style>
     /* ─── RESET & BASE ─── */
     * {
@@ -53,7 +53,7 @@
       z-index: 1;
       max-width: 820px;
       width: 100%;
-      background: rgba(255, 255, 255, 0.65);
+      background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(16px);
       border-radius: 40px;
       border: 1px solid rgba(255, 255, 255, 0.5);
@@ -138,7 +138,6 @@
       100% { opacity: 1; transform: scale(1) translateY(0); }
     }
 
-    /* Stem */
     .stem {
       width: 4px;
       height: 80px;
@@ -169,7 +168,6 @@
       transform: rotate(25deg);
     }
 
-    /* Flower head */
     .bloom {
       position: relative;
       width: 56px;
@@ -194,14 +192,13 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
       background: var(--p-color, #f5a0b8);
     }
-    /* Outer petals */
     .bloom .petal:nth-child(1) { transform: rotate(0deg) translate(10px, -2px); }
     .bloom .petal:nth-child(2) { transform: rotate(60deg) translate(10px, -2px); }
     .bloom .petal:nth-child(3) { transform: rotate(120deg) translate(10px, -2px); }
     .bloom .petal:nth-child(4) { transform: rotate(180deg) translate(10px, -2px); }
     .bloom .petal:nth-child(5) { transform: rotate(240deg) translate(10px, -2px); }
     .bloom .petal:nth-child(6) { transform: rotate(300deg) translate(10px, -2px); }
-    /* Inner petals */
+
     .bloom .petal-inner {
       position: absolute;
       width: 18px;
@@ -249,15 +246,61 @@
       align-items: center;
       margin: 10px 0 20px;
       width: 100%;
+      position: relative;
+    }
+
+    /* Floating hearts */
+    .floating-hearts {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .heart-particle {
+      position: absolute;
+      font-size: 1.2rem;
+      animation: floatHeart 8s linear infinite;
+      opacity: 0;
+      pointer-events: none;
+    }
+    @keyframes floatHeart {
+      0%   { opacity: 0; transform: translateY(100%) scale(0.5) rotate(0deg); }
+      10%  { opacity: 0.7; }
+      90%  { opacity: 0.7; }
+      100% { opacity: 0; transform: translateY(-200px) scale(1.2) rotate(20deg); }
+    }
+
+    /* Cake glow */
+    .cake-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(255, 200, 150, 0.1), transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: pulseGlow 3s ease-in-out infinite;
+      z-index: 0;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
     }
 
     .cake {
       position: relative;
-      width: 240px;
+      width: 260px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
+      z-index: 1;
     }
 
     .layer {
@@ -321,7 +364,6 @@
       opacity: 0.5;
     }
 
-    /* Frosting drips */
     .drip {
       position: absolute;
       width: 14px;
@@ -339,52 +381,57 @@
     .drip:nth-child(5) { left: 78%; height: 20px; width: 12px; }
     .drip:nth-child(6) { left: 92%; height: 14px; width: 10px; }
 
-    /* Candles */
+    /* ─── 21 CANDLES in a heart shape ─── */
     .candles-container {
-      display: flex;
-      gap: 20px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px 8px;
       margin-bottom: 10px;
-      justify-content: center;
+      justify-items: center;
+      align-items: end;
       position: relative;
       z-index: 2;
+      width: 100%;
+      max-width: 280px;
     }
+
     .candle {
-      width: 14px;
-      height: 44px;
+      width: 12px;
+      height: 36px;
       background: linear-gradient(180deg, #f5a0b8, #d47a92);
-      border-radius: 4px 4px 2px 2px;
+      border-radius: 3px 3px 2px 2px;
       position: relative;
-      box-shadow: inset -2px 0 8px rgba(0,0,0,0.06);
+      box-shadow: inset -2px 0 6px rgba(0,0,0,0.06);
       transition: all 0.5s ease;
       transform-origin: bottom;
       cursor: default;
+      display: inline-block;
     }
     .candle::before {
       content: '';
       position: absolute;
-      top: -12px;
+      top: -10px;
       left: 50%;
       transform: translateX(-50%);
-      width: 4px;
-      height: 14px;
+      width: 3px;
+      height: 12px;
       background: #333;
       border-radius: 2px;
       opacity: 0.3;
     }
-    /* Flame */
     .candle .flame {
       position: absolute;
-      top: -28px;
+      top: -24px;
       left: 50%;
       transform: translateX(-50%);
-      width: 16px;
-      height: 26px;
+      width: 14px;
+      height: 22px;
       background: radial-gradient(circle at 50% 20%, #ffe066, #f5a623 40%, #d47a2a 80%, transparent);
       border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
       filter: blur(0.5px);
       animation: flicker 0.3s infinite alternate ease-in-out;
-      box-shadow: 0 0 40px rgba(255, 200, 50, 0.4);
-      transition: all 0.6s ease;
+      box-shadow: 0 0 30px rgba(255, 200, 50, 0.35);
+      transition: all 0.5s ease;
     }
     @keyframes flicker {
       0%   { transform: translateX(-50%) scale(1) rotate(0deg); }
@@ -392,18 +439,17 @@
     }
     .candle .flame-glow {
       position: absolute;
-      top: -36px;
+      top: -30px;
       left: 50%;
       transform: translateX(-50%);
-      width: 50px;
-      height: 50px;
-      background: radial-gradient(circle, rgba(255, 200, 50, 0.15), transparent 70%);
+      width: 40px;
+      height: 40px;
+      background: radial-gradient(circle, rgba(255, 200, 50, 0.12), transparent 70%);
       border-radius: 50%;
       pointer-events: none;
-      transition: opacity 0.6s ease;
+      transition: opacity 0.5s ease;
     }
 
-    /* Extinguished */
     .candle.extinguished {
       background: linear-gradient(180deg, #b0a0a0, #8a7a7a);
       transform: scale(0.85) translateY(6px);
@@ -415,6 +461,12 @@
       transform: scale(0.2);
       animation: none;
       box-shadow: none;
+    }
+
+    /* Heart shape arrangement: 21 candles */
+    /* Row 1: 5, Row 2: 5, Row 3: 5, Row 4: 4, Row 5: 2 */
+    .candle.hidden {
+      visibility: hidden;
     }
 
     .blow-info {
@@ -429,6 +481,8 @@
       flex-wrap: wrap;
       justify-content: center;
       letter-spacing: 0.04em;
+      position: relative;
+      z-index: 2;
     }
     .blow-info .mic-icon {
       display: inline-block;
@@ -446,6 +500,8 @@
       min-height: 1.6em;
       margin-top: 4px;
       font-weight: 400;
+      position: relative;
+      z-index: 2;
     }
 
     .mic-btn {
@@ -461,6 +517,8 @@
       box-shadow: 0 4px 20px rgba(199,139,219,0.2);
       margin-top: 12px;
       font-family: 'Inter', sans-serif;
+      position: relative;
+      z-index: 2;
     }
     .mic-btn:hover {
       transform: scale(1.05);
@@ -481,23 +539,35 @@
       border: 1px solid rgba(255,255,255,0.4);
       box-shadow: 0 8px 32px rgba(0,0,0,0.03);
       margin: 10px 0 20px;
-      font-family: 'Playfair Display', serif;
-      font-size: 1.3rem;
+      font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+      font-size: 1.4rem;
+      font-weight: 400;
       color: #3d344a;
-      line-height: 1.9;
-      letter-spacing: 0.02em;
+      line-height: 2;
+      letter-spacing: 0.03em;
+      animation: letterReveal 1.2s ease forwards;
+    }
+    @keyframes letterReveal {
+      from { opacity: 0; transform: scale(0.96) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
     }
     .love-letter .big-emoji {
       font-size: 2.8rem;
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .love-letter .closing {
       display: block;
-      margin-top: 16px;
+      margin-top: 14px;
       font-size: 1.1rem;
       font-weight: 400;
       color: #b8a6c9;
+      font-style: italic;
+      letter-spacing: 0.06em;
+    }
+    .love-letter .highlight {
+      color: #c78bdb;
+      font-weight: 600;
     }
 
     .back-link {
@@ -550,7 +620,7 @@
       .container { padding: 20px 16px; min-height: 480px; }
       .garden { height: 200px; }
       .bloom { width: 40px; height: 40px; }
-      .bloom .petal { width: 18px; height: 22px; transform-origin: 0 0; }
+      .bloom .petal { width: 18px; height: 22px; }
       .bloom .petal:nth-child(1) { transform: rotate(0deg) translate(6px, -1px); }
       .bloom .petal:nth-child(2) { transform: rotate(60deg) translate(6px, -1px); }
       .bloom .petal:nth-child(3) { transform: rotate(120deg) translate(6px, -1px); }
@@ -566,14 +636,15 @@
       .bloom .petal-inner:nth-child(12) { transform: rotate(330deg) translate(4px, 0px); }
       .bloom .center { width: 12px; height: 12px; }
       .stem { height: 60px; }
-      .cake { width: 170px; }
+      .cake { width: 180px; }
       .layer-bottom { height: 42px; }
       .layer-middle { height: 34px; }
       .layer-top { height: 30px; }
-      .candle { width: 10px; height: 34px; }
-      .candle .flame { width: 12px; height: 20px; top: -22px; }
-      .candles-container { gap: 12px; }
+      .candle { width: 10px; height: 28px; }
+      .candle .flame { width: 10px; height: 18px; top: -20px; }
+      .candles-container { gap: 3px 6px; max-width: 220px; }
       .love-letter { font-size: 1.1rem; padding: 18px; }
+      .cake-glow { width: 200px; height: 200px; }
     }
     @media (max-width: 400px) {
       .bloom { width: 32px; height: 32px; }
@@ -581,10 +652,13 @@
       .bloom .petal-inner { width: 10px; height: 14px; }
       .bloom .center { width: 10px; height: 10px; }
       .stem { height: 48px; }
-      .cake { width: 130px; }
+      .cake { width: 140px; }
       .layer-bottom { height: 34px; }
       .layer-middle { height: 28px; }
       .layer-top { height: 24px; }
+      .candle { width: 8px; height: 22px; }
+      .candle .flame { width: 8px; height: 14px; top: -16px; }
+      .candles-container { gap: 2px 4px; max-width: 160px; }
     }
   </style>
 </head>
@@ -608,6 +682,8 @@
     <!-- ═══ STAGE 2: CAKE ═══ -->
     <div class="stage" id="stage2">
       <div class="cake-scene">
+        <div class="cake-glow"></div>
+        <div class="floating-hearts" id="heartsContainer"></div>
         <div class="cake">
           <div class="candles-container" id="candlesContainer"></div>
           <div class="layer layer-top"><div class="decoration"></div></div>
@@ -638,14 +714,14 @@
       <div class="love-letter">
         <span class="big-emoji">💖</span>
         Ruth, my love,<br />
-        As your 21st birthday dawns, I want you to know that
+        As your <span class="highlight">21st</span> birthday dawns, I want you to know that
         every flower that bloomed today is a reflection of the
         beauty you bring into my world. Every candle that flickered
         was a wish for your happiness. And now, as they go out,
         know that my love for you burns brighter than any flame.
         <br /><br />
         You are my forever, my always. Here's to you, my darling.
-        <span class="closing">— with all my heart</span>
+        <span class="closing">— with all my heart, forever yours</span>
       </div>
       <a href="index.html" class="back-link">← back to celebration</a>
     </div>
@@ -657,7 +733,7 @@
       'use strict';
 
       // ─── CONFIG ───
-      const TOTAL_CANDLES = 5;
+      const TOTAL_CANDLES = 21;
       let candleIndex = 0;
       let blowDetected = false;
       let audioContext = null;
@@ -674,6 +750,7 @@
       const candlesContainer = document.getElementById('candlesContainer');
       const blowStatus = document.getElementById('blowStatus');
       const micButton = document.getElementById('micButton');
+      const heartsContainer = document.getElementById('heartsContainer');
 
       // ─── CREATE FLOWERS ───
       function createGarden() {
@@ -690,27 +767,22 @@
           const plant = document.createElement('div');
           plant.className = 'plant';
           const colors = colorPairs[i % colorPairs.length];
-          // stem
           const stem = document.createElement('div');
           stem.className = 'stem';
-          // bloom
           const bloom = document.createElement('div');
           bloom.className = 'bloom';
-          // outer petals (6)
           for (let j = 0; j < 6; j++) {
             const petal = document.createElement('div');
             petal.className = 'petal';
             petal.style.background = `radial-gradient(circle at 30% 30%, ${colors[0]}, ${colors[1]})`;
             bloom.appendChild(petal);
           }
-          // inner petals (6)
           for (let j = 0; j < 6; j++) {
             const inner = document.createElement('div');
             inner.className = 'petal-inner';
             inner.style.background = `radial-gradient(circle at 30% 30%, ${colors[2]}, ${colors[0]})`;
             bloom.appendChild(inner);
           }
-          // center
           const center = document.createElement('div');
           center.className = 'center';
           bloom.appendChild(center);
@@ -721,22 +793,62 @@
       }
       createGarden();
 
-      // ─── CREATE CANDLES ───
+      // ─── CREATE 21 CANDLES IN HEART SHAPE ───
       function createCandles() {
         candlesContainer.innerHTML = '';
-        for (let i = 0; i < TOTAL_CANDLES; i++) {
-          const candle = document.createElement('div');
-          candle.className = 'candle';
-          const flame = document.createElement('div');
-          flame.className = 'flame';
-          const glow = document.createElement('div');
-          glow.className = 'flame-glow';
-          candle.appendChild(flame);
-          candle.appendChild(glow);
-          candlesContainer.appendChild(candle);
+        // Heart shape: rows of 5, 5, 5, 4, 2
+        const rows = [5, 5, 5, 4, 2];
+        let candleCount = 0;
+        rows.forEach((count, rowIdx) => {
+          for (let i = 0; i < count; i++) {
+            const candle = document.createElement('div');
+            candle.className = 'candle';
+            candle.dataset.idx = candleCount;
+            const flame = document.createElement('div');
+            flame.className = 'flame';
+            const glow = document.createElement('div');
+            glow.className = 'flame-glow';
+            candle.appendChild(flame);
+            candle.appendChild(glow);
+            // Center the row
+            const totalCols = 7;
+            const offset = Math.floor((totalCols - count) / 2);
+            const col = offset + i;
+            candle.style.gridColumn = col + 1;
+            candle.style.gridRow = rowIdx + 1;
+            candlesContainer.appendChild(candle);
+            candleCount++;
+          }
+        });
+        // Fill remaining grid cells with hidden candles for spacing
+        const totalCells = 7 * 5;
+        for (let i = candleCount; i < totalCells; i++) {
+          const hidden = document.createElement('div');
+          hidden.className = 'candle hidden';
+          hidden.style.visibility = 'hidden';
+          hidden.style.pointerEvents = 'none';
+          candlesContainer.appendChild(hidden);
         }
       }
       createCandles();
+
+      // ─── CREATE FLOATING HEARTS ───
+      function createHearts() {
+        heartsContainer.innerHTML = '';
+        const heartEmojis = ['❤️', '💖', '💕', '💗', '❤️‍🔥', '💞'];
+        for (let i = 0; i < 20; i++) {
+          const heart = document.createElement('div');
+          heart.className = 'heart-particle';
+          heart.textContent = heartEmojis[i % heartEmojis.length];
+          heart.style.left = (Math.random() * 100) + '%';
+          heart.style.animationDuration = (6 + Math.random() * 8) + 's';
+          heart.style.animationDelay = (Math.random() * 10) + 's';
+          heart.style.fontSize = (0.8 + Math.random() * 1.2) + 'rem';
+          heart.style.opacity = 0.3 + Math.random() * 0.5;
+          heartsContainer.appendChild(heart);
+        }
+      }
+      createHearts();
 
       // ─── SPARKLE / CONFETTI ───
       function sparkleBurst(cx, cy, count = 30) {
@@ -763,7 +875,7 @@
 
       function confettiBurst(cx, cy) {
         const colors = ['#f8a4b8', '#c78bdb', '#f5c6a0', '#ffd6d6', '#d4b8e0', '#fce7f3', '#ffb3c6', '#b8d4e3'];
-        const count = 60 + Math.floor(Math.random() * 40);
+        const count = 80 + Math.floor(Math.random() * 60);
         for (let i = 0; i < count; i++) {
           const piece = document.createElement('div');
           piece.className = 'confetti-piece';
@@ -774,13 +886,13 @@
           piece.style.background = colors[Math.floor(Math.random() * colors.length)];
           piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
           const angle = Math.random() * 2 * Math.PI;
-          const dist = 80 + Math.random() * 350;
-          piece.style.animationDuration = (1.2 + Math.random() * 1.8) + 's';
+          const dist = 80 + Math.random() * 400;
+          piece.style.animationDuration = (1.2 + Math.random() * 2) + 's';
           piece.style.animationDelay = (Math.random() * 0.6) + 's';
           piece.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-          piece.style.setProperty('--ty', Math.sin(angle) * dist - 180 + 'px');
+          piece.style.setProperty('--ty', Math.sin(angle) * dist - 200 + 'px');
           document.body.appendChild(piece);
-          setTimeout(() => piece.remove(), 3000);
+          setTimeout(() => piece.remove(), 3500);
         }
       }
 
@@ -796,32 +908,34 @@
       function goToStage3() {
         stage2.classList.remove('active');
         stage3.classList.add('active');
-        // Celebration
-        sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 60);
-        confettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+        // Massive celebration
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => {
+            sparkleBurst(w * Math.random(), h * Math.random(), 40 + Math.random() * 30);
+            confettiBurst(w * Math.random(), h * Math.random());
+          }, i * 300);
+        }
+        // Big final burst
         setTimeout(() => {
-          sparkleBurst(window.innerWidth / 3, window.innerHeight / 3, 45);
-          confettiBurst(window.innerWidth / 3, window.innerHeight / 3);
-        }, 300);
-        setTimeout(() => {
-          sparkleBurst(window.innerWidth * 0.7, window.innerHeight * 0.3, 45);
-          confettiBurst(window.innerWidth * 0.7, window.innerHeight * 0.3);
+          sparkleBurst(w / 2, h / 2, 80);
+          confettiBurst(w / 2, h / 2);
         }, 600);
       }
 
       // ─── EXTINGUISH ───
       function extinguishCandle() {
         if (isExtinguishing) return;
-        const candles = document.querySelectorAll('.candle:not(.extinguished)');
+        const candles = document.querySelectorAll('.candle:not(.extinguished):not(.hidden)');
         if (candles.length === 0) {
-          blowStatus.textContent = '🎉 All candles are out!';
+          blowStatus.textContent = '🎉 All 21 candles are out!';
           if (animationFrame) cancelAnimationFrame(animationFrame);
-          setTimeout(goToStage3, 1000);
+          setTimeout(goToStage3, 1200);
           return;
         }
         isExtinguishing = true;
         const candle = candles[0];
-        // Shrink flame with a quick animation
         const flame = candle.querySelector('.flame');
         const glow = candle.querySelector('.flame-glow');
         if (flame) {
@@ -836,18 +950,17 @@
         setTimeout(() => {
           candle.classList.add('extinguished');
           candleIndex++;
-          blowStatus.textContent = `💨 ${candleIndex} of ${TOTAL_CANDLES} candles out! Keep blowing!`;
-          // Sparkle at candle position
+          const remaining = document.querySelectorAll('.candle:not(.extinguished):not(.hidden)').length;
+          blowStatus.textContent = `💨 ${candleIndex} of ${TOTAL_CANDLES} candles out! ${remaining} remaining...`;
           const rect = candle.getBoundingClientRect();
-          sparkleBurst(rect.left + rect.width/2, rect.top + rect.height/2, 20);
-          confettiBurst(rect.left + rect.width/2, rect.top + rect.height/2);
+          sparkleBurst(rect.left + rect.width/2, rect.top + rect.height/2, 18);
           isExtinguishing = false;
           blowDetected = false;
 
           if (candleIndex >= TOTAL_CANDLES) {
-            blowStatus.textContent = '🎉 All candles are out!';
+            blowStatus.textContent = '🎉 All 21 candles are out!';
             if (animationFrame) cancelAnimationFrame(animationFrame);
-            setTimeout(goToStage3, 1000);
+            setTimeout(goToStage3, 1200);
           }
         }, 400);
       }
@@ -888,7 +1001,6 @@
           blowStatus.textContent = '💨 Blow detected!';
           extinguishCandle();
         } else if (avg < threshold && blowDetected) {
-          // Reset after a cooldown
           setTimeout(() => {
             if (avg < threshold) blowDetected = false;
           }, 500);
@@ -896,7 +1008,7 @@
         animationFrame = requestAnimationFrame(detectBlow);
       }
 
-      // ─── FALLBACK: SPACEBAR (hidden, for testing) ───
+      // ─── FALLBACK: SPACEBAR ───
       document.addEventListener('keydown', function(e) {
         if (e.key === ' ' && stage2.classList.contains('active')) {
           e.preventDefault();
@@ -923,7 +1035,7 @@
         sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 20);
       }, 600);
 
-      console.log('🌸 Day 10 – refined romantic experience ready 💖');
+      console.log('🌸 Day 10 – 21 candles, hearts, and a love letter for Ruth 💖');
     })();
   </script>
 
