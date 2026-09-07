@@ -381,31 +381,36 @@
     .drip:nth-child(5) { left: 78%; height: 20px; width: 12px; }
     .drip:nth-child(6) { left: 92%; height: 14px; width: 10px; }
 
-    /* ─── 21 CANDLES in a heart shape ─── */
+    /* ─── 21 CANDLES IN HEART SHAPE ─── */
     .candles-container {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 4px 8px;
+      grid-template-rows: repeat(5, 1fr);
+      gap: 6px 8px;
       margin-bottom: 10px;
       justify-items: center;
       align-items: end;
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 280px;
+      max-width: 320px;
+      aspect-ratio: 7 / 5;
     }
 
     .candle {
-      width: 12px;
-      height: 36px;
+      width: 100%;
+      max-width: 24px;
+      aspect-ratio: 1 / 2;
       background: linear-gradient(180deg, #f5a0b8, #d47a92);
-      border-radius: 3px 3px 2px 2px;
+      border-radius: 4px 4px 2px 2px;
       position: relative;
       box-shadow: inset -2px 0 6px rgba(0,0,0,0.06);
       transition: all 0.5s ease;
       transform-origin: bottom;
       cursor: default;
       display: inline-block;
+      justify-self: center;
+      align-self: end;
     }
     .candle::before {
       content: '';
@@ -463,11 +468,7 @@
       box-shadow: none;
     }
 
-    /* Heart shape arrangement: 21 candles */
-    /* Row 1: 5, Row 2: 5, Row 3: 5, Row 4: 4, Row 5: 2 */
-    .candle.hidden {
-      visibility: hidden;
-    }
+    /* We use grid placement, no need for hidden class */
 
     .blow-info {
       font-family: 'Inter', sans-serif;
@@ -640,9 +641,9 @@
       .layer-bottom { height: 42px; }
       .layer-middle { height: 34px; }
       .layer-top { height: 30px; }
-      .candle { width: 10px; height: 28px; }
+      .candle { max-width: 18px; }
       .candle .flame { width: 10px; height: 18px; top: -20px; }
-      .candles-container { gap: 3px 6px; max-width: 220px; }
+      .candles-container { max-width: 220px; gap: 4px 6px; }
       .love-letter { font-size: 1.1rem; padding: 18px; }
       .cake-glow { width: 200px; height: 200px; }
     }
@@ -656,9 +657,9 @@
       .layer-bottom { height: 34px; }
       .layer-middle { height: 28px; }
       .layer-top { height: 24px; }
-      .candle { width: 8px; height: 22px; }
+      .candle { max-width: 14px; }
       .candle .flame { width: 8px; height: 14px; top: -16px; }
-      .candles-container { gap: 2px 4px; max-width: 160px; }
+      .candles-container { max-width: 160px; gap: 2px 4px; }
     }
   </style>
 </head>
@@ -796,39 +797,36 @@
       // ─── CREATE 21 CANDLES IN HEART SHAPE ───
       function createCandles() {
         candlesContainer.innerHTML = '';
-        // Heart shape: rows of 5, 5, 5, 4, 2
-        const rows = [5, 5, 5, 4, 2];
-        let candleCount = 0;
-        rows.forEach((count, rowIdx) => {
-          for (let i = 0; i < count; i++) {
-            const candle = document.createElement('div');
-            candle.className = 'candle';
-            candle.dataset.idx = candleCount;
-            const flame = document.createElement('div');
-            flame.className = 'flame';
-            const glow = document.createElement('div');
-            glow.className = 'flame-glow';
-            candle.appendChild(flame);
-            candle.appendChild(glow);
-            // Center the row
-            const totalCols = 7;
-            const offset = Math.floor((totalCols - count) / 2);
-            const col = offset + i;
-            candle.style.gridColumn = col + 1;
-            candle.style.gridRow = rowIdx + 1;
-            candlesContainer.appendChild(candle);
-            candleCount++;
-          }
+        // Heart shape pattern: [row, col]
+        const positions = [
+          // Row 1: cols 2,3,5,6 (4 candles)
+          { row: 1, col: 2 }, { row: 1, col: 3 }, { row: 1, col: 5 }, { row: 1, col: 6 },
+          // Row 2: cols 1-7 (7 candles)
+          { row: 2, col: 1 }, { row: 2, col: 2 }, { row: 2, col: 3 }, { row: 2, col: 4 },
+          { row: 2, col: 5 }, { row: 2, col: 6 }, { row: 2, col: 7 },
+          // Row 3: cols 1-6 (6 candles)
+          { row: 3, col: 1 }, { row: 3, col: 2 }, { row: 3, col: 3 }, { row: 3, col: 4 },
+          { row: 3, col: 5 }, { row: 3, col: 6 },
+          // Row 4: cols 2,3,4 (3 candles)
+          { row: 4, col: 2 }, { row: 4, col: 3 }, { row: 4, col: 4 },
+          // Row 5: col 3 (1 candle)
+          { row: 5, col: 3 }
+        ];
+
+        positions.forEach((pos, idx) => {
+          const candle = document.createElement('div');
+          candle.className = 'candle';
+          candle.dataset.idx = idx;
+          const flame = document.createElement('div');
+          flame.className = 'flame';
+          const glow = document.createElement('div');
+          glow.className = 'flame-glow';
+          candle.appendChild(flame);
+          candle.appendChild(glow);
+          candle.style.gridRow = pos.row;
+          candle.style.gridColumn = pos.col;
+          candlesContainer.appendChild(candle);
         });
-        // Fill remaining grid cells with hidden candles for spacing
-        const totalCells = 7 * 5;
-        for (let i = candleCount; i < totalCells; i++) {
-          const hidden = document.createElement('div');
-          hidden.className = 'candle hidden';
-          hidden.style.visibility = 'hidden';
-          hidden.style.pointerEvents = 'none';
-          candlesContainer.appendChild(hidden);
-        }
       }
       createCandles();
 
@@ -908,7 +906,6 @@
       function goToStage3() {
         stage2.classList.remove('active');
         stage3.classList.add('active');
-        // Massive celebration
         const w = window.innerWidth;
         const h = window.innerHeight;
         for (let i = 0; i < 5; i++) {
@@ -917,7 +914,6 @@
             confettiBurst(w * Math.random(), h * Math.random());
           }, i * 300);
         }
-        // Big final burst
         setTimeout(() => {
           sparkleBurst(w / 2, h / 2, 80);
           confettiBurst(w / 2, h / 2);
@@ -927,7 +923,7 @@
       // ─── EXTINGUISH ───
       function extinguishCandle() {
         if (isExtinguishing) return;
-        const candles = document.querySelectorAll('.candle:not(.extinguished):not(.hidden)');
+        const candles = document.querySelectorAll('.candle:not(.extinguished)');
         if (candles.length === 0) {
           blowStatus.textContent = '🎉 All 21 candles are out!';
           if (animationFrame) cancelAnimationFrame(animationFrame);
@@ -950,7 +946,7 @@
         setTimeout(() => {
           candle.classList.add('extinguished');
           candleIndex++;
-          const remaining = document.querySelectorAll('.candle:not(.extinguished):not(.hidden)').length;
+          const remaining = document.querySelectorAll('.candle:not(.extinguished)').length;
           blowStatus.textContent = `💨 ${candleIndex} of ${TOTAL_CANDLES} candles out! ${remaining} remaining...`;
           const rect = candle.getBoundingClientRect();
           sparkleBurst(rect.left + rect.width/2, rect.top + rect.height/2, 18);
@@ -1035,7 +1031,7 @@
         sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 20);
       }, 600);
 
-      console.log('🌸 Day 10 – 21 candles, hearts, and a love letter for Ruth 💖');
+      console.log('🌸 Day 10 – 21 candles in a perfect heart shape, ready for Ruth 💖');
     })();
   </script>
 
