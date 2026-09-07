@@ -19,7 +19,6 @@
       background: #fcf6f0;
       padding: 20px;
       overflow-y: auto;
-      /* allow scrolling */;
     }
 
     /* ─── SOFT BACKGROUND ─── */
@@ -66,10 +65,6 @@
       align-items: center;
       justify-content: center;
       transition: all 0.3s ease;
-    }
-
-    /* ensure container can grow with content */
-    .container {
       height: auto;
     }
 
@@ -746,6 +741,30 @@
       }
     }
 
+    /* ─── AUDIO NOTICE (mobile-friendly) ─── */
+    .audio-notice {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      color: #b8a6c9;
+      margin-top: 10px;
+      opacity: 0.6;
+      letter-spacing: 0.04em;
+      animation: pulseNotice 2s ease-in-out infinite;
+      display: none;
+    }
+    .audio-notice.show {
+      display: block;
+    }
+    @keyframes pulseNotice {
+      0%,
+      100% {
+        opacity: 0.4;
+      }
+      50% {
+        opacity: 0.9;
+      }
+    }
+
     /* ─── RESPONSIVE ─── */
     @media (max-width: 600px) {
       .container {
@@ -895,7 +914,7 @@
   <div class="bg" aria-hidden="true"></div>
 
   <!-- ─── AUDIO ─── -->
-  <audio id="bgAudio" src="audio_02.mp3" preload="auto"></audio>
+  <audio id="bgAudio" src="audio_02.mp3" preload="auto" playsinline></audio>
 
   <div class="container" id="app">
 
@@ -944,18 +963,27 @@
     <div class="stage" id="stage3">
       <div class="love-letter">
         <span class="big-emoji">💖</span>
-        Ruth, my love,<br />
-        As your <span class="highlight">21st</span> birthday dawns, I want you to know that
-        every flower that bloomed today is a reflection of the
-        beauty you bring into my world. Every candle that flickered
-        was a wish for your happiness. And now, as they go out,
-        know that my love for you burns brighter than any flame.
-        <br /><br />
-        You are my forever, my always. Here's to you, my darling.
-        <span class="closing">— with all my heart, forever yours</span>
+        Ruth, my love,<br /><br />
+        As your <span class="highlight">21st</span> birthday dawns, I find myself reflecting on every moment we've
+        shared. The garden that bloomed before you is not just a symbol of this day—it is a testament to the way you have
+        grown, blossomed, and radiated warmth into my life. Each flower carries a hue of your laughter, your kindness,
+        and the quiet strength you hold with such grace.<br /><br />
+        And those candles—twenty-one of them, each a flickering hope for your happiness. As they are extinguished, one by
+        one, I wish for you a lifetime of joy, adventure, and love that never fades. But know this: my love for you is
+        not a candle that burns out. It is a steady flame, constant and unwavering, that will shine through every
+        season, every joy, and every challenge.<br /><br />
+        You are my anchor and my wings. With you, I have found a home. With you, I have discovered parts of myself I
+        never knew existed. Your smile lights up the darkest corners of my world, and your laughter is the sweetest
+        melody I know.<br /><br />
+        So here's to you, my darling—on this milestone and every day after. You are my forever, my always, my heart's
+        true north.<br /><br />
+        <span class="closing">— with all my love, now and always</span>
       </div>
       <a href="index.html" class="back-link">← back to celebration</a>
     </div>
+
+    <!-- ─── AUDIO NOTICE ─── -->
+    <div class="audio-notice" id="audioNotice">🎵 tap anywhere to start the music</div>
 
   </div>
 
@@ -972,6 +1000,7 @@
       let dataArray = null;
       let animationFrame = null;
       let isExtinguishing = false;
+      let audioStarted = false;
 
       // ─── DOM ───
       const stage1 = document.getElementById('stage1');
@@ -983,18 +1012,18 @@
       const micButton = document.getElementById('micButton');
       const heartsContainer = document.getElementById('heartsContainer');
       const bgAudio = document.getElementById('bgAudio');
+      const audioNotice = document.getElementById('audioNotice');
 
-      // ─── AUTO-PLAY AUDIO AFTER 1 SECOND ───
-      setTimeout(function() {
-        bgAudio.play().catch(function(e) {
-          console.log('Audio autoplay blocked. User interaction needed.', e);
-          // try again on next user click
-          document.addEventListener('click', function playOnce() {
-            bgAudio.play().catch(function() {});
-            document.removeEventListener('click', playOnce);
-          }, { once: true });
-        });
-      }, 1000);
+      // ─── WAIT FOR DOM FULLY LOADED ───
+      function init() {
+        createGarden();
+        createCandles();
+        createHearts();
+        setupAudio();
+        setupTransitions();
+        setupSparkles();
+        console.log('🌸 Day 10 – 21 candles in a perfect heart shape, ready for Ruth 💖');
+      }
 
       // ─── CREATE FLOWERS ───
       function createGarden() {
@@ -1035,7 +1064,6 @@
           garden.appendChild(plant);
         }
       }
-      createGarden();
 
       // ─── CREATE 21 CANDLES IN HEART SHAPE ───
       function createCandles() {
@@ -1065,7 +1093,6 @@
           candlesContainer.appendChild(candle);
         });
       }
-      createCandles();
 
       // ─── CREATE FLOATING HEARTS ───
       function createHearts() {
@@ -1083,7 +1110,45 @@
           heartsContainer.appendChild(heart);
         }
       }
-      createHearts();
+
+      // ─── AUDIO SETUP (mobile-friendly) ───
+      function setupAudio() {
+        // Show notice on mobile
+        if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+          audioNotice.classList.add('show');
+        }
+
+        // Try autoplay with a small delay
+        setTimeout(function() {
+          bgAudio.play().then(function() {
+            audioStarted = true;
+            audioNotice.classList.remove('show');
+          }).catch(function() {
+            // Autoplay blocked – wait for user interaction
+            audioNotice.classList.add('show');
+          });
+        }, 1200);
+
+        // On any tap/click, try to start audio
+        document.addEventListener('click', function startAudioOnInteraction() {
+          if (!audioStarted) {
+            bgAudio.play().then(function() {
+              audioStarted = true;
+              audioNotice.classList.remove('show');
+            }).catch(function() {});
+          }
+        }, { once: false });
+
+        // Also when mic button is clicked
+        micButton.addEventListener('click', function() {
+          if (!audioStarted) {
+            bgAudio.play().then(function() {
+              audioStarted = true;
+              audioNotice.classList.remove('show');
+            }).catch(function() {});
+          }
+        });
+      }
 
       // ─── SPARKLE / CONFETTI ───
       function sparkleBurst(cx, cy, count = 30) {
@@ -1157,6 +1222,18 @@
         }, 600);
       }
 
+      function setupTransitions() {
+        setTimeout(() => {
+          goToStage2();
+        }, 4800);
+      }
+
+      function setupSparkles() {
+        setTimeout(() => {
+          sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 20);
+        }, 600);
+      }
+
       // ─── EXTINGUISH ───
       function extinguishCandle() {
         if (isExtinguishing) return;
@@ -1215,7 +1292,7 @@
             detectBlow();
           })
           .catch(err => {
-            blowStatus.textContent = '❌ Could not access microphone. Please allow and try again.';
+            blowStatus.textContent = '❌ Microphone access denied. Press SPACEBAR to blow out candles.';
             console.error(err);
           });
       }
@@ -1257,22 +1334,21 @@
         e.preventDefault();
         initAudio();
         // also try to resume audio context if needed
-        if (bgAudio.paused) {
-          bgAudio.play().catch(function() {});
+        if (bgAudio.paused && !audioStarted) {
+          bgAudio.play().then(function() {
+            audioStarted = true;
+            audioNotice.classList.remove('show');
+          }).catch(function() {});
         }
       });
 
-      // ─── AUTO START ───
-      setTimeout(() => {
-        goToStage2();
-      }, 4800);
+      // ─── START AFTER DOM READY ───
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
 
-      // ─── INITIAL SPARKLE ───
-      setTimeout(() => {
-        sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 20);
-      }, 600);
-
-      console.log('🌸 Day 10 – 21 candles in a perfect heart shape, ready for Ruth 💖');
     })();
   </script>
 
