@@ -96,6 +96,7 @@
             border: 1px solid rgba(255, 255, 255, 0.6);
             box-shadow: 0 4px 20px rgba(194, 123, 158, 0.08);
             margin-top: 12px;
+            transition: 0.3s ease;
         }
 
         .header .day-badge strong {
@@ -153,8 +154,9 @@
             gap: 10px;
         }
 
-        .coming-soon .badge span {
-            font-size: 1.6rem;
+        .coming-soon .badge .day-emoji {
+            font-size: 1.8rem;
+            line-height: 1;
         }
 
         /* ─── COUNTDOWN TO DAY ─── */
@@ -198,22 +200,39 @@
             margin-top: 2px;
         }
 
-        /* ─── MESSAGE ─── */
+        /* ─── MESSAGE BOX (UNIQUE PER DAY) ─── */
         .message-box {
             margin: 12px 0 28px;
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.4);
+            padding: 20px 24px;
+            background: rgba(255, 255, 255, 0.5);
             border-radius: var(--radius);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1rem;
-            color: #7a6a88;
-            line-height: 1.6;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 16px rgba(199, 139, 219, 0.04);
+            transition: 0.3s ease;
         }
 
-        .message-box .highlight {
-            color: #c27b9e;
+        .message-box .message-content {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1rem;
+            color: #3d344a;
+            line-height: 1.7;
+        }
+
+        .message-box .message-content .highlight-emoji {
+            font-size: 1.6rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .message-box .message-content .day-date {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
             font-weight: 600;
+            color: #b8a6c9;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-top: 8px;
+            display: block;
         }
 
         /* ─── BACK BUTTON ─── */
@@ -249,7 +268,7 @@
             gap: 8px;
         }
 
-        /* ─── WISH BUTTON (mini) ─── */
+        /* ─── WISH MINI ─── */
         .wish-mini {
             margin-top: 16px;
         }
@@ -358,9 +377,11 @@
                 padding: 10px 28px;
                 font-size: 0.85rem;
             }
+            .message-box .message-content {
+                font-size: 0.95rem;
+            }
             .message-box {
-                font-size: 0.85rem;
-                padding: 12px 16px;
+                padding: 16px 16px;
             }
         }
 
@@ -407,7 +428,7 @@
         <header class="header">
             <div class="name">Ruth</div>
             <div class="sub">twenty‑one · a celebration</div>
-            <div class="day-badge">
+            <div class="day-badge" id="dayBadge">
                 day <strong id="dayNumber">—</strong> · countdown
             </div>
         </header>
@@ -415,13 +436,15 @@
         <!-- ═══ DAY DISPLAY ═══ -->
         <div class="day-display">
             <div class="big-day" id="bigDay">—</div>
-            <div class="day-label">days to go ✦</div>
+            <div class="day-label" id="dayLabel">days to go ✦</div>
         </div>
 
-        <!-- ═══ COMING SOON ═══ -->
+        <!-- ═══ COMING SOON (with dynamic emoji) ═══ -->
         <div class="coming-soon">
             <div class="badge">
-                <span>🌸</span> coming soon · check back <span>🌸</span>
+                <span class="day-emoji" id="dayEmoji">🌸</span>
+                coming soon · check back
+                <span class="day-emoji" id="dayEmoji2">🌸</span>
             </div>
         </div>
 
@@ -445,11 +468,13 @@
             </div>
         </div>
 
-        <!-- ═══ MESSAGE ═══ -->
+        <!-- ═══ UNIQUE MESSAGE BOX ═══ -->
         <div class="message-box" id="messageBox">
-            <span class="highlight">✨</span> This day of the countdown hasn't arrived yet.
-            Check back when the time comes to reveal something special!
-            <span class="highlight">✨</span>
+            <div class="message-content" id="messageContent">
+                <span class="highlight-emoji" id="msgEmoji">✨</span>
+                <span id="msgText">This day of the countdown hasn't arrived yet.</span>
+                <span class="day-date" id="msgDate"></span>
+            </div>
         </div>
 
         <!-- ═══ BACK BUTTON ═══ -->
@@ -474,6 +499,60 @@
             // ─── CONFIG ───
             const BIRTHDAY = new Date(2026, 8, 18, 0, 0, 0).getTime();
 
+            // ─── UNIQUE MESSAGES FOR EACH DAY (1 to 10) ───
+            const DAY_DETAILS = {
+                1: {
+                    emoji: '🎂',
+                    label: 'TOMORROW IS THE DAY!',
+                    message: 'The anticipation is electric. Ruth, get ready for the most magical 21st birthday ever! The world is waiting to celebrate you. Just one more sleep!'
+                },
+                2: {
+                    emoji: '💫',
+                    label: 'Two days left!',
+                    message: 'The universe is aligning to celebrate you, Ruth. So much love is coming your way. Just you wait—it\'s going to be spectacular.'
+                },
+                3: {
+                    emoji: '🌟',
+                    label: 'Three days to go!',
+                    message: 'Like a three-act play, your 21 years have been a beautiful story. The best act is just beginning, and we can\'t wait to see it unfold.'
+                },
+                4: {
+                    emoji: '🕊️',
+                    label: 'Four days!',
+                    message: 'The countdown feels so real now. We\'re already practicing our happy dance for you. Get ready to be showered with joy and endless smiles.'
+                },
+                5: {
+                    emoji: '🌺',
+                    label: 'Five days!',
+                    message: 'Halfway through the final stretch. Sending you a wave of pure joy and excitement. You are so close to stepping into your 21st year!'
+                },
+                6: {
+                    emoji: '✨',
+                    label: 'Six days!',
+                    message: 'Each passing moment brings us closer to celebrating you. You are so deeply cherished, Ruth. The world is brighter because you\'re in it.'
+                },
+                7: {
+                    emoji: '🌈',
+                    label: 'One week to go!',
+                    message: 'A whole week of building anticipation for the incredible person you are, Ruth. Soak it all in—this is your moment, and it\'s going to be beautiful.'
+                },
+                8: {
+                    emoji: '🌅',
+                    label: 'Eight days!',
+                    message: 'The excitement is building. Like a beautiful sunrise, your 21st is just over the horizon. Hold on tight, the best is yet to come!'
+                },
+                9: {
+                    emoji: '🎈',
+                    label: 'Nine days!',
+                    message: 'The countdown is officially on. We’re so excited to honor you and all that you are. The magic is coming, and it\'s all for you.'
+                },
+                10: {
+                    emoji: '🥂',
+                    label: 'Ten days!',
+                    message: 'Here we go, the final countdown has begun. Hold onto your heart, magic is coming. Ten days until we celebrate the remarkable person you are, Ruth!'
+                }
+            };
+
             // ─── PARSE DAY FROM URL ───
             function getDayFromURL() {
                 const path = window.location.pathname;
@@ -481,7 +560,6 @@
                 if (match) {
                     return parseInt(match[1], 10);
                 }
-                // fallback: try to get from query param
                 const params = new URLSearchParams(window.location.search);
                 const q = params.get('day');
                 if (q) return parseInt(q, 10);
@@ -493,40 +571,43 @@
             // ─── DOM ───
             const dayNumberEl = document.getElementById('dayNumber');
             const bigDayEl = document.getElementById('bigDay');
+            const dayLabelEl = document.getElementById('dayLabel');
+            const dayEmoji = document.getElementById('dayEmoji');
+            const dayEmoji2 = document.getElementById('dayEmoji2');
             const cdDays = document.getElementById('cdDays');
             const cdHours = document.getElementById('cdHours');
             const cdMinutes = document.getElementById('cdMinutes');
             const cdSeconds = document.getElementById('cdSeconds');
-            const messageBox = document.getElementById('messageBox');
+            const msgEmoji = document.getElementById('msgEmoji');
+            const msgText = document.getElementById('msgText');
+            const msgDate = document.getElementById('msgDate');
             const wishMiniBtn = document.getElementById('wishMiniBtn');
             const wishResponse = document.getElementById('wishResponse');
             const backBtn = document.getElementById('backBtn');
+            const dayBadge = document.getElementById('dayBadge');
 
             const WISHES = [
-                'Ruth, you are pure magic ✨',
-                '21 looks stunning on you 💖',
-                'Every moment with you is a gift 🌟',
-                'Can’t wait to celebrate you! 🥳',
-                'You make the world brighter ❤️',
-                'Forever and always, Ruth 💫',
-                'So grateful for you 🌸',
-                'You deserve all the joy in the world 🦋',
-                'Happy 21st, beautiful soul 💗',
-                'Here’s to you and all your dreams 🌙',
-                'Sending you the biggest hug 🤗',
-                'You are so loved 💕',
-                'Your light shines so bright ⭐',
-                'Cheers to 21 years of you 🥂',
+                'Ruth, you are pure magic ✨', '21 looks stunning on you 💖',
+                'Every moment with you is a gift 🌟', 'Can’t wait to celebrate you! 🥳',
+                'You make the world brighter ❤️', 'Forever and always, Ruth 💫',
+                'So grateful for you 🌸', 'You deserve all the joy in the world 🦋',
+                'Happy 21st, beautiful soul 💗', 'Here’s to you and all your dreams 🌙',
+                'Sending you the biggest hug 🤗', 'You are so loved 💕',
+                'Your light shines so bright ⭐', 'Cheers to 21 years of you 🥂',
                 'Ruth, you are one of a kind 🌺'
             ];
 
             // ─── UPDATE UI ───
             if (day !== null && day >= 1 && day <= 10) {
+                const details = DAY_DETAILS[day] || DAY_DETAILS[10];
+
+                // Set basic info
                 dayNumberEl.textContent = String(day).padStart(2, '0');
                 bigDayEl.textContent = String(day).padStart(2, '0');
+                dayEmoji.textContent = details.emoji;
+                dayEmoji2.textContent = details.emoji;
 
                 // Calculate the date for this day
-                // day 10 = 10 days before birthday, day 1 = 1 day before
                 const dayDate = new Date(BIRTHDAY);
                 dayDate.setDate(dayDate.getDate() - day);
                 const dateStr = dayDate.toLocaleDateString('en-US', {
@@ -535,35 +616,34 @@
                     year: 'numeric'
                 });
 
-                messageBox.innerHTML = `
-                            <span class="highlight">🌸</span>
-                            <strong>Day ${day}</strong> · ${dateStr}
-                            <br />
-                            This day of the countdown hasn't arrived yet.
-                            Check back when the time comes to reveal something special!
-                            <span class="highlight">🌸</span>
-                        `;
+                // Update the unique message box
+                msgEmoji.textContent = details.emoji;
+                msgText.innerHTML = `<strong>${details.label}</strong> ${details.message}`;
+                msgDate.textContent = `📅 ${dateStr} · ${day} days to go`;
+
+                // Update the badge with a special touch
+                dayBadge.innerHTML =
+                    `✨ day <strong>${String(day).padStart(2, '0')}</strong> · ${details.label.split('!')[0]}`;
 
                 // Store the target time for this day
                 window._targetTime = dayDate.getTime();
 
-                // Update back button to go to main page with anchor
+                // Update back button
                 backBtn.href = 'index.html';
 
                 // Update page title
-                document.title = `Day ${String(day).padStart(2, '0')} · Ruth's 21st`;
+                document.title = `Day ${String(day).padStart(2, '0')} · ${details.label}`;
 
             } else {
-                // Fallback: day not found or invalid
+                // Fallback
                 dayNumberEl.textContent = '—';
                 bigDayEl.textContent = '?';
-                messageBox.innerHTML = `
-                            <span class="highlight">✨</span>
-                            This page is part of Ruth's 21st countdown.
-                            <br />
-                            Please visit the <a href="index.html" style="color:#c78bdb;text-decoration:none;font-weight:600;">main celebration</a> to follow along.
-                            <span class="highlight">✨</span>
-                        `;
+                dayEmoji.textContent = '🌸';
+                dayEmoji2.textContent = '🌸';
+                msgEmoji.textContent = '✨';
+                msgText.innerHTML =
+                    'This page is part of Ruth\'s 21st countdown. Please visit the <a href="index.html" style="color:#c78bdb;text-decoration:none;font-weight:600;">main celebration</a> to follow along.';
+                msgDate.textContent = '';
                 window._targetTime = BIRTHDAY;
                 document.title = 'Countdown · Ruth\'s 21st';
             }
@@ -574,7 +654,6 @@
                 const target = window._targetTime || BIRTHDAY;
                 let diff = Math.max(0, target - now);
 
-                // If we're past the target, show 00:00:00:00
                 if (diff === 0) {
                     cdDays.textContent = '00';
                     cdHours.textContent = '00';
@@ -655,7 +734,6 @@
                 wishResponse.textContent = msg;
                 wishResponse.className = 'wish-response show';
 
-                // Also update the badge momentarily
                 const badge = document.querySelector('.day-badge');
                 if (badge) {
                     const orig = badge.innerHTML;
@@ -691,7 +769,7 @@
                 }
             });
 
-            console.log(`🌸 Day ${day || '?'} placeholder · Ruth's 21st countdown 💖`);
+            console.log(`🌸 Day ${day || '?'} placeholder · Unique message loaded for Ruth's 21st 💖`);
 
         })();
     </script>
