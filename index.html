@@ -4,7 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ruth · 21 · A Celebration</title>
+
+    <!-- ─── Open Graph / Social Sharing ─── -->
+    <meta property="og:title" content="Ruth · 21 · A Celebration" />
+    <meta property="og:description" content="A scrapbook celebration for Ruth's 21st birthday — made with love." />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#fcf6f0" />
+
+    <!-- ─── Preconnect for Fonts ─── -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
     <style>
         /* ─── RESET ─── */
         * {
@@ -28,8 +39,29 @@
             background: var(--cream);
             color: var(--text);
             min-height: 100vh;
-            padding: 20px;
+            padding: 20px 20px 10px;
             line-height: 1.5;
+        }
+
+        /* ─── REDUCE MOTION ─── */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            .polaroid:hover {
+                transform: none !important;
+            }
+            .polaroid .img-wrap img {
+                transition: none !important;
+            }
+            .sparkle-burst,
+            .confetti-piece {
+                display: none !important;
+            }
         }
 
         /* ─── SOFT BACKGROUND ─── */
@@ -50,7 +82,7 @@
             z-index: 1;
             max-width: 1120px;
             margin: 0 auto;
-            padding: 20px 16px 50px;
+            padding: 20px 16px 30px;
         }
 
         /* ─── HEADER ─── */
@@ -101,6 +133,14 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .today-date {
+            margin-top: 14px;
+            font-size: 0.8rem;
+            color: #b8a6c9;
+            font-weight: 300;
+            letter-spacing: 0.06em;
         }
 
         /* ─── COUNTDOWN ─── */
@@ -176,23 +216,56 @@
             border-color: rgba(199, 139, 219, 0.2);
         }
 
+        .polaroid:focus-visible {
+            outline: 3px solid #c78bdb;
+            outline-offset: 4px;
+        }
+
         .polaroid .img-wrap {
             border-radius: 4px;
             overflow: hidden;
             background: #f0ebe3;
             position: relative;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ─── Placeholder for missing images ─── */
+        .polaroid .img-wrap .placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.4rem;
+            background: linear-gradient(135deg, #fce7f3, #f3e8ff);
+            color: #c78bdb;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
         }
 
         .polaroid .img-wrap img {
             width: 100%;
-            height: auto;
+            height: 100%;
             display: block;
-            aspect-ratio: 1 / 1;
             object-fit: cover;
             transition: 0.4s ease;
+            position: relative;
+            z-index: 1;
         }
 
-        .polaroid:hover .img-wrap img {
+        .polaroid .img-wrap img.hidden {
+            display: none;
+        }
+
+        .polaroid .img-wrap img.hidden+.placeholder {
+            opacity: 1;
+        }
+
+        .polaroid:hover .img-wrap img:not(.hidden) {
             transform: scale(1.04);
         }
 
@@ -203,26 +276,6 @@
             color: #b8a6c9;
             margin-top: 8px;
             letter-spacing: 0.04em;
-        }
-
-        .polaroid:nth-child(1) {
-            --rot: -1.5deg;
-        }
-        .polaroid:nth-child(2) {
-            --rot: 2.5deg;
-            margin-top: 8px;
-        }
-        .polaroid:nth-child(3) {
-            --rot: -1deg;
-            margin-top: -4px;
-        }
-        .polaroid:nth-child(4) {
-            --rot: 1.8deg;
-            margin-top: 12px;
-        }
-        .polaroid:nth-child(5) {
-            --rot: -2.2deg;
-            margin-top: 2px;
         }
 
         /* ─── TIMELINE ─── */
@@ -299,6 +352,11 @@
             border-color: rgba(199, 139, 219, 0.15);
         }
 
+        .timeline .step .content:focus-visible {
+            outline: 3px solid #c78bdb;
+            outline-offset: 3px;
+        }
+
         .timeline .step .content .day {
             font-family: 'Playfair Display', serif;
             font-size: 1.8rem;
@@ -353,6 +411,92 @@
             background-clip: text;
         }
 
+        /* ─── MEMORY MODAL ─── */
+        .memory-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            padding: 30px;
+        }
+
+        .memory-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .memory-modal .card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            max-width: 480px;
+            width: 100%;
+            padding: 36px 32px 30px;
+            border-radius: 24px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            transform: scale(0.92) translateY(20px);
+            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        .memory-modal.active .card {
+            transform: scale(1) translateY(0);
+        }
+
+        .memory-modal .card .mem-day {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .memory-modal .card .mem-label {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1rem;
+            color: #b8a6c9;
+            margin: 4px 0 12px;
+        }
+
+        .memory-modal .card .mem-text {
+            font-size: 1rem;
+            color: #4a4058;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .memory-modal .card .close-mem {
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            border: none;
+            color: #fff;
+            padding: 10px 32px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .memory-modal .card .close-mem:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 28px rgba(199, 139, 219, 0.3);
+        }
+
+        .memory-modal .card .close-mem:focus-visible {
+            outline: 3px solid #c78bdb;
+            outline-offset: 3px;
+        }
+
         /* ─── WISH SECTION ─── */
         .wish-section {
             text-align: center;
@@ -382,6 +526,11 @@
 
         .wish-btn:active {
             transform: scale(0.95);
+        }
+
+        .wish-btn:focus-visible {
+            outline: 3px solid #c78bdb;
+            outline-offset: 4px;
         }
 
         .wish-btn span {
@@ -465,6 +614,11 @@
             transform: rotate(90deg);
         }
 
+        .lightbox .close:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: 4px;
+        }
+
         .lightbox .nav {
             position: absolute;
             top: 50%;
@@ -484,6 +638,11 @@
         .lightbox .nav:hover {
             opacity: 1;
             background: rgba(255, 255, 255, 0.12);
+        }
+
+        .lightbox .nav:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: 4px;
         }
 
         .lightbox .nav.prev {
@@ -544,6 +703,71 @@
                 opacity: 0;
                 transform: translateY(100vh) rotate(720deg) scale(0.2);
             }
+        }
+
+        /* ─── FOOTER ─── */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px 0 10px;
+            font-size: 0.75rem;
+            color: #c9bcd6;
+            letter-spacing: 0.04em;
+            border-top: 1px solid rgba(199, 139, 219, 0.12);
+        }
+
+        .footer span {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.9rem;
+        }
+
+        /* ─── 21 THINGS ─── */
+        .things-section {
+            max-width: 720px;
+            margin: 10px auto 30px;
+            text-align: center;
+        }
+
+        .things-section .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .things-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .things-grid .thing {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(4px);
+            padding: 10px 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 0.8rem;
+            color: #5a4e6a;
+            transition: 0.3s ease;
+            cursor: default;
+        }
+
+        .things-grid .thing:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .things-grid .thing .num {
+            display: inline-block;
+            font-weight: 700;
+            color: #c78bdb;
+            margin-right: 4px;
         }
 
         /* ─── RESPONSIVE ─── */
@@ -657,6 +881,10 @@
                 font-size: 0.7rem;
                 bottom: 16px;
             }
+
+            .things-grid {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            }
         }
 
         @media (max-width: 400px) {
@@ -704,6 +932,16 @@
         <div class="counter" id="lightboxCounter"></div>
     </div>
 
+    <!-- ─── MEMORY MODAL ─── -->
+    <div class="memory-modal" id="memoryModal" role="dialog" aria-modal="true" aria-label="Memory">
+        <div class="card">
+            <div class="mem-day" id="memDay">01</div>
+            <div class="mem-label" id="memLabel">begin</div>
+            <div class="mem-text" id="memText">A memory from this day…</div>
+            <button class="close-mem" id="closeMem">✨ Keep celebrating</button>
+        </div>
+    </div>
+
     <!-- ─── MAIN ─── -->
     <div class="scrapbook">
 
@@ -714,6 +952,7 @@
             <div class="age-badge">
                 <strong>21</strong> &nbsp;·&nbsp; born 18 · 09 · 2005
             </div>
+            <div class="today-date" id="todayDate"></div>
         </header>
 
         <!-- ═══ COUNTDOWN ═══ -->
@@ -740,31 +979,36 @@
         <div class="gallery" id="gallery" role="group" aria-label="Photo gallery">
             <div class="polaroid" data-index="0">
                 <div class="img-wrap">
-                    <img src="ruth1.jpg" alt="Ruth 1" loading="lazy" onerror="this.style.display='none'" />
+                    <img src="ruth1.jpg" alt="Ruth 1" loading="lazy" decoding="async" />
+                    <div class="placeholder" aria-hidden="true">💕</div>
                 </div>
                 <div class="caption">✦ 1/5</div>
             </div>
             <div class="polaroid" data-index="1">
                 <div class="img-wrap">
-                    <img src="ruth2.jpg" alt="Ruth 2" loading="lazy" onerror="this.style.display='none'" />
+                    <img src="ruth2.jpg" alt="Ruth 2" loading="lazy" decoding="async" />
+                    <div class="placeholder" aria-hidden="true">🌸</div>
                 </div>
                 <div class="caption">✦ 2/5</div>
             </div>
             <div class="polaroid" data-index="2">
                 <div class="img-wrap">
-                    <img src="ruth3.jpg" alt="Ruth 3" loading="lazy" onerror="this.style.display='none'" />
+                    <img src="ruth3.jpg" alt="Ruth 3" loading="lazy" decoding="async" />
+                    <div class="placeholder" aria-hidden="true">✨</div>
                 </div>
                 <div class="caption">✦ 3/5</div>
             </div>
             <div class="polaroid" data-index="3">
                 <div class="img-wrap">
-                    <img src="ruth4.jpg" alt="Ruth 4" loading="lazy" onerror="this.style.display='none'" />
+                    <img src="ruth4.jpg" alt="Ruth 4" loading="lazy" decoding="async" />
+                    <div class="placeholder" aria-hidden="true">🌺</div>
                 </div>
                 <div class="caption">✦ 4/5</div>
             </div>
             <div class="polaroid" data-index="4">
                 <div class="img-wrap">
-                    <img src="ruth5.jpg" alt="Ruth 5" loading="lazy" onerror="this.style.display='none'" />
+                    <img src="ruth5.jpg" alt="Ruth 5" loading="lazy" decoding="async" />
+                    <div class="placeholder" aria-hidden="true">🦋</div>
                 </div>
                 <div class="caption">✦ 5/5</div>
             </div>
@@ -776,6 +1020,12 @@
             <div class="timeline" id="timeline" role="list"></div>
         </section>
 
+        <!-- ═══ 21 THINGS ABOUT RUTH ═══ -->
+        <section class="things-section">
+            <h2 class="section-title">21 things about Ruth</h2>
+            <div class="things-grid" id="thingsGrid"></div>
+        </section>
+
         <!-- ═══ WISH ═══ -->
         <section class="wish-section">
             <button class="wish-btn" id="wishBtn">
@@ -783,6 +1033,11 @@
             </button>
             <div class="wish-message" id="wishMessage"></div>
         </section>
+
+        <!-- ═══ FOOTER ═══ -->
+        <footer class="footer">
+            <span>Made with love for Ruth 💕</span> &nbsp;·&nbsp; 21 never looked so beautiful
+        </footer>
 
     </div>
 
@@ -793,7 +1048,7 @@
             'use strict';
 
             // ─── CONFIG ───
-            const BIRTHDAY = new Date(2026, 8, 18, 0, 0, 0).getTime();
+            const BIRTHDAY = new Date(2026, 8, 18, 0, 0, 0).getTime(); // September 18, 2026
             const DAYS = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
             const LABELS = ['begin', 'closer', 'near', 'so close', 'anticipation', 'one week', 'almost',
                 'final stretch', 'tomorrow!', '🎂 today!'
@@ -802,14 +1057,42 @@
                 'the anticipation builds', 'one week to go', 'nearly here', 'the final stretch', 'tomorrow!',
                 'HAPPY BIRTHDAY! 🎉'
             ];
+            // ─── Memories for each day (index 0 = day 10, index 9 = day 1) ───
+            const MEMORIES = [
+                'Ten days to go — the excitement is already electric. ✨',
+                'Nine days — planning the perfect celebration starts now!',
+                'Eight days — you light up every room you enter.',
+                'Seven days — one week until the world celebrates you.',
+                'Six days — your laugh is the best sound in the world.',
+                'Five days — half a decade of being amazing (and we\'re just getting started).',
+                'Four days — so much joy, so little time.',
+                'Three days — the final stretch, and you\'re handling it with grace.',
+                'Two days — tomorrow is almost here! 💖',
+                'One day — HAPPY BIRTHDAY RUTH! You are pure magic. 🎂'
+            ];
+
             const WISHES = [
                 'Ruth, you are pure magic ✨', '21 looks stunning on you 💖',
                 'Every moment with you is a gift 🌟', 'Can’t wait to celebrate you! 🥳',
                 'You make the world brighter ❤️', 'Forever and always, Ruth 💫',
                 'So grateful for you 🌸', 'You deserve all the joy in the world 🦋',
-                'Happy 21st, beautiful soul 💗', 'Here’s to you and all your dreams 🌙'
+                'Happy 21st, beautiful soul 💗', 'Here’s to you and all your dreams 🌙',
+                'Your heart is gold, Ruth 💛', 'The world is better because you\'re in it 🌍'
             ];
-            const EMOJIS = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
+
+            const THINGS = [
+                'Has the warmest smile', 'Makes everyone feel seen',
+                'Can light up any room', 'Gives the best hugs',
+                'Always knows what to say', 'Has a heart of gold',
+                'Loves with her whole soul', 'Is fiercely loyal',
+                'Has incredible style', 'Makes the best playlists',
+                'Can find beauty in anything', 'Is a natural leader',
+                'Has the most contagious laugh', 'Is wise beyond her years',
+                'Never gives up', 'Sees the best in everyone',
+                'Is a true friend', 'Brings people together',
+                'Has the kindest eyes', 'Makes ordinary moments extraordinary',
+                'Is absolutely unforgettable'
+            ];
 
             // ─── DOM ───
             const daysEl = document.getElementById('cdDays');
@@ -826,16 +1109,67 @@
             const lightboxPrev = document.getElementById('lightboxPrev');
             const lightboxNext = document.getElementById('lightboxNext');
             const lightboxCounter = document.getElementById('lightboxCounter');
+            const memoryModal = document.getElementById('memoryModal');
+            const memDay = document.getElementById('memDay');
+            const memLabel = document.getElementById('memLabel');
+            const memText = document.getElementById('memText');
+            const closeMem = document.getElementById('closeMem');
+            const todayDateEl = document.getElementById('todayDate');
+            const thingsGrid = document.getElementById('thingsGrid');
 
             let lightboxIndex = 0;
             const galleryImages = [];
 
-            // ─── GATHER IMAGES ───
+            // ─── TODAY'S DATE ───
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+            todayDateEl.textContent = '✨ ' + dateStr;
+
+            // ─── GATHER IMAGES & HANDLE BROKEN ───
             polaroids.forEach((p, i) => {
                 const img = p.querySelector('img');
-                if (img && img.src) {
-                    galleryImages.push({ src: img.src, alt: img.alt || `Ruth ${i+1}` });
+                const placeholder = p.querySelector('.placeholder');
+                if (img) {
+                    // Store src for lightbox
+                    if (img.src && !img.src.includes('ruth')) {
+                        galleryImages.push({ src: img.src, alt: img.alt || `Ruth ${i+1}` });
+                    } else {
+                        // placeholder will show
+                        galleryImages.push({ src: '#', alt: `Ruth ${i+1}` });
+                    }
+
+                    img.addEventListener('error', function() {
+                        this.classList.add('hidden');
+                        if (placeholder) placeholder.style.opacity = '1';
+                        // update galleryImages with placeholder
+                        galleryImages[i] = { src: '#', alt: `Ruth ${i+1}` };
+                    });
+
+                    // if src is empty or just a filename, trigger error manually
+                    if (!img.src || img.src.includes('ruth')) {
+                        img.classList.add('hidden');
+                        if (placeholder) placeholder.style.opacity = '1';
+                    }
                 }
+            });
+
+            // ─── RANDOM POLAROID ROTATIONS ───
+            polaroids.forEach(el => {
+                const rot = (Math.random() - 0.5) * 4;
+                el.style.setProperty('--rot', rot + 'deg');
+            });
+
+            // ─── 21 THINGS ───
+            THINGS.forEach((text, idx) => {
+                const div = document.createElement('div');
+                div.className = 'thing';
+                div.innerHTML = `<span class="num">${String(idx+1).padStart(2,'0')}.</span> ${text}`;
+                thingsGrid.appendChild(div);
             });
 
             // ─── COUNTDOWN ───
@@ -862,10 +1196,10 @@
                     step.className = 'step';
                     step.setAttribute('role', 'listitem');
 
-                    const content = document.createElement('a');
+                    const content = document.createElement('button');
                     content.className = 'content';
-                    content.href = `day_${String(day).padStart(2, '0')}.html`;
                     content.setAttribute('data-day', day);
+                    content.setAttribute('data-index', idx);
 
                     const daySpan = document.createElement('div');
                     daySpan.className = 'day';
@@ -889,19 +1223,46 @@
                     step.appendChild(content);
                     step.appendChild(dot);
 
+                    // Click → open memory modal
                     content.addEventListener('click', function(e) {
                         e.preventDefault();
+                        const index = parseInt(this.getAttribute('data-index'));
+                        openMemory(index);
                         sparkleBurst(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight /
-                            2, 30);
-                        setTimeout(() => {
-                            window.location.href = this.href;
-                        }, 380);
+                            2, 20);
                     });
 
                     timelineEl.appendChild(step);
                 });
             }
             renderTimeline();
+
+            // ─── MEMORY MODAL ───
+            function openMemory(index) {
+                const day = DAYS[index];
+                const label = LABELS[10 - day] || `day ${day}`;
+                const text = MEMORIES[index] || 'A beautiful memory in the making.';
+                memDay.textContent = String(day).padStart(2, '0');
+                memLabel.textContent = label;
+                memText.textContent = text;
+                memoryModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMemory() {
+                memoryModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            closeMem.addEventListener('click', closeMemory);
+            memoryModal.addEventListener('click', function(e) {
+                if (e.target === this) closeMemory();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && memoryModal.classList.contains('active')) {
+                    closeMemory();
+                }
+            });
 
             // ─── SPARKLE BURST ───
             function sparkleBurst(cx, cy, count = 30) {
@@ -953,6 +1314,12 @@
             // ─── LIGHTBOX ───
             function openLightbox(index) {
                 if (!galleryImages.length) return;
+                const imgData = galleryImages[index];
+                if (!imgData || imgData.src === '#') {
+                    // if placeholder, just sparkle
+                    sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 12);
+                    return;
+                }
                 lightboxIndex = Math.max(0, Math.min(index, galleryImages.length - 1));
                 const img = galleryImages[lightboxIndex];
                 lightboxImg.src = img.src;
@@ -969,21 +1336,21 @@
 
             function prevImage() {
                 if (galleryImages.length) {
-                    openLightbox((lightboxIndex - 1 + galleryImages.length) % galleryImages.length);
+                    let idx = (lightboxIndex - 1 + galleryImages.length) % galleryImages.length;
+                    openLightbox(idx);
                 }
             }
 
             function nextImage() {
                 if (galleryImages.length) {
-                    openLightbox((lightboxIndex + 1) % galleryImages.length);
+                    let idx = (lightboxIndex + 1) % galleryImages.length;
+                    openLightbox(idx);
                 }
             }
 
             polaroids.forEach((p, idx) => {
                 p.addEventListener('click', function(e) {
-                    if (galleryImages.length) {
-                        openLightbox(idx);
-                    }
+                    openLightbox(idx);
                     sparkleBurst(e.clientX, e.clientY, 12);
                 });
             });
@@ -1023,19 +1390,26 @@
                     badge.style.background = '';
                 }, 3000);
 
+                // extended from 4000 → 6000
                 setTimeout(() => {
                     wishMsg.className = 'wish-message';
-                }, 4000);
+                }, 6000);
             });
 
             // ─── LIGHT SPARKLE ON CLICK ───
             document.addEventListener('click', function(e) {
                 const tag = e.target.tagName.toLowerCase();
                 if (tag === 'a' || tag === 'button' || e.target.closest('.polaroid') ||
-                    e.target.closest('.content') || e.target.closest('.lightbox')) return;
+                    e.target.closest('.content') || e.target.closest('.lightbox') ||
+                    e.target.closest('.memory-modal')) return;
                 if (Math.random() > 0.2) return;
                 sparkleBurst(e.clientX, e.clientY, 8);
             });
+
+            // ─── CONFETTI ON PAGE LOAD (small burst) ───
+            setTimeout(() => {
+                confettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+            }, 600);
 
             console.log('✨ Ruth · 21 · A celebration of you 💖');
         })();
