@@ -475,56 +475,56 @@
 
             const BIRTHDAY = new Date(2026, 8, 18, 0, 0, 0).getTime();
 
-            // ─── ROMANTIC & HEARTWARMING MESSAGES FOR EACH DAY ───
+            // ─── ROMANTIC MESSAGES WITH SIMPLE, PUNCHY LABELS ───
             const DAY_DETAILS = {
                 1: {
                     emoji: '🌅',
-                    label: 'Just one sunrise away',
+                    label: 'Tomorrow is the day!',
                     message: 'My heart is already bursting with love for you. Tomorrow, the world gets to celebrate the most beautiful soul I know. You are my dawn, my light, my everything. See you at 21, my love.'
                 },
                 2: {
                     emoji: '💫',
-                    label: 'Two days until your light shines brighter',
+                    label: 'Two days left!',
                     message: 'Every moment without you feels like a lifetime, but knowing you\'re about to step into the most magnificent year yet fills me with such joy. You are the star that guides me home, Ruth.'
                 },
                 3: {
                     emoji: '🌙',
-                    label: 'Three nights of dreaming of you',
+                    label: 'Three days to go!',
                     message: 'I close my eyes and I see your smile—it\'s the only thing I need. These last few days are a gentle reminder of how deeply I cherish you. You are my moon, my tide, my constant.'
                 },
                 4: {
                     emoji: '🕊️',
-                    label: 'Four days of pure anticipation',
+                    label: 'Four days!',
                     message: 'My soul is already dancing at the thought of celebrating you. You\'ve filled my life with so much tenderness and grace. I can\'t wait to hold you and whisper how much you mean to me.'
                 },
                 5: {
                     emoji: '🌺',
-                    label: 'Five blossoms until you bloom',
+                    label: 'Five days!',
                     message: 'You are the most exquisite flower in my garden. With every passing day, I fall more in love with the person you are. Your 21st will be as radiant as your heart.'
                 },
                 6: {
                     emoji: '✨',
-                    label: 'Six days of counting blessings',
+                    label: 'Six days!',
                     message: 'My greatest blessing is you, Ruth. Every heartbeat brings me closer to the day I get to see you shine even brighter. You are my miracle, my forever, my home.'
                 },
                 7: {
                     emoji: '🌈',
-                    label: 'One week of wonder',
+                    label: 'One week to go!',
                     message: 'A week from today, I\'ll be looking into your eyes, celebrating the most incredible person I\'ve ever known. You are my rainbow after every storm, my hope, my love.'
                 },
                 8: {
                     emoji: '🌅',
-                    label: 'Eight days of golden light',
+                    label: 'Eight days!',
                     message: 'The anticipation is like golden honey, sweet and slow. You are the warmth I wake up for, the tenderness I hold onto. I\'m counting every second until I can hold you close.'
                 },
                 9: {
                     emoji: '🎈',
-                    label: 'Nine days of love letters',
+                    label: 'Nine days!',
                     message: 'If I could write you a thousand love letters, they still wouldn\'t capture how much you mean to me. You are poetry in motion, and I\'m so ready to celebrate every beautiful part of you.'
                 },
                 10: {
                     emoji: '🥂',
-                    label: 'Ten days of counting down to forever',
+                    label: 'Ten days!',
                     message: 'Here we are, my love—the final stretch. Ten days until I get to toast to you, to us, to everything you are and everything you\'ll become. You are my greatest adventure, and I\'m so grateful to walk this path with you.'
                 }
             };
@@ -586,12 +586,14 @@
                     year: 'numeric'
                 });
 
+                // Keep the romantic full message, but use the simple label in the badge
                 msgEmoji.textContent = details.emoji;
                 msgText.innerHTML = `<strong>${details.label}</strong><br />${details.message}`;
                 msgDate.textContent = `📅 ${dateStr} · ${day} days to go`;
 
+                // Simple badge
                 dayBadge.innerHTML =
-                    `💕 day <strong>${String(day).padStart(2, '0')}</strong> · ${details.label.split(' ').slice(0,3).join(' ')}`;
+                    `💕 day <strong>${String(day).padStart(2, '0')}</strong> · ${details.label}`;
 
                 window._targetTime = dayDate.getTime();
                 backBtn.href = 'index.html';
@@ -725,7 +727,7 @@
                 }
             });
 
-            console.log(`🌸 Day ${day || '?'} · Romantic love letter for Ruth 💖`);
+            console.log(`🌸 Day ${day || '?'} · Romantic message with simple label 💖`);
         })();
     </script>
 
