@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Day 10 · Ruth's 21st · Blow the Candles</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <style>
+        /* ─── RESET & BASE ─── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --pink: #f5a0b8;
+            --purple: #c78bdb;
+            --peach: #f5c6a0;
+            --cream: #fcf6f0;
+            --text: #2d2a3a;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
+            --radius: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--cream);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse at 20% 30%, rgba(248, 164, 184, 0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 70%, rgba(199, 139, 219, 0.20) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 50%, rgba(245, 198, 160, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 720px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 30px 20px 40px;
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(16px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        /* ─── HEADER ─── */
+        .header .name {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.4rem, 8vw, 4rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+        .header .sub {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1rem;
+            color: #b8a6c9;
+            margin-top: -2px;
+            letter-spacing: 0.08em;
+        }
+
+        /* ─── STAGE CONTAINERS ─── */
+        .stage {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 1s ease;
+        }
+        .stage.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ─── STAGE 1: FLOWERS ─── */
+        .flower-field {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            margin: 20px 0;
+            overflow: visible;
+        }
+        .flower {
+            position: absolute;
+            bottom: 0;
+            font-size: 2.8rem;
+            animation: growFlower 2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            opacity: 0;
+            transform: scale(0) translateY(50px);
+        }
+        .flower:nth-child(1) { left: 5%; animation-delay: 0.1s; }
+        .flower:nth-child(2) { left: 18%; animation-delay: 0.4s; font-size: 3.2rem; }
+        .flower:nth-child(3) { left: 35%; animation-delay: 0.7s; font-size: 3.6rem; }
+        .flower:nth-child(4) { left: 55%; animation-delay: 1.0s; font-size: 3.0rem; }
+        .flower:nth-child(5) { left: 72%; animation-delay: 1.3s; font-size: 3.8rem; }
+        .flower:nth-child(6) { left: 88%; animation-delay: 1.6s; font-size: 2.6rem; }
+        .flower:nth-child(7) { left: 45%; animation-delay: 1.9s; font-size: 4.0rem; }
+
+        @keyframes growFlower {
+            0% { opacity: 0; transform: scale(0) translateY(50px); }
+            60% { opacity: 1; transform: scale(1.2) translateY(-10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .stage1-text {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.3rem;
+            color: #c27b9e;
+            margin-top: 10px;
+        }
+
+        /* ─── STAGE 2: CAKE & CANDLES ─── */
+        .cake-wrapper {
+            position: relative;
+            margin: 20px 0;
+            font-size: 5rem;
+            line-height: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .cake-wrapper .cake {
+            font-size: 6rem;
+            display: block;
+        }
+        .candles {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 4px;
+            justify-content: center;
+        }
+        .candle {
+            font-size: 2.2rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        .candle.lit {
+            filter: drop-shadow(0 0 8px rgba(255, 200, 50, 0.9));
+        }
+        .candle.extinguished {
+            filter: grayscale(1) brightness(0.6);
+            transform: scale(0.9);
+        }
+
+        .blow-instruction {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            color: #b8a6c9;
+            margin-top: 12px;
+            transition: 0.3s;
+        }
+        .blow-instruction .mic-icon {
+            font-size: 1.8rem;
+            display: inline-block;
+            animation: pulseMic 1.5s infinite;
+        }
+        @keyframes pulseMic {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .blow-status {
+            font-size: 0.9rem;
+            color: #c27b9e;
+            margin-top: 6px;
+            min-height: 1.4em;
+        }
+
+        /* ─── STAGE 3: ROMANTIC MESSAGE ─── */
+        .romantic-message {
+            padding: 20px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.4rem;
+            color: #3d344a;
+            line-height: 1.8;
+            max-width: 90%;
+            margin: 10px auto;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: var(--radius);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(199, 139, 219, 0.06);
+        }
+        .romantic-message .big-emoji {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        /* ─── BACK BUTTON ─── */
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 28px;
+            border-radius: 60px;
+            border: none;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.18);
+            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-decoration: none;
+        }
+        .back-btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.28);
+        }
+
+        /* ─── SPARKLE BURST ─── */
+        .sparkle-burst {
+            position: fixed;
+            pointer-events: none;
+            font-size: 1.6rem;
+            animation: burst 0.8s ease-out forwards;
+            z-index: 999;
+        }
+        @keyframes burst {
+            0% { opacity: 1; transform: translate(0,0) scale(0.2) rotate(0deg); }
+            100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg); }
+        }
+        .confetti-piece {
+            position: fixed;
+            pointer-events: none;
+            z-index: 998;
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            animation: confettiFall linear forwards;
+        }
+        @keyframes confettiFall {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+            100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.2); }
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 600px) {
+            .container { padding: 20px 16px; min-height: 400px; }
+            .flower { font-size: 2rem !important; }
+            .cake-wrapper .cake { font-size: 4rem; }
+            .candle { font-size: 1.6rem; }
+            .romantic-message { font-size: 1.1rem; padding: 14px; }
+        }
+        @media (max-width: 400px) {
+            .flower { font-size: 1.6rem !important; }
+            .cake-wrapper .cake { font-size: 3rem; }
+            .candle { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg" aria-hidden="true"></div>
+
+    <div class="container" id="app">
+
+        <header class="header">
+            <div class="name">Ruth</div>
+            <div class="sub">twenty‑one · day 10</div>
+        </header>
+
+        <!-- ═══ STAGE 1: FLOWERS ═══ -->
+        <div class="stage active" id="stage1">
+            <div class="flower-field" id="flowerField">
+                <div class="flower">🌸</div>
+                <div class="flower">🌺</div>
+                <div class="flower">🌻</div>
+                <div class="flower">🌷</div>
+                <div class="flower">🌹</div>
+                <div class="flower">🌼</div>
+                <div class="flower">🌸</div>
+            </div>
+            <div class="stage1-text">🌱 A garden of love blooms for you, Ruth... 🌱</div>
+        </div>
+
+        <!-- ═══ STAGE 2: CAKE & CANDLES ═══ -->
+        <div class="stage" id="stage2">
+            <div class="cake-wrapper">
+                <div class="candles" id="candlesContainer">
+                    <span class="candle lit" data-idx="0">🕯️</span>
+                    <span class="candle lit" data-idx="1">🕯️</span>
+                    <span class="candle lit" data-idx="2">🕯️</span>
+                    <span class="candle lit" data-idx="3">🕯️</span>
+                    <span class="candle lit" data-idx="4">🕯️</span>
+                </div>
+                <span class="cake">🎂</span>
+            </div>
+            <div class="blow-instruction">
+                <span class="mic-icon">🎤</span> Blow into your microphone to extinguish the candles!
+            </div>
+            <div class="blow-status" id="blowStatus">Waiting for blow...</div>
+            <button id="micButton" class="back-btn" style="margin-top:12px;">🎙️ Allow Microphone</button>
+        </div>
+
+        <!-- ═══ STAGE 3: ROMANTIC MESSAGE ═══ -->
+        <div class="stage" id="stage3">
+            <div class="romantic-message">
+                <span class="big-emoji">💖</span>
+                Ruth, my love,<br />
+                As your 21st birthday dawns, I want you to know that
+                every flower that bloomed today is a reflection of the
+                beauty you bring into my world. Every candle that flickered
+                was a wish for your happiness. And now, as they go out,
+                know that my love for you burns brighter than any flame.
+                <br /><br />
+                You are my forever, my always. Here's to you, my darling.
+                <span style="display:block; margin-top:10px; font-size:2rem;">🌹💕</span>
+            </div>
+            <a href="index.html" class="back-btn">← back to celebration</a>
+        </div>
+
+    </div>
+
+    <!-- ─── SCRIPT ─── -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ─── DOM refs ───
+            const stage1 = document.getElementById('stage1');
+            const stage2 = document.getElementById('stage2');
+            const stage3 = document.getElementById('stage3');
+            const micButton = document.getElementById('micButton');
+            const blowStatus = document.getElementById('blowStatus');
+            const candles = document.querySelectorAll('.candle');
+            const flowerField = document.getElementById('flowerField');
+
+            let audioContext = null;
+            let analyser = null;
+            let dataArray = null;
+            let isBlowing = false;
+            let blowDetected = false;
+            let animationFrame = null;
+            let candleCount = candles.length;
+
+            // ─── SPARKLE / CONFETTI HELPERS ───
+            function sparkleBurst(cx, cy, count = 30) {
+                const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
+                const total = count + Math.floor(Math.random() * 16);
+                for (let i = 0; i < total; i++) {
+                    const spark = document.createElement('div');
+                    spark.className = 'sparkle-burst';
+                    spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    const angle = Math.random() * 2 * Math.PI;
+                    const dist = 80 + Math.random() * 200;
+                    const tx = Math.cos(angle) * dist;
+                    const ty = Math.sin(angle) * dist - 60;
+                    spark.style.setProperty('--tx', tx + 'px');
+                    spark.style.setProperty('--ty', ty + 'px');
+                    spark.style.left = (cx || window.innerWidth / 2) + 'px';
+                    spark.style.top = (cy || window.innerHeight / 2) + 'px';
+                    spark.style.fontSize = 1 + Math.random() * 2 + 'rem';
+                    spark.style.animationDuration = 0.5 + Math.random() * 0.7 + 's';
+                    document.body.appendChild(spark);
+                    setTimeout(() => spark.remove(), 1400);
+                }
+            }
+
+            function confettiBurst(cx, cy) {
+                const colors = ['#f8a4b8', '#c78bdb', '#f5c6a0', '#ffd6d6', '#d4b8e0', '#fce7f3', '#ffb3c6', '#b8d4e3'];
+                const count = 60 + Math.floor(Math.random() * 40);
+                for (let i = 0; i < count; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    piece.style.left = (cx || window.innerWidth / 2) + 'px';
+                    piece.style.top = (cy || window.innerHeight / 2) + 'px';
+                    piece.style.width = (5 + Math.random() * 8) + 'px';
+                    piece.style.height = (5 + Math.random() * 8) + 'px';
+                    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    const angle = Math.random() * 2 * Math.PI;
+                    const dist = 80 + Math.random() * 350;
+                    piece.style.animationDuration = (1.2 + Math.random() * 1.8) + 's';
+                    piece.style.animationDelay = (Math.random() * 0.6) + 's';
+                    piece.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                    piece.style.setProperty('--ty', Math.sin(angle) * dist - 180 + 'px');
+                    document.body.appendChild(piece);
+                    setTimeout(() => piece.remove(), 3000);
+                }
+            }
+
+            // ─── TRANSITION TO STAGE 2 ───
+            function goToStage2() {
+                stage1.classList.remove('active');
+                stage2.classList.add('active');
+                // Request mic permission automatically if not already
+                if (!audioContext) {
+                    micButton.click(); // trigger permission
+                }
+            }
+
+            // ─── TRANSITION TO STAGE 3 ───
+            function goToStage3() {
+                stage2.classList.remove('active');
+                stage3.classList.add('active');
+                // Fireworks
+                sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 50);
+                confettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+                setTimeout(() => {
+                    sparkleBurst(window.innerWidth / 3, window.innerHeight / 3, 40);
+                    confettiBurst(window.innerWidth / 3, window.innerHeight / 3);
+                }, 300);
+                setTimeout(() => {
+                    sparkleBurst(window.innerWidth * 0.7, window.innerHeight * 0.3, 40);
+                    confettiBurst(window.innerWidth * 0.7, window.innerHeight * 0.3);
+                }, 600);
+            }
+
+            // ─── BLOW DETECTION ───
+            function initAudio() {
+                if (audioContext) return;
+                navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+                    .then(stream => {
+                        audioContext = new(window.AudioContext || window.webkitAudioContext)();
+                        analyser = audioContext.createAnalyser();
+                        analyser.fftSize = 512;
+                        const source = audioContext.createMediaStreamSource(stream);
+                        source.connect(analyser);
+                        dataArray = new Uint8Array(analyser.frequencyBinCount);
+                        micButton.style.display = 'none';
+                        blowStatus.textContent = '🎤 Listening... blow into the mic!';
+                        detectBlow();
+                    })
+                    .catch(err => {
+                        blowStatus.textContent = '❌ Could not access microphone. Please allow and try again.';
+                        console.error(err);
+                    });
+            }
+
+            function detectBlow() {
+                if (!analyser) return;
+                analyser.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    sum += dataArray[i];
+                }
+                let avg = sum / dataArray.length;
+                // Threshold for blow (tune as needed)
+                let threshold = 35;
+                if (avg > threshold && !blowDetected) {
+                    // Blow detected!
+                    blowDetected = true;
+                    blowStatus.textContent = '💨 Blow detected! Extinguishing candles...';
+                    extinguishCandle();
+                } else if (avg < threshold && blowDetected) {
+                    // Reset blow state after a moment to allow multiple blows? but we only need one.
+                }
+                animationFrame = requestAnimationFrame(detectBlow);
+            }
+
+            let candleIndex = 0;
+
+            function extinguishCandle() {
+                if (candleIndex >= candles.length) {
+                    // All candles out
+                    blowStatus.textContent = '🎉 All candles are out!';
+                    // Stop listening
+                    if (animationFrame) cancelAnimationFrame(animationFrame);
+                    // Show romantic message after a short delay
+                    setTimeout(goToStage3, 800);
+                    return;
+                }
+                const candle = candles[candleIndex];
+                candle.classList.remove('lit');
+                candle.classList.add('extinguished');
+                // Change emoji to extinguished candle
+                candle.textContent = '🕯️'; // could also use a grey candle emoji if available
+                candleIndex++;
+
+                // Sparkle each time a candle goes out
+                const rect = candle.getBoundingClientRect();
+                sparkleBurst(rect.left + rect.width / 2, rect.top + rect.height / 2, 20);
+                confettiBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+                blowStatus.textContent = `💨 ${candleIndex} of ${candles.length} candles out! Keep blowing!`;
+
+                // Reset blowDetected so they can blow again
+                blowDetected = false;
+
+                // If all candles are out, the next detection will trigger the final stage
+                if (candleIndex >= candles.length) {
+                    blowStatus.textContent = '🎉 All candles are out!';
+                    if (animationFrame) cancelAnimationFrame(animationFrame);
+                    setTimeout(goToStage3, 800);
+                }
+            }
+
+            // ─── AUTO START FLOWERS, THEN CAKE ───
+            // After flowers bloom, move to cake
+            setTimeout(() => {
+                goToStage2();
+            }, 4000); // wait 4 seconds for flowers to finish
+
+            // ─── MIC BUTTON ───
+            micButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                initAudio();
+            });
+
+            // ─── FALLBACK: if microphone not allowed, user can click to start ───
+            // Also if they don't click, we can detect but we need permission.
+
+            // ─── KEYBOARD: allow space to simulate blow for testing ───
+            document.addEventListener('keydown', function(e) {
+                if (e.key === ' ' && stage2.classList.contains('active')) {
+                    e.preventDefault();
+                    if (!blowDetected) {
+                        // Simulate blow
+                        blowDetected = true;
+                        extinguishCandle();
+                    }
+                }
+            });
+
+            // ─── INITIAL SPARKLE ON LOAD ───
+            setTimeout(() => {
+                sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 20);
+            }, 500);
+
+            console.log('🌸 Day 10 interactive experience loaded. Enjoy, Ruth! 💖');
+        })();
+    </script>
+
+</body>
+</html>
