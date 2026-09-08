@@ -48,7 +48,7 @@
         .wrapper {
             position: relative;
             z-index: 1;
-            max-width: 860px;
+            max-width: 920px;
             width: 100%;
             margin: 0 auto;
             padding: 30px 24px 40px;
@@ -611,8 +611,8 @@
                 word: 'MULO',
                 clue: 'A Girl\'s BestFriend',
                 number: 3,
-                startRow: 1,
-                startCol: 11,
+                startRow: 0, // changed to avoid conflict with AIRFRESHENER
+                startCol: 15, // moved to the right
                 direction: 'down'
             }, {
                 word: 'HUNGRY',
@@ -679,7 +679,7 @@
                 direction: 'down'
             }, {
                 word: 'SENDMEMONEY',
-                clue: 'My Dad has refused to',
+                clue: 'My Dad doesn\'t have refused to', // updated clue
                 number: 13,
                 startRow: 6,
                 startCol: 0,
@@ -687,7 +687,6 @@
             }];
 
             // ─── BUILD GRID ───
-            // Determine grid dimensions
             let maxRow = 0,
                 maxCol = 0;
             WORDS.forEach(w => {
@@ -697,7 +696,7 @@
                 if (endRow > maxRow) maxRow = endRow;
                 if (endCol > maxCol) maxCol = endCol;
             });
-            // Add some padding
+            // Add padding
             const rows = maxRow + 2;
             const cols = maxCol + 2;
 
@@ -711,24 +710,19 @@
             }
 
             // Place words
-            WORDS.forEach(w => {
+            WORDS.forEach((w, idx) => {
                 const len = w.word.length;
                 for (let i = 0; i < len; i++) {
                     const r = w.direction === 'down' ? w.startRow + i : w.startRow;
                     const c = w.direction === 'across' ? w.startCol + i : w.startCol;
                     const letter = w.word[i];
                     if (grid[r][c] === null) {
-                        grid[r][c] = { letter, wordIndex: WORDS.indexOf(w), word: w };
+                        grid[r][c] = { letter, wordIndex: idx, word: w };
                     } else {
-                        // If there's already a letter, it should match (intersection)
-                        // We'll keep the existing letter but note that this cell is shared
-                        // For simplicity, we trust our layout
+                        // If conflict, we trust our layout – but we avoid conflict now.
                     }
                 }
             });
-
-            // Also mark cells that are part of a word but not yet set
-            // Actually we already set them above.
 
             // ─── RENDER GRID ───
             const gridContainer = document.getElementById('gridContainer');
@@ -738,10 +732,13 @@
             const cellInputs = {};
 
             function renderGrid() {
-                gridContainer.style.gridTemplateColumns = `repeat(${cols}, 34px)`;
+                const isMobile = window.innerWidth < 600;
+                const isTiny = window.innerWidth < 400;
+                const cellSize = isTiny ? 22 : isMobile ? 28 : 34;
+                gridContainer.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
                 gridContainer.innerHTML = '';
 
-                // First pass: collect numbers for cells
+                // Collect numbers for cells
                 const cellNumbers = {};
                 WORDS.forEach(w => {
                     const r = w.startRow;
@@ -786,11 +783,18 @@
                         input.autocomplete = 'off';
                         input.spellcheck = false;
 
+                        // Restore saved value
+                        const saved = getSavedState();
+                        const val = saved ? saved[`${r},${c}`] : null;
+                        if (val) {
+                            input.value = val;
+                        }
+
                         // Store reference
                         const key2 = `${r},${c}`;
                         cellInputs[key2] = input;
 
-                        // Event: auto-advance on input
+                        // ─── INPUT HANDLING ───
                         input.addEventListener('input', function(e) {
                             const val = this.value.toUpperCase();
                             this.value = val;
@@ -814,7 +818,75 @@
                                     }
                                 }
                             }
+                            // Save state
+                            saveState();
                             checkProgress();
+                        });
+
+                        // ─── KEYBOARD NAVIGATION (Backspace, arrows) ───
+                        input.addEventListener('keydown', function(e) {
+                            const key = e.key;
+                            const row = parseInt(this.dataset.row);
+                            const col = parseInt(this.dataset.col);
+                            const wIdx = parseInt(this.dataset.wordIndex);
+                            const wordData = WORDS[wIdx];
+                            if (!wordData) return;
+
+                            // Helper to get previous cell in the word
+                            function getPrevCell() {
+                                const dir = wordData.direction;
+                                let prevR = row,
+                                    prevC = col;
+                                if (dir === 'across') prevC = col - 1;
+                                else prevR = row - 1;
+                                const key = `${prevR},${prevC}`;
+                                return cellInputs[key] || null;
+                            }
+
+                            function getNextCell() {
+                                const dir = wordData.direction;
+                                let nextR = row,
+                                    nextC = col;
+                                if (dir === 'across') nextC = col + 1;
+                                else nextR = row + 1;
+                                const key = `${nextR},${nextC}`;
+                                return cellInputs[key] || null;
+                            }
+
+                            if (key === 'Backspace') {
+                                e.preventDefault();
+                                if (this.value === '') {
+                                    // Move to previous cell and clear it
+                                    const prev = getPrevCell();
+                                    if (prev) {
+                                        prev.value = '';
+                                        prev.focus();
+                                        prev.select();
+                                        // Trigger input event to update state
+                                        const ev = new Event('input', { bubbles: true });
+                                        prev.dispatchEvent(ev);
+                                    }
+                                } else {
+                                    // Clear current cell
+                                    this.value = '';
+                                    // Trigger input to update state
+                                    const ev = new Event('input', { bubbles: true });
+                                    this.dispatchEvent(ev);
+                                }
+                            } else if (key === 'ArrowLeft') {
+                                e.preventDefault();
+                                const prev = getPrevCell();
+                                if (prev) { prev.focus();
+                                    prev.select(); }
+                            } else if (key === 'ArrowRight') {
+                                e.preventDefault();
+                                const next = getNextCell();
+                                if (next) { next.focus();
+                                    next.select(); }
+                            } else if (key === 'ArrowUp' || key === 'ArrowDown') {
+                                // For simplicity, we can ignore vertical arrows or implement basic
+                                // Not critical.
+                            }
                         });
 
                         // Focus highlight
@@ -847,26 +919,39 @@
                         gridContainer.appendChild(cell);
                     }
                 }
+            }
 
-                // Adjust cell sizes for small screens
-                const isMobile = window.innerWidth < 600;
-                const isTiny = window.innerWidth < 400;
-                const size = isTiny ? 22 : isMobile ? 28 : 34;
-                gridContainer.style.gridTemplateColumns = `repeat(${cols}, ${size}px)`;
-                document.querySelectorAll('.cell').forEach(el => {
-                    el.style.width = size + 'px';
-                    el.style.height = size + 'px';
-                    const inp = el.querySelector('.cell-input');
-                    if (inp) inp.style.fontSize = (isTiny ? 0.7 : isMobile ? 0.85 : 1.1) + 'rem';
+            // ─── LOCAL STORAGE ───
+            const STORAGE_KEY = 'crosswordState_ruth21';
+
+            function getSavedState() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    return raw ? JSON.parse(raw) : null;
+                } catch { return null; }
+            }
+
+            function saveState() {
+                const state = {};
+                document.querySelectorAll('.cell-input').forEach(inp => {
+                    const val = inp.value;
+                    if (val) {
+                        const key = `${inp.dataset.row},${inp.dataset.col}`;
+                        state[key] = val;
+                    }
                 });
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            }
+
+            function clearSavedState() {
+                localStorage.removeItem(STORAGE_KEY);
             }
 
             // ─── RENDER CLUES ───
             function renderClues() {
                 clueContainer.innerHTML = '';
-                // Sort by number
                 const sorted = [...WORDS].sort((a, b) => a.number - b.number);
-                sorted.forEach(w => {
+                sorted.forEach((w, idx) => {
                     const row = document.createElement('div');
                     row.className = 'clue-row';
                     row.dataset.wordIndex = WORDS.indexOf(w);
@@ -884,11 +969,9 @@
                     const answer = document.createElement('span');
                     answer.className = 'clue-answer';
                     answer.id = `clue-answer-${WORDS.indexOf(w)}`;
-                    // Show solved state later
-                    const wordLen = w.word.length;
-                    let placeholder = '';
-                    for (let i = 0; i < wordLen; i++) placeholder += '·';
-                    answer.textContent = placeholder;
+                    let dots = '';
+                    for (let i = 0; i < w.word.length; i++) dots += '·';
+                    answer.textContent = dots;
                     row.appendChild(answer);
 
                     clueContainer.appendChild(row);
@@ -912,10 +995,10 @@
                         const input = cellInputs[key];
                         if (!input) { allCorrect = false; break; }
                         const val = input.value.toUpperCase();
-                        if (val === '') { allFilled = false; allCorrect = false; break; }
+                        if (val === '') { allFilled = false;
+                            allCorrect = false; break; }
                         if (val !== word[i]) { allCorrect = false; break; }
                     }
-                    // Update visual
                     const answerEl = document.getElementById(`clue-answer-${idx}`);
                     if (answerEl) {
                         if (allCorrect && allFilled) {
@@ -923,7 +1006,6 @@
                             answerEl.className = 'clue-answer solved';
                             solved++;
                         } else {
-                            // Show what's been filled so far
                             let filled = '';
                             let hasFilled = false;
                             for (let i = 0; i < len; i++) {
@@ -970,16 +1052,17 @@
                     }
                 });
 
-                // Update progress bar
                 const fill = document.getElementById('progressFill');
                 const text = document.getElementById('progressText');
                 const pct = Math.round((solved / total) * 100);
                 fill.style.width = pct + '%';
                 text.textContent = `${solved} / ${total} solved`;
 
-                // Check if fully solved
+                // If fully solved, show message and clear saved state
                 if (solved === total) {
                     showRomanticMessage();
+                    // Clear saved state so next visit is fresh
+                    clearSavedState();
                 } else {
                     hideRomanticMessage();
                 }
@@ -1004,14 +1087,12 @@
                         );
                     }, i * 300);
                 }
-                // Sparkle
                 setTimeout(() => {
                     sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 40);
                 }, 200);
             }
 
             function hideRomanticMessage() {
-                // Only hide if not fully solved
                 const el = document.getElementById('romanticMessage');
                 const solved = WORDS.filter((w, idx) => {
                     const answerEl = document.getElementById(`clue-answer-${idx}`);
@@ -1071,7 +1152,6 @@
 
             // ─── ACTIONS ───
             function checkAll() {
-                // Just trigger progress check which updates visuals
                 checkProgress();
                 const solved = WORDS.filter((w, idx) => {
                     const answerEl = document.getElementById(`clue-answer-${idx}`);
@@ -1080,14 +1160,12 @@
                 if (solved === WORDS.length) {
                     showRomanticMessage();
                 } else {
-                    // Shake any wrong answers
                     document.querySelectorAll('.cell-input.wrong').forEach(el => {
                         el.style.animation = 'none';
                         void el.offsetWidth;
                         el.style.animation = 'shake 0.3s ease';
                         setTimeout(() => { el.style.animation = ''; }, 400);
                     });
-                    // Also highlight empty ones
                     document.querySelectorAll('.cell-input').forEach(el => {
                         if (el.value === '') {
                             el.style.background = 'rgba(231, 76, 60, 0.05)';
@@ -1113,19 +1191,17 @@
                         answerEl.className = 'clue-answer';
                     }
                 });
+                clearSavedState();
                 checkProgress();
-                // Focus first cell
                 const first = document.querySelector('.cell-input');
                 if (first) first.focus();
             }
 
             function giveHint() {
-                // Find first unsolved word
                 for (let idx = 0; idx < WORDS.length; idx++) {
                     const w = WORDS[idx];
                     const answerEl = document.getElementById(`clue-answer-${idx}`);
                     if (answerEl && !answerEl.classList.contains('solved')) {
-                        // Fill in the first letter of this word
                         const firstR = w.direction === 'down' ? w.startRow : w.startRow;
                         const firstC = w.direction === 'across' ? w.startCol : w.startCol;
                         const key = `${firstR},${firstC}`;
@@ -1134,13 +1210,10 @@
                             input.value = w.word[0];
                             input.classList.add('correct');
                             input.classList.remove('wrong');
-                            // Trigger input event
                             const ev = new Event('input', { bubbles: true });
                             input.dispatchEvent(ev);
-                            // Highlight
                             input.style.background = 'rgba(199, 139, 219, 0.2)';
                             setTimeout(() => { input.style.background = ''; }, 800);
-                            // Focus
                             input.focus();
                             input.select();
                             break;
@@ -1151,13 +1224,14 @@
 
             function resetAll() {
                 clearAll();
-                // Also reset any saved state
+                // Also clear saved state
+                clearSavedState();
                 messageShown = false;
                 document.getElementById('romanticMessage').classList.remove('show');
                 checkProgress();
             }
 
-            // ─── KEYBOARD NAVIGATION ───
+            // ─── KEYBOARD SHORTCUTS ───
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') {
                     const active = document.activeElement;
@@ -1180,6 +1254,20 @@
             // ─── INIT ───
             renderGrid();
             renderClues();
+            // Restore saved state after grid is rendered
+            const saved = getSavedState();
+            if (saved) {
+                Object.keys(saved).forEach(key => {
+                    const input = cellInputs[key];
+                    if (input) {
+                        input.value = saved[key];
+                        // Trigger events to update colors
+                        const ev = new Event('input', { bubbles: true });
+                        input.dispatchEvent(ev);
+                    }
+                });
+            }
+            // Now check progress to update UI
             checkProgress();
 
             // Click on grid to focus first empty cell
