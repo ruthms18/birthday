@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Day XX · Ruth's 21st</title>
+    <title>Crossword · Ruth's 21st</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
     <style>
-        /* ─── RESET ─── */
         * {
             margin: 0;
             padding: 0;
@@ -46,13 +45,13 @@
             pointer-events: none;
         }
 
-        .placeholder {
+        .wrapper {
             position: relative;
             z-index: 1;
-            max-width: 720px;
+            max-width: 920px;
             width: 100%;
             margin: 0 auto;
-            padding: 30px 20px 40px;
+            padding: 30px 24px 40px;
             background: rgba(255, 255, 255, 0.55);
             backdrop-filter: blur(16px);
             border-radius: 32px;
@@ -63,7 +62,7 @@
 
         .header .name {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(2.4rem, 8vw, 4rem);
+            font-size: clamp(2rem, 6vw, 3.4rem);
             font-weight: 700;
             line-height: 1.1;
             background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
@@ -75,245 +74,425 @@
 
         .header .sub {
             font-family: 'Patrick Hand', cursive;
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #b8a6c9;
             margin-top: -2px;
             letter-spacing: 0.08em;
         }
 
-        .header .day-badge {
+        .header .puzzle-title {
             display: inline-block;
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(8px);
             padding: 6px 24px;
             border-radius: 60px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             color: #c27b9e;
             border: 1px solid rgba(255, 255, 255, 0.6);
             box-shadow: 0 4px 20px rgba(194, 123, 158, 0.08);
-            margin-top: 12px;
-            transition: 0.3s ease;
+            margin-top: 10px;
         }
 
-        .header .day-badge strong {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            background: linear-gradient(135deg, #f5b8b8, #c78bdb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .crossword-grid-wrap {
+            overflow-x: auto;
+            margin: 18px 0 12px;
+            padding: 4px 0;
+            -webkit-overflow-scrolling: touch;
         }
 
-        .day-display {
-            margin: 24px 0 12px;
+        .crossword-grid {
+            display: grid;
+            gap: 2px;
+            margin: 0 auto;
+            width: fit-content;
+            background: rgba(199, 139, 219, 0.10);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(199, 139, 219, 0.12);
         }
 
-        .day-display .big-day {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(5rem, 18vw, 9rem);
-            font-weight: 700;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1;
-            letter-spacing: 2px;
-            text-shadow: 0 4px 40px rgba(199, 139, 219, 0.15);
-        }
-
-        .day-display .day-label {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.2rem;
-            color: #b8a6c9;
-            letter-spacing: 0.12em;
-            margin-top: -4px;
-        }
-
-        .coming-soon {
-            margin: 18px 0 24px;
-            padding: 14px 20px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 60px;
-            display: inline-block;
-            border: 1px solid rgba(199, 139, 219, 0.15);
-            backdrop-filter: blur(4px);
-        }
-
-        .coming-soon .badge {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.4rem;
-            color: #c27b9e;
+        .cell {
+            width: 34px;
+            height: 34px;
             display: flex;
             align-items: center;
-            gap: 10px;
-        }
-
-        .coming-soon .badge .day-emoji {
-            font-size: 1.8rem;
-            line-height: 1;
-        }
-
-        .day-countdown {
-            display: flex;
             justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin: 18px 0 28px;
-        }
-
-        .day-countdown .item {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(8px);
-            padding: 8px 14px 6px;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            text-align: center;
-            min-width: 56px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-        }
-
-        .day-countdown .item .num {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
+            background: #fff;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
             font-weight: 700;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1;
-            display: block;
-        }
-
-        .day-countdown .item .label {
-            font-size: 0.5rem;
+            font-size: 1.1rem;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #a392b0;
-            font-weight: 600;
-            margin-top: 2px;
+            color: var(--text);
+            transition: 0.15s ease;
+            border: 1px solid rgba(199, 139, 219, 0.15);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+            position: relative;
         }
 
-        .message-box {
-            margin: 12px 0 28px;
-            padding: 20px 24px;
-            background: rgba(255, 255, 255, 0.5);
+        .cell.black {
+            background: #2d2a3a;
+            border-color: #2d2a3a;
+        }
+
+        .cell .cell-input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            color: var(--text);
+            outline: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.1s ease;
+        }
+
+        .cell .cell-input:focus {
+            background: rgba(199, 139, 219, 0.08);
+            box-shadow: inset 0 0 0 2px var(--purple);
+        }
+
+        .cell .cell-input.correct {
+            color: #4caf50;
+            background: rgba(76, 175, 80, 0.06);
+        }
+
+        .cell .cell-input.wrong {
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.06);
+            animation: shake 0.3s ease;
+        }
+
+        .cell .cell-number {
+            position: absolute;
+            top: 1px;
+            left: 3px;
+            font-size: 0.5rem;
+            font-weight: 700;
+            color: #b8a6c9;
+            pointer-events: none;
+            line-height: 1;
+        }
+
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-4px);
+            }
+            40% {
+                transform: translateX(4px);
+            }
+            60% {
+                transform: translateX(-3px);
+            }
+            80% {
+                transform: translateX(3px);
+            }
+        }
+
+        .cell .cell-input.highlighted {
+            background: rgba(199, 139, 219, 0.12);
+        }
+
+        .clues-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 16px 0 20px;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.4);
+            padding: 18px 20px;
             border-radius: var(--radius);
             border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 4px 16px rgba(199, 139, 219, 0.04);
-            transition: 0.3s ease;
+            max-height: 360px;
+            overflow-y: auto;
         }
 
-        .message-box .message-content {
+        .clues-section .clue-row {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            font-size: 0.9rem;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(199, 139, 219, 0.06);
+        }
+
+        .clues-section .clue-row:last-child {
+            border-bottom: none;
+        }
+
+        .clues-section .clue-num {
+            font-weight: 700;
+            color: var(--purple);
+            min-width: 28px;
+            font-size: 0.8rem;
+        }
+
+        .clues-section .clue-text {
+            flex: 1;
+            color: var(--text);
+            font-weight: 400;
+        }
+
+        .clues-section .clue-answer {
             font-family: 'Patrick Hand', cursive;
-            font-size: 1.1rem;
-            color: #3d344a;
-            line-height: 1.7;
-        }
-
-        .message-box .message-content .highlight-emoji {
-            font-size: 2rem;
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        .message-box .message-content .day-date {
-            font-family: 'Inter', sans-serif;
-            font-size: 0.75rem;
-            font-weight: 600;
+            font-size: 0.85rem;
             color: #b8a6c9;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            margin-top: 10px;
-            display: block;
+            min-width: 60px;
+            text-align: right;
+            opacity: 0.5;
+            font-weight: 600;
         }
 
-        .back-btn {
-            display: inline-block;
-            padding: 12px 36px;
+        .clues-section .clue-answer.solved {
+            opacity: 1;
+            color: #4caf50;
+        }
+
+        .clues-section .clue-answer.wrong-answer {
+            opacity: 1;
+            color: #e74c3c;
+        }
+
+        .action-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 6px 0 16px;
+        }
+
+        .action-bar button {
+            padding: 10px 28px;
             border-radius: 60px;
             border: none;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            letter-spacing: 0.02em;
             background: linear-gradient(135deg, #f8a4b8, #c78bdb);
             color: #fff;
-            font-weight: 600;
-            font-size: 0.95rem;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.18);
-            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            text-decoration: none;
-            letter-spacing: 0.02em;
+            box-shadow: 0 6px 24px rgba(199, 139, 219, 0.20);
         }
 
-        .back-btn:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.28);
+        .action-bar button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 36px rgba(199, 139, 219, 0.28);
         }
 
-        .back-btn:active {
+        .action-bar button:active {
             transform: scale(0.95);
         }
 
-        .back-btn span {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .action-bar button.secondary {
+            background: rgba(199, 139, 219, 0.12);
+            color: var(--purple);
+            box-shadow: none;
         }
 
-        .wish-mini {
-            margin-top: 16px;
+        .action-bar button.secondary:hover {
+            background: rgba(199, 139, 219, 0.22);
+            box-shadow: none;
         }
 
-        .wish-mini button {
-            background: none;
-            border: none;
+        .action-bar button.success {
+            background: linear-gradient(135deg, #66bb6a, #43a047);
+            box-shadow: 0 6px 24px rgba(76, 175, 80, 0.25);
+        }
+
+        .action-bar button.success:hover {
+            box-shadow: 0 10px 36px rgba(76, 175, 80, 0.35);
+        }
+
+        .romantic-message {
+            margin: 16px 0 6px;
+            padding: 24px 28px;
+            background: linear-gradient(135deg, rgba(248, 164, 184, 0.12), rgba(199, 139, 219, 0.12));
+            border-radius: var(--radius);
+            border: 2px solid rgba(199, 139, 219, 0.25);
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: opacity 0.8s ease, max-height 0.8s ease, padding 0.6s ease, margin 0.6s ease;
+            padding: 0 28px;
+            margin: 0;
+        }
+
+        .romantic-message.show {
+            opacity: 1;
+            max-height: 600px;
+            padding: 24px 28px;
+            margin: 16px 0 6px;
+        }
+
+        .romantic-message .msg-heart {
+            font-size: 2.4rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .romantic-message .msg-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .romantic-message .msg-body {
             font-family: 'Patrick Hand', cursive;
-            font-size: 0.95rem;
-            color: #b8a6c9;
+            font-size: 1.15rem;
+            color: #3d344a;
+            line-height: 1.8;
+            -webkit-text-fill-color: #3d344a;
+        }
+
+        .romantic-message .msg-body strong {
+            color: var(--purple);
+            -webkit-text-fill-color: var(--purple);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 14px;
+            padding: 10px 32px;
+            border-radius: 60px;
+            border: none;
+            background: rgba(199, 139, 219, 0.10);
+            color: var(--purple);
+            font-weight: 600;
+            font-size: 0.85rem;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
             transition: 0.3s ease;
-            padding: 4px 12px;
-            border-radius: 20px;
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            border: 1px solid rgba(199, 139, 219, 0.15);
         }
 
-        .wish-mini button:hover {
-            color: #c27b9e;
-            background: rgba(199, 139, 219, 0.06);
+        .back-link:hover {
+            background: rgba(199, 139, 219, 0.18);
+            transform: translateY(-2px);
         }
 
-        .wish-mini .wish-response {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1rem;
-            color: #c27b9e;
-            min-height: 1.8rem;
-            opacity: 0;
-            transition: 0.5s ease;
-            transform: translateY(6px);
-            margin-top: 4px;
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(199, 139, 219, 0.12);
+            border-radius: 4px;
+            margin: 6px 0 12px;
+            overflow: hidden;
         }
 
-        .wish-mini .wish-response.show {
-            opacity: 1;
-            transform: translateY(0);
+        .progress-bar .fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--pink), var(--purple));
+            border-radius: 4px;
+            transition: width 0.5s ease;
         }
 
-        .sparkle-burst {
-            position: fixed;
-            pointer-events: none;
-            font-size: 1.4rem;
-            animation: burst 0.8s ease-out forwards;
-            z-index: 999;
+        .progress-text {
+            font-size: 0.75rem;
+            color: #b8a6c9;
+            font-weight: 600;
+            letter-spacing: 0.04em;
         }
 
-        @keyframes burst {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(0.2) rotate(0deg);
+        @media (max-width: 600px) {
+            .wrapper {
+                padding: 18px 12px 28px;
+                border-radius: 24px;
             }
-            100% {
-                opacity: 0;
-                transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg);
+            .cell {
+                width: 28px;
+                height: 28px;
             }
+            .cell .cell-input {
+                font-size: 0.85rem;
+            }
+            .cell .cell-number {
+                font-size: 0.4rem;
+                top: 0px;
+                left: 2px;
+            }
+            .crossword-grid {
+                gap: 1.5px;
+                padding: 5px;
+            }
+            .clues-section {
+                padding: 12px 14px;
+                max-height: 280px;
+            }
+            .clues-section .clue-row {
+                font-size: 0.78rem;
+            }
+            .action-bar button {
+                padding: 8px 18px;
+                font-size: 0.78rem;
+            }
+            .romantic-message .msg-title {
+                font-size: 1.2rem;
+            }
+            .romantic-message .msg-body {
+                font-size: 0.95rem;
+            }
+            .romantic-message.show {
+                padding: 16px 18px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .cell {
+                width: 22px;
+                height: 22px;
+            }
+            .cell .cell-input {
+                font-size: 0.7rem;
+            }
+            .cell .cell-number {
+                font-size: 0.35rem;
+                top: 0px;
+                left: 1px;
+            }
+            .crossword-grid {
+                gap: 1px;
+                padding: 3px;
+            }
+            .clues-section .clue-row {
+                font-size: 0.7rem;
+                gap: 4px;
+            }
+            .clues-section .clue-num {
+                min-width: 20px;
+                font-size: 0.65rem;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--cream);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            border-radius: 10px;
         }
 
         .confetti-piece {
@@ -337,70 +516,23 @@
             }
         }
 
-        @media (max-width: 600px) {
-            .placeholder {
-                padding: 20px 16px 30px;
-                border-radius: 24px;
-            }
-            .header .name {
-                font-size: 2.8rem;
-            }
-            .header .sub {
-                font-size: 0.9rem;
-            }
-            .day-display .big-day {
-                font-size: 5rem;
-            }
-            .day-countdown .item {
-                min-width: 44px;
-                padding: 6px 10px 4px;
-            }
-            .day-countdown .item .num {
-                font-size: 1.4rem;
-            }
-            .coming-soon .badge {
-                font-size: 1.1rem;
-            }
-            .back-btn {
-                padding: 10px 28px;
-                font-size: 0.85rem;
-            }
-            .message-box .message-content {
-                font-size: 0.95rem;
-            }
-            .message-box {
-                padding: 16px 16px;
-            }
+        .sparkle-burst {
+            position: fixed;
+            pointer-events: none;
+            font-size: 1.4rem;
+            animation: burst 0.8s ease-out forwards;
+            z-index: 999;
         }
 
-        @media (max-width: 400px) {
-            .header .name {
-                font-size: 2.2rem;
+        @keyframes burst {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(0.2) rotate(0deg);
             }
-            .day-display .big-day {
-                font-size: 3.8rem;
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg);
             }
-            .day-countdown {
-                gap: 6px;
-            }
-            .day-countdown .item {
-                min-width: 36px;
-                padding: 4px 6px 3px;
-            }
-            .day-countdown .item .num {
-                font-size: 1.1rem;
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--cream);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            border-radius: 10px;
         }
     </style>
 </head>
@@ -408,64 +540,50 @@
 
     <div class="bg" aria-hidden="true"></div>
 
-    <div class="placeholder" id="app">
+    <div class="wrapper" id="app">
 
         <header class="header">
             <div class="name">Ruth</div>
-            <div class="sub">twenty‑one · a celebration</div>
-            <div class="day-badge" id="dayBadge">
-                day <strong id="dayNumber">—</strong> · countdown
-            </div>
+            <div class="sub">twenty‑one · a crossword for you</div>
+            <div class="puzzle-title">💕 solve · reveal </div>
+            <p>SCROLL BELOW AFTER YOU SOLVE IT</p>
+        
         </header>
 
-        <div class="day-display">
-            <div class="big-day" id="bigDay">—</div>
-            <div class="day-label" id="dayLabel">days to go ✦</div>
+        <div class="progress-bar">
+            <div class="fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">0 / 13 solved</div>
+
+        <div class="crossword-grid-wrap">
+            <div class="crossword-grid" id="gridContainer"></div>
         </div>
 
-        <div class="coming-soon">
-            <div class="badge">
-                <span class="day-emoji" id="dayEmoji">🌸</span>
-                coming soon · check back
-                <span class="day-emoji" id="dayEmoji2">🌸</span>
-            </div>
+        <div class="clues-section" id="cluesContainer"></div>
+
+        <div class="action-bar">
+            <button id="checkBtn">✅ check answers</button>
+            <button id="clearBtn" class="secondary">✕ clear</button>
+            <button id="hintBtn" class="secondary">💡 hint</button>
+            <button id="resetBtn" class="secondary">⟳ reset</button>
         </div>
 
-        <div class="day-countdown" id="dayCountdown" role="timer" aria-label="Countdown to this day">
-            <div class="item">
-                <span class="num" id="cdDays">00</span>
-                <span class="label">days</span>
-            </div>
-            <div class="item">
-                <span class="num" id="cdHours">00</span>
-                <span class="label">hours</span>
-            </div>
-            <div class="item">
-                <span class="num" id="cdMinutes">00</span>
-                <span class="label">mins</span>
-            </div>
-            <div class="item">
-                <span class="num" id="cdSeconds">00</span>
-                <span class="label">secs</span>
-            </div>
-        </div>
-
-        <div class="message-box" id="messageBox">
-            <div class="message-content" id="messageContent">
-                <span class="highlight-emoji" id="msgEmoji">✨</span>
-                <span id="msgText">This day of the countdown hasn't arrived yet.</span>
-                <span class="day-date" id="msgDate"></span>
+        <div class="romantic-message" id="romanticMessage">
+            <span class="msg-heart">💖</span>
+            <div class="msg-title">Every answer tells a story…</div>
+            <div class="msg-body">
+                Each clue, each word, each little memory... they all lead back to <strong>you</strong>.
+                Getting to know you is an adventure, and i love every part of it.
+                Every day I discover something new to love about you.
+                You are my puzzle, my mystery, my forever baby girl.
+                <br /><br />
+                9 more days to go, <strong>mama.</strong> 💕
+                <br /><br />
+                <span style="font-size:1.4rem;">✨ Happy 21st, my love ✨</span>
             </div>
         </div>
 
-        <a href="index.html" class="back-btn" id="backBtn">
-            <span>← back to celebration</span>
-        </a>
-
-        <div class="wish-mini">
-            <button id="wishMiniBtn">💫 send a little love</button>
-            <div class="wish-response" id="wishResponse"></div>
-        </div>
+        <a href="index.html" class="back-link">← back to home</a>
 
     </div>
 
@@ -473,194 +591,522 @@
         (function() {
             'use strict';
 
-            const BIRTHDAY = new Date(2026, 8, 18, 0, 0, 0).getTime();
+            // ─── WORD DATA ───
+            // Each entry: { word, clue, number, startRow, startCol, direction }
+            // direction: 'across' or 'down'
 
-            // ─── ROMANTIC MESSAGES WITH SIMPLE, PUNCHY LABELS ───
-            const DAY_DETAILS = {
-                1: {
-                    emoji: '🌅',
-                    label: 'Tomorrow is the day!',
-                    message: 'My heart is already bursting with love for you. Tomorrow, the world gets to celebrate the most beautiful soul I know. You are my dawn, my light, my everything. See you at 21, my love.'
-                },
-                2: {
-                    emoji: '💫',
-                    label: 'Two days left!',
-                    message: 'Every moment without you feels like a lifetime, but knowing you\'re about to step into the most magnificent year yet fills me with such joy. You are the star that guides me home, Ruth.'
-                },
-                3: {
-                    emoji: '🌙',
-                    label: 'Three days to go!',
-                    message: 'I close my eyes and I see your smile—it\'s the only thing I need. These last few days are a gentle reminder of how deeply I cherish you. You are my moon, my tide, my constant.'
-                },
-                4: {
-                    emoji: '🕊️',
-                    label: 'Four days!',
-                    message: 'My soul is already dancing at the thought of celebrating you. You\'ve filled my life with so much tenderness and grace. I can\'t wait to hold you and whisper how much you mean to me.'
-                },
-                5: {
-                    emoji: '🌺',
-                    label: 'Five days!',
-                    message: 'You are the most exquisite flower in my garden. With every passing day, I fall more in love with the person you are. Your 21st will be as radiant as your heart.'
-                },
-                6: {
-                    emoji: '✨',
-                    label: 'Six days!',
-                    message: 'My greatest blessing is you, Ruth. Every heartbeat brings me closer to the day I get to see you shine even brighter. You are my miracle, my forever, my home.'
-                },
-                7: {
-                    emoji: '🌈',
-                    label: 'One week to go!',
-                    message: 'A week from today, I\'ll be looking into your eyes, celebrating the most incredible person I\'ve ever known. You are my rainbow after every storm, my hope, my love.'
-                },
-                8: {
-                    emoji: '🌅',
-                    label: 'Eight days!',
-                    message: 'The anticipation is like golden honey, sweet and slow. You are the warmth I wake up for, the tenderness I hold onto. I\'m counting every second until I can hold you close.'
-                },
-                9: {
-                    emoji: '🎈',
-                    label: 'Nine days!',
-                    message: 'If I could write you a thousand love letters, they still wouldn\'t capture how much you mean to me. You are poetry in motion, and I\'m so ready to celebrate every beautiful part of you.'
-                },
-                10: {
-                    emoji: '🥂',
-                    label: 'Ten days!',
-                    message: 'Here we are, my love—the final stretch. Ten days until I get to toast to you, to us, to everything you are and everything you\'ll become. You are my greatest adventure, and I\'m so grateful to walk this path with you.'
+            const WORDS = [{
+                word: 'IVY',
+                clue: 'A Baby Girl\'s Name',
+                number: 1,
+                startRow: 0,
+                startCol: 4,
+                direction: 'down'
+            }, {
+                word: 'PATRICKSTAR',
+                clue: 'A Nickelodeon Character',
+                number: 2,
+                startRow: 0,
+                startCol: 0,
+                direction: 'across'
+            }, {
+                word: 'MULO',
+                clue: 'A Girl\'s BestFriend',
+                number: 3,
+                startRow: 0, // changed to avoid conflict with AIRFRESHENER
+                startCol: 15, // moved to the right
+                direction: 'down'
+            }, {
+                word: 'HUNGRY',
+                clue: 'Never say in DM',
+                number: 4,
+                startRow: 1,
+                startCol: 12,
+                direction: 'down'
+            }, {
+                word: 'UPSET',
+                clue: 'For the 77th time, im',
+                number: 5,
+                startRow: 1,
+                startCol: 13,
+                direction: 'down'
+            }, {
+                word: 'MONEY',
+                clue: 'Stop Sending back',
+                number: 6,
+                startRow: 1,
+                startCol: 14,
+                direction: 'down'
+            }, {
+                word: 'BRUNO',
+                clue: 'We never talk about',
+                number: 7,
+                startRow: 7,
+                startCol: 10,
+                direction: 'down'
+            }, {
+                word: 'SANDYS',
+                clue: 'First Date',
+                number: 8,
+                startRow: 7,
+                startCol: 11,
+                direction: 'down'
+            }, {
+                word: 'BABYGIRL',
+                clue: 'Tukiya\'s',
+                number: 9,
+                startRow: 7,
+                startCol: 12,
+                direction: 'down'
+            }, {
+                word: 'AIRFRESHENER',
+                clue: 'Pregnant Woman\'s Perfume (fill this last)',
+                number: 10,
+                startRow: 3,
+                startCol: 0,
+                direction: 'across'
+            }, {
+                word: 'YOURSELF',
+                clue: 'Keep your hands to',
+                number: 11,
+                startRow: 7,
+                startCol: 13,
+                direction: 'down'
+            }, {
+                word: 'G3',
+                clue: 'Ive gone to study',
+                number: 12,
+                startRow: 7,
+                startCol: 14,
+                direction: 'down'
+            }, {
+                word: 'GIVEMEMONEY',
+                clue: 'My Dad doesn\'t', // updated clue
+                number: 13,
+                startRow: 6,
+                startCol: 0,
+                direction: 'across'
+            }];
+
+            // ─── BUILD GRID ───
+            let maxRow = 0,
+                maxCol = 0;
+            WORDS.forEach(w => {
+                const len = w.word.length;
+                const endRow = w.direction === 'down' ? w.startRow + len - 1 : w.startRow;
+                const endCol = w.direction === 'across' ? w.startCol + len - 1 : w.startCol;
+                if (endRow > maxRow) maxRow = endRow;
+                if (endCol > maxCol) maxCol = endCol;
+            });
+            // Add padding
+            const rows = maxRow + 2;
+            const cols = maxCol + 2;
+
+            // Initialize grid with null (empty)
+            let grid = [];
+            for (let r = 0; r < rows; r++) {
+                grid[r] = [];
+                for (let c = 0; c < cols; c++) {
+                    grid[r][c] = null;
                 }
-            };
-
-            function getDayFromURL() {
-                const path = window.location.pathname;
-                const match = path.match(/day_(\d{2})\.html/i);
-                if (match) return parseInt(match[1], 10);
-                const params = new URLSearchParams(window.location.search);
-                const q = params.get('day');
-                if (q) return parseInt(q, 10);
-                return null;
             }
 
-            const day = getDayFromURL();
+            // Place words
+            WORDS.forEach((w, idx) => {
+                const len = w.word.length;
+                for (let i = 0; i < len; i++) {
+                    const r = w.direction === 'down' ? w.startRow + i : w.startRow;
+                    const c = w.direction === 'across' ? w.startCol + i : w.startCol;
+                    const letter = w.word[i];
+                    if (grid[r][c] === null) {
+                        grid[r][c] = { letter, wordIndex: idx, word: w };
+                    } else {
+                        // If conflict, we trust our layout – but we avoid conflict now.
+                    }
+                }
+            });
 
-            const dayNumberEl = document.getElementById('dayNumber');
-            const bigDayEl = document.getElementById('bigDay');
-            const dayLabelEl = document.getElementById('dayLabel');
-            const dayEmoji = document.getElementById('dayEmoji');
-            const dayEmoji2 = document.getElementById('dayEmoji2');
-            const cdDays = document.getElementById('cdDays');
-            const cdHours = document.getElementById('cdHours');
-            const cdMinutes = document.getElementById('cdMinutes');
-            const cdSeconds = document.getElementById('cdSeconds');
-            const msgEmoji = document.getElementById('msgEmoji');
-            const msgText = document.getElementById('msgText');
-            const msgDate = document.getElementById('msgDate');
-            const wishMiniBtn = document.getElementById('wishMiniBtn');
-            const wishResponse = document.getElementById('wishResponse');
-            const backBtn = document.getElementById('backBtn');
-            const dayBadge = document.getElementById('dayBadge');
+            // ─── RENDER GRID ───
+            const gridContainer = document.getElementById('gridContainer');
+            const clueContainer = document.getElementById('cluesContainer');
 
-            const WISHES = [
-                'Ruth, you are pure magic ✨', '21 looks stunning on you 💖',
-                'Every moment with you is a gift 🌟', 'Can’t wait to celebrate you! 🥳',
-                'You make the world brighter ❤️', 'Forever and always, Ruth 💫',
-                'So grateful for you 🌸', 'You deserve all the joy in the world 🦋',
-                'Happy 21st, beautiful soul 💗', 'Here’s to you and all your dreams 🌙',
-                'Sending you the biggest hug 🤗', 'You are so loved 💕',
-                'Your light shines so bright ⭐', 'Cheers to 21 years of you 🥂',
-                'Ruth, you are one of a kind 🌺', 'My heart beats for you ❤️‍🔥',
-                'You are my everything 💖', 'Forever yours, always and truly 💞'
-            ];
+            // Track input elements for each cell
+            const cellInputs = {};
 
-            if (day !== null && day >= 1 && day <= 10) {
-                const details = DAY_DETAILS[day] || DAY_DETAILS[10];
+            function renderGrid() {
+                const isMobile = window.innerWidth < 600;
+                const isTiny = window.innerWidth < 400;
+                const cellSize = isTiny ? 22 : isMobile ? 28 : 34;
+                gridContainer.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
+                gridContainer.innerHTML = '';
 
-                dayNumberEl.textContent = String(day).padStart(2, '0');
-                bigDayEl.textContent = String(day).padStart(2, '0');
-                dayEmoji.textContent = details.emoji;
-                dayEmoji2.textContent = details.emoji;
-
-                const dayDate = new Date(BIRTHDAY);
-                dayDate.setDate(dayDate.getDate() - day);
-                const dateStr = dayDate.toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric'
+                // Collect numbers for cells
+                const cellNumbers = {};
+                WORDS.forEach(w => {
+                    const r = w.startRow;
+                    const c = w.startCol;
+                    const key = `${r},${c}`;
+                    if (!cellNumbers[key]) {
+                        cellNumbers[key] = w.number;
+                    }
                 });
 
-                // Keep the romantic full message, but use the simple label in the badge
-                msgEmoji.textContent = details.emoji;
-                msgText.innerHTML = `<strong>${details.label}</strong><br />${details.message}`;
-                msgDate.textContent = `📅 ${dateStr} · ${day} days to go`;
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.dataset.row = r;
+                        cell.dataset.col = c;
 
-                // Simple badge
-                dayBadge.innerHTML =
-                    `💕 day <strong>${String(day).padStart(2, '0')}</strong> · ${details.label}`;
+                        const data = grid[r][c];
+                        if (data === null) {
+                            cell.classList.add('black');
+                            gridContainer.appendChild(cell);
+                            continue;
+                        }
 
-                window._targetTime = dayDate.getTime();
-                backBtn.href = 'index.html';
-                document.title = `Day ${String(day).padStart(2, '0')} · ${details.label}`;
+                        // White cell
+                        const key = `${r},${c}`;
+                        if (cellNumbers[key]) {
+                            const num = document.createElement('span');
+                            num.className = 'cell-number';
+                            num.textContent = cellNumbers[key];
+                            cell.appendChild(num);
+                        }
 
-            } else {
-                dayNumberEl.textContent = '—';
-                bigDayEl.textContent = '?';
-                dayEmoji.textContent = '💕';
-                dayEmoji2.textContent = '💕';
-                msgEmoji.textContent = '✨';
-                msgText.innerHTML =
-                    'This page is part of Ruth\'s 21st countdown. Please visit the <a href="index.html" style="color:#c78bdb;text-decoration:none;font-weight:600;">main celebration</a> to follow along.';
-                msgDate.textContent = '';
-                window._targetTime = BIRTHDAY;
-                document.title = 'Countdown · Ruth\'s 21st';
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.maxLength = 1;
+                        input.className = 'cell-input';
+                        input.dataset.row = r;
+                        input.dataset.col = c;
+                        input.dataset.letter = data.letter;
+                        input.dataset.wordIndex = data.wordIndex;
+                        input.autocomplete = 'off';
+                        input.spellcheck = false;
+
+                        // Restore saved value
+                        const saved = getSavedState();
+                        const val = saved ? saved[`${r},${c}`] : null;
+                        if (val) {
+                            input.value = val;
+                        }
+
+                        // Store reference
+                        const key2 = `${r},${c}`;
+                        cellInputs[key2] = input;
+
+                        // ─── INPUT HANDLING ───
+                        input.addEventListener('input', function(e) {
+                            const val = this.value.toUpperCase();
+                            this.value = val;
+                            if (val.length === 1) {
+                                // Move to next cell in the same word direction
+                                const row = parseInt(this.dataset.row);
+                                const col = parseInt(this.dataset.col);
+                                const wIdx = parseInt(this.dataset.wordIndex);
+                                const wordData = WORDS[wIdx];
+                                if (wordData) {
+                                    const dir = wordData.direction;
+                                    let nextR = row,
+                                        nextC = col;
+                                    if (dir === 'across') nextC = col + 1;
+                                    else nextR = row + 1;
+                                    const nextKey = `${nextR},${nextC}`;
+                                    const nextInput = cellInputs[nextKey];
+                                    if (nextInput) {
+                                        nextInput.focus();
+                                        nextInput.select();
+                                    }
+                                }
+                            }
+                            // Save state
+                            saveState();
+                            checkProgress();
+                        });
+
+                        // ─── KEYBOARD NAVIGATION (Backspace, arrows) ───
+                        input.addEventListener('keydown', function(e) {
+                            const key = e.key;
+                            const row = parseInt(this.dataset.row);
+                            const col = parseInt(this.dataset.col);
+                            const wIdx = parseInt(this.dataset.wordIndex);
+                            const wordData = WORDS[wIdx];
+                            if (!wordData) return;
+
+                            // Helper to get previous cell in the word
+                            function getPrevCell() {
+                                const dir = wordData.direction;
+                                let prevR = row,
+                                    prevC = col;
+                                if (dir === 'across') prevC = col - 1;
+                                else prevR = row - 1;
+                                const key = `${prevR},${prevC}`;
+                                return cellInputs[key] || null;
+                            }
+
+                            function getNextCell() {
+                                const dir = wordData.direction;
+                                let nextR = row,
+                                    nextC = col;
+                                if (dir === 'across') nextC = col + 1;
+                                else nextR = row + 1;
+                                const key = `${nextR},${nextC}`;
+                                return cellInputs[key] || null;
+                            }
+
+                            if (key === 'Backspace') {
+                                e.preventDefault();
+                                if (this.value === '') {
+                                    // Move to previous cell and clear it
+                                    const prev = getPrevCell();
+                                    if (prev) {
+                                        prev.value = '';
+                                        prev.focus();
+                                        prev.select();
+                                        // Trigger input event to update state
+                                        const ev = new Event('input', { bubbles: true });
+                                        prev.dispatchEvent(ev);
+                                    }
+                                } else {
+                                    // Clear current cell
+                                    this.value = '';
+                                    // Trigger input to update state
+                                    const ev = new Event('input', { bubbles: true });
+                                    this.dispatchEvent(ev);
+                                }
+                            } else if (key === 'ArrowLeft') {
+                                e.preventDefault();
+                                const prev = getPrevCell();
+                                if (prev) { prev.focus();
+                                    prev.select(); }
+                            } else if (key === 'ArrowRight') {
+                                e.preventDefault();
+                                const next = getNextCell();
+                                if (next) { next.focus();
+                                    next.select(); }
+                            } else if (key === 'ArrowUp' || key === 'ArrowDown') {
+                                // For simplicity, we can ignore vertical arrows or implement basic
+                                // Not critical.
+                            }
+                        });
+
+                        // Focus highlight
+                        input.addEventListener('focus', function() {
+                            const row = parseInt(this.dataset.row);
+                            const col = parseInt(this.dataset.col);
+                            const wIdx = parseInt(this.dataset.wordIndex);
+                            const wordData = WORDS[wIdx];
+                            if (wordData) {
+                                const len = wordData.word.length;
+                                for (let i = 0; i < len; i++) {
+                                    const r2 = wordData.direction === 'down' ? wordData.startRow + i : wordData
+                                        .startRow;
+                                    const c2 = wordData.direction === 'across' ? wordData.startCol + i : wordData
+                                        .startCol;
+                                    const k = `${r2},${c2}`;
+                                    const el = cellInputs[k];
+                                    if (el) el.classList.add('highlighted');
+                                }
+                            }
+                        });
+
+                        input.addEventListener('blur', function() {
+                            document.querySelectorAll('.cell-input.highlighted').forEach(el => {
+                                el.classList.remove('highlighted');
+                            });
+                        });
+
+                        cell.appendChild(input);
+                        gridContainer.appendChild(cell);
+                    }
+                }
             }
 
-            function updateCountdown() {
-                const now = Date.now();
-                const target = window._targetTime || BIRTHDAY;
-                let diff = Math.max(0, target - now);
+            // ─── LOCAL STORAGE ───
+            const STORAGE_KEY = 'crosswordState_ruth21';
 
-                if (diff === 0) {
-                    cdDays.textContent = '00';
-                    cdHours.textContent = '00';
-                    cdMinutes.textContent = '00';
-                    cdSeconds.textContent = '00';
-                    return;
+            function getSavedState() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    return raw ? JSON.parse(raw) : null;
+                } catch { return null; }
+            }
+
+            function saveState() {
+                const state = {};
+                document.querySelectorAll('.cell-input').forEach(inp => {
+                    const val = inp.value;
+                    if (val) {
+                        const key = `${inp.dataset.row},${inp.dataset.col}`;
+                        state[key] = val;
+                    }
+                });
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            }
+
+            function clearSavedState() {
+                localStorage.removeItem(STORAGE_KEY);
+            }
+
+            // ─── RENDER CLUES ───
+            function renderClues() {
+                clueContainer.innerHTML = '';
+                const sorted = [...WORDS].sort((a, b) => a.number - b.number);
+                sorted.forEach((w, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'clue-row';
+                    row.dataset.wordIndex = WORDS.indexOf(w);
+
+                    const num = document.createElement('span');
+                    num.className = 'clue-num';
+                    num.textContent = w.number + '.';
+                    row.appendChild(num);
+
+                    const text = document.createElement('span');
+                    text.className = 'clue-text';
+                    text.textContent = w.clue;
+                    row.appendChild(text);
+
+                    const answer = document.createElement('span');
+                    answer.className = 'clue-answer';
+                    answer.id = `clue-answer-${WORDS.indexOf(w)}`;
+                    let dots = '';
+                    for (let i = 0; i < w.word.length; i++) dots += '·';
+                    answer.textContent = dots;
+                    row.appendChild(answer);
+
+                    clueContainer.appendChild(row);
+                });
+            }
+
+            // ─── CHECK PROGRESS ───
+            function checkProgress() {
+                let solved = 0;
+                const total = WORDS.length;
+
+                WORDS.forEach((w, idx) => {
+                    const word = w.word;
+                    const len = word.length;
+                    let allCorrect = true;
+                    let allFilled = true;
+                    for (let i = 0; i < len; i++) {
+                        const r = w.direction === 'down' ? w.startRow + i : w.startRow;
+                        const c = w.direction === 'across' ? w.startCol + i : w.startCol;
+                        const key = `${r},${c}`;
+                        const input = cellInputs[key];
+                        if (!input) { allCorrect = false; break; }
+                        const val = input.value.toUpperCase();
+                        if (val === '') { allFilled = false;
+                            allCorrect = false; break; }
+                        if (val !== word[i]) { allCorrect = false; break; }
+                    }
+                    const answerEl = document.getElementById(`clue-answer-${idx}`);
+                    if (answerEl) {
+                        if (allCorrect && allFilled) {
+                            answerEl.textContent = word;
+                            answerEl.className = 'clue-answer solved';
+                            solved++;
+                        } else {
+                            let filled = '';
+                            let hasFilled = false;
+                            for (let i = 0; i < len; i++) {
+                                const r = w.direction === 'down' ? w.startRow + i : w.startRow;
+                                const c = w.direction === 'across' ? w.startCol + i : w.startCol;
+                                const key = `${r},${c}`;
+                                const input = cellInputs[key];
+                                if (input) {
+                                    const val = input.value.toUpperCase();
+                                    if (val) { filled += val;
+                                        hasFilled = true; } else filled += '·';
+                                } else { filled += '·'; }
+                            }
+                            if (hasFilled) {
+                                answerEl.textContent = filled;
+                                answerEl.className = 'clue-answer';
+                            } else {
+                                let dots = '';
+                                for (let i = 0; i < len; i++) dots += '·';
+                                answerEl.textContent = dots;
+                                answerEl.className = 'clue-answer';
+                            }
+                        }
+                    }
+
+                    // Update cell colors
+                    for (let i = 0; i < len; i++) {
+                        const r = w.direction === 'down' ? w.startRow + i : w.startRow;
+                        const c = w.direction === 'across' ? w.startCol + i : w.startCol;
+                        const key = `${r},${c}`;
+                        const input = cellInputs[key];
+                        if (input) {
+                            const val = input.value.toUpperCase();
+                            if (val === '') {
+                                input.classList.remove('correct', 'wrong');
+                            } else if (val === word[i]) {
+                                input.classList.add('correct');
+                                input.classList.remove('wrong');
+                            } else {
+                                input.classList.add('wrong');
+                                input.classList.remove('correct');
+                            }
+                        }
+                    }
+                });
+
+                const fill = document.getElementById('progressFill');
+                const text = document.getElementById('progressText');
+                const pct = Math.round((solved / total) * 100);
+                fill.style.width = pct + '%';
+                text.textContent = `${solved} / ${total} solved`;
+
+                // If fully solved, show message and clear saved state
+                if (solved === total) {
+                    showRomanticMessage();
+                    // Clear saved state so next visit is fresh
+                    clearSavedState();
+                } else {
+                    hideRomanticMessage();
                 }
 
-                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-                cdDays.textContent = String(d).padStart(2, '0');
-                cdHours.textContent = String(h).padStart(2, '0');
-                cdMinutes.textContent = String(m).padStart(2, '0');
-                cdSeconds.textContent = String(s).padStart(2, '0');
+                return solved;
             }
 
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
+            // ─── ROMANTIC MESSAGE ───
+            let messageShown = false;
 
-            function sparkleBurst(cx, cy, count) {
-                const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
-                const total = count || 24 + Math.floor(Math.random() * 16);
-                for (let i = 0; i < total; i++) {
-                    const spark = document.createElement('div');
-                    spark.className = 'sparkle-burst';
-                    spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-                    const angle = Math.random() * 2 * Math.PI;
-                    const dist = 60 + Math.random() * 180;
-                    const tx = Math.cos(angle) * dist;
-                    const ty = Math.sin(angle) * dist - 50;
-                    spark.style.setProperty('--tx', tx + 'px');
-                    spark.style.setProperty('--ty', ty + 'px');
-                    spark.style.left = (cx || window.innerWidth / 2) + 'px';
-                    spark.style.top = (cy || window.innerHeight / 2) + 'px';
-                    spark.style.fontSize = 1 + Math.random() * 1.8 + 'rem';
-                    spark.style.animationDuration = 0.4 + Math.random() * 0.6 + 's';
-                    document.body.appendChild(spark);
-                    setTimeout(() => spark.remove(), 1200);
+            function showRomanticMessage() {
+                if (messageShown) return;
+                messageShown = true;
+                const el = document.getElementById('romanticMessage');
+                el.classList.add('show');
+                // Confetti burst
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        confettiBurst(
+                            window.innerWidth * (0.2 + Math.random() * 0.6),
+                            window.innerHeight * (0.2 + Math.random() * 0.4)
+                        );
+                    }, i * 300);
+                }
+                setTimeout(() => {
+                    sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 40);
+                }, 200);
+            }
+
+            function hideRomanticMessage() {
+                const el = document.getElementById('romanticMessage');
+                const solved = WORDS.filter((w, idx) => {
+                    const answerEl = document.getElementById(`clue-answer-${idx}`);
+                    return answerEl && answerEl.classList.contains('solved');
+                }).length;
+                if (solved < WORDS.length) {
+                    el.classList.remove('show');
+                    messageShown = false;
                 }
             }
 
+            // ─── CONFETTI & SPARKLE ───
             function confettiBurst(cx, cy) {
                 const colors = ['#f8a4b8', '#c78bdb', '#f5c6a0', '#ffd6d6', '#d4b8e0', '#fce7f3', '#ffb3c6', '#b8d4e3'];
                 const count = 40 + Math.floor(Math.random() * 30);
@@ -684,50 +1130,182 @@
                 }
             }
 
-            wishMiniBtn.addEventListener('click', function(e) {
-                const cx = e.clientX || window.innerWidth / 2;
-                const cy = e.clientY || window.innerHeight / 2;
-                sparkleBurst(cx, cy, 30);
-                confettiBurst(cx, cy);
-
-                const msg = WISHES[Math.floor(Math.random() * WISHES.length)];
-                wishResponse.textContent = msg;
-                wishResponse.className = 'wish-response show';
-
-                const badge = document.querySelector('.day-badge');
-                if (badge) {
-                    const orig = badge.innerHTML;
-                    badge.innerHTML = '💫 ' + msg;
-                    badge.style.background = 'rgba(252, 231, 243, 0.8)';
-                    setTimeout(() => {
-                        badge.innerHTML = orig;
-                        badge.style.background = '';
-                    }, 3000);
+            function sparkleBurst(cx, cy, count) {
+                const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
+                const total = count || 24 + Math.floor(Math.random() * 16);
+                for (let i = 0; i < total; i++) {
+                    const spark = document.createElement('div');
+                    spark.className = 'sparkle-burst';
+                    spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    const angle = Math.random() * 2 * Math.PI;
+                    const dist = 60 + Math.random() * 180;
+                    const tx = Math.cos(angle) * dist;
+                    const ty = Math.sin(angle) * dist - 50;
+                    spark.style.setProperty('--tx', tx + 'px');
+                    spark.style.setProperty('--ty', ty + 'px');
+                    spark.style.left = (cx || window.innerWidth / 2) + 'px';
+                    spark.style.top = (cy || window.innerHeight / 2) + 'px';
+                    spark.style.fontSize = 1 + Math.random() * 1.8 + 'rem';
+                    spark.style.animationDuration = 0.4 + Math.random() * 0.6 + 's';
+                    document.body.appendChild(spark);
+                    setTimeout(() => spark.remove(), 1200);
                 }
+            }
 
-                setTimeout(() => {
-                    wishResponse.className = 'wish-response';
-                }, 4200);
-            });
+            // ─── ACTIONS ───
+            function checkAll() {
+                checkProgress();
+                const solved = WORDS.filter((w, idx) => {
+                    const answerEl = document.getElementById(`clue-answer-${idx}`);
+                    return answerEl && answerEl.classList.contains('solved');
+                }).length;
+                if (solved === WORDS.length) {
+                    showRomanticMessage();
+                } else {
+                    document.querySelectorAll('.cell-input.wrong').forEach(el => {
+                        el.style.animation = 'none';
+                        void el.offsetWidth;
+                        el.style.animation = 'shake 0.3s ease';
+                        setTimeout(() => { el.style.animation = ''; }, 400);
+                    });
+                    document.querySelectorAll('.cell-input').forEach(el => {
+                        if (el.value === '') {
+                            el.style.background = 'rgba(231, 76, 60, 0.05)';
+                            setTimeout(() => { el.style.background = ''; }, 600);
+                        }
+                    });
+                }
+            }
 
-            document.addEventListener('click', function(e) {
-                const tag = e.target.tagName.toLowerCase();
-                if (tag === 'a' || tag === 'button' || e.target.closest('.sparkle-burst')) return;
-                if (Math.random() > 0.25) return;
-                sparkleBurst(e.clientX, e.clientY, 6);
-            });
+            function clearAll() {
+                document.querySelectorAll('.cell-input').forEach(el => {
+                    el.value = '';
+                    el.classList.remove('correct', 'wrong', 'highlighted');
+                });
+                messageShown = false;
+                document.getElementById('romanticMessage').classList.remove('show');
+                WORDS.forEach((w, idx) => {
+                    const answerEl = document.getElementById(`clue-answer-${idx}`);
+                    if (answerEl) {
+                        let dots = '';
+                        for (let i = 0; i < w.word.length; i++) dots += '·';
+                        answerEl.textContent = dots;
+                        answerEl.className = 'clue-answer';
+                    }
+                });
+                clearSavedState();
+                checkProgress();
+                const first = document.querySelector('.cell-input');
+                if (first) first.focus();
+            }
 
+            function giveHint() {
+                for (let idx = 0; idx < WORDS.length; idx++) {
+                    const w = WORDS[idx];
+                    const answerEl = document.getElementById(`clue-answer-${idx}`);
+                    if (answerEl && !answerEl.classList.contains('solved')) {
+                        const firstR = w.direction === 'down' ? w.startRow : w.startRow;
+                        const firstC = w.direction === 'across' ? w.startCol : w.startCol;
+                        const key = `${firstR},${firstC}`;
+                        const input = cellInputs[key];
+                        if (input && input.value === '') {
+                            input.value = w.word[0];
+                            input.classList.add('correct');
+                            input.classList.remove('wrong');
+                            const ev = new Event('input', { bubbles: true });
+                            input.dispatchEvent(ev);
+                            input.style.background = 'rgba(199, 139, 219, 0.2)';
+                            setTimeout(() => { input.style.background = ''; }, 800);
+                            input.focus();
+                            input.select();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            function resetAll() {
+                clearAll();
+                // Also clear saved state
+                clearSavedState();
+                messageShown = false;
+                document.getElementById('romanticMessage').classList.remove('show');
+                checkProgress();
+            }
+
+            // ─── KEYBOARD SHORTCUTS ───
             document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const active = document.activeElement;
+                    if (active && active.classList.contains('cell-input')) {
+                        e.preventDefault();
+                        checkAll();
+                    }
+                }
                 if (e.key === 'Escape') {
-                    const el = document.activeElement;
-                    if (el) el.blur();
+                    document.activeElement && document.activeElement.blur();
                 }
                 if (e.key === 'h' || e.key === 'H') {
-                    window.location.href = 'index.html';
+                    if (!e.ctrlKey && !e.metaKey) giveHint();
+                }
+                if (e.key === 'c' || e.key === 'C') {
+                    if (!e.ctrlKey && !e.metaKey) checkAll();
                 }
             });
 
-            console.log(`🌸 Day ${day || '?'} · Romantic message with simple label 💖`);
+            // ─── INIT ───
+            renderGrid();
+            renderClues();
+            // Restore saved state after grid is rendered
+            const saved = getSavedState();
+            if (saved) {
+                Object.keys(saved).forEach(key => {
+                    const input = cellInputs[key];
+                    if (input) {
+                        input.value = saved[key];
+                        // Trigger events to update colors
+                        const ev = new Event('input', { bubbles: true });
+                        input.dispatchEvent(ev);
+                    }
+                });
+            }
+            // Now check progress to update UI
+            checkProgress();
+
+            // Click on grid to focus first empty cell
+            gridContainer.addEventListener('click', function(e) {
+                const target = e.target.closest('.cell-input');
+                if (!target) {
+                    const first = document.querySelector('.cell-input');
+                    if (first) first.focus();
+                }
+            });
+
+            // Button events
+            document.getElementById('checkBtn').addEventListener('click', checkAll);
+            document.getElementById('clearBtn').addEventListener('click', clearAll);
+            document.getElementById('hintBtn').addEventListener('click', giveHint);
+            document.getElementById('resetBtn').addEventListener('click', resetAll);
+
+            // Window resize - re-render grid sizes
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    const isMobile = window.innerWidth < 600;
+                    const isTiny = window.innerWidth < 400;
+                    const size = isTiny ? 22 : isMobile ? 28 : 34;
+                    gridContainer.style.gridTemplateColumns = `repeat(${cols}, ${size}px)`;
+                    document.querySelectorAll('.cell').forEach(el => {
+                        el.style.width = size + 'px';
+                        el.style.height = size + 'px';
+                        const inp = el.querySelector('.cell-input');
+                        if (inp) inp.style.fontSize = (isTiny ? 0.7 : isMobile ? 0.85 : 1.1) + 'rem';
+                    });
+                }, 200);
+            });
+
+            console.log('💕 Crossword for Ruth · solve to reveal the message!');
         })();
     </script>
 
