@@ -329,7 +329,7 @@
             <h1>Our Story</h1>
             <div class="sub">— Ruth's 21st Celebration —</div>
             <div class="story-desc">
-                A gentle walk, a flower, and a ride into forever<br />
+                A ride through love, with every mile a memory<br />
                 ✨ A love story in 2 minutes ✨
             </div>
             <button class="btn-play" id="playBtn">▶ play story</button>
@@ -392,28 +392,19 @@
                 { time: 52.5, text: "Yeah, you've got a friend in me" },
             ];
 
-            // ─── BILLBOARD MESSAGES ───
+            // ─── BILLBOARD SENTENCES ───
             const BILLBOARD_MSGS = [
-                "✨ Forever Starts Today ✨",
-                "💕 You & Me, Always 💕",
-                "🌹 Every Love Story is Beautiful",
-                "🌟 Together is Our Favorite Place",
-                "💫 Two Hearts, One Journey",
-                "🌸 Love is in the Air",
-                "💖 You've Got a Friend in Me",
-                "🌅 The Best Ride of Our Lives",
-                "💞 Ruth & Her Forever",
-                "🎵 Our Song, Our Story"
+                "✨ Every mile with you is a memory in the making ✨",
+                "💕 Love is not about how many days we've spent, but how much we've shared 💕",
+                "🌹 You are the reason my heart beats a little faster every day 🌹",
+                "🌟 Together we are unstoppable, together we are infinite 🌟",
+                "💫 Your smile is the sunshine that lights up my darkest days 💫",
+                "🌸 In a world full of chaos, you are my peace and my home 🌸",
+                "💖 You've got a friend in me, and I've got you in my heart forever 💖",
+                "🌅 The best part of my day is the moment I get to see you smile 🌅",
+                "💞 Ruth, you are my forever, my always, my everything 💞",
+                "🎵 Our song plays on, and our love grows stronger with every note 🎵"
             ];
-
-            // ─── SCENE TIMELINE ───
-            // phase 0: guy walks in with flowers (0-2.5s)
-            // phase 1: opens door, lady gets in (2.5-5s)
-            // phase 2: guy walks to driver side, gets in (5-7.5s)
-            // phase 3: car starts driving (7.5-10s)
-            // phase 4: driving on road, billboard, cars pass (10-16s)
-            // phase 5: romantic lean-in, arm around (16-19s)
-            // phase 6: finale (19-22s)
 
             // ─── DRAWING HELPERS ───
 
@@ -432,256 +423,281 @@
                 ctx.closePath();
             }
 
-            // ─── DRAW ROAD (perspective, 5 lanes) ───
-            function drawRoad(progress, time) {
-                // sky gradient
+            // ─── DRAW ROAD (3 lanes, perspective) ───
+            function drawRoad(time, scrollOffset) {
+                // Sky gradient – romantic sunset
                 const skyGrad = ctx.createLinearGradient(0, 0, 0, H * 0.55);
-                const sunset = Math.min(progress * 0.8, 0.6);
-                skyGrad.addColorStop(0, `rgba(25, 15, 45, ${1 - sunset * 0.3})`);
-                skyGrad.addColorStop(0.4, `rgba(80, 40, 80, ${1 - sunset * 0.4})`);
-                skyGrad.addColorStop(0.7, `rgba(180, 80, 60, ${1 - sunset * 0.3})`);
-                skyGrad.addColorStop(1, `rgba(220, 140, 80, ${1 - sunset * 0.2})`);
+                skyGrad.addColorStop(0, '#1a0a2a');
+                skyGrad.addColorStop(0.3, '#2a1a3a');
+                skyGrad.addColorStop(0.6, '#4a2a3a');
+                skyGrad.addColorStop(0.8, '#8a4a3a');
+                skyGrad.addColorStop(1, '#c87a4a');
                 ctx.fillStyle = skyGrad;
                 ctx.fillRect(0, 0, W, H * 0.6);
 
-                // sun
-                const sunX = W * 0.7 + Math.sin(time * 0.1) * 20;
-                const sunY = H * 0.22 - progress * 10;
-                const sunR = 28 + Math.sin(time * 0.5) * 2;
-                const sunGrad = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunR * 2.5);
-                sunGrad.addColorStop(0, 'rgba(255, 200, 100, 0.6)');
-                sunGrad.addColorStop(0.3, 'rgba(255, 150, 50, 0.3)');
-                sunGrad.addColorStop(1, 'rgba(255, 100, 20, 0)');
+                // Sun
+                const sunX = W * 0.75 + Math.sin(time * 0.1) * 15;
+                const sunY = H * 0.22 + Math.sin(time * 0.05) * 5;
+                const sunR = 30 + Math.sin(time * 0.3) * 2;
+                const sunGrad = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunR * 3);
+                sunGrad.addColorStop(0, 'rgba(255, 220, 160, 0.7)');
+                sunGrad.addColorStop(0.2, 'rgba(255, 180, 100, 0.4)');
+                sunGrad.addColorStop(0.6, 'rgba(200, 100, 50, 0.15)');
+                sunGrad.addColorStop(1, 'rgba(200, 80, 40, 0)');
                 ctx.fillStyle = sunGrad;
                 ctx.beginPath();
-                ctx.arc(sunX, sunY, sunR * 2.5, 0, Math.PI * 2);
+                ctx.arc(sunX, sunY, sunR * 3, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = 'rgba(255, 220, 140, 0.8)';
+                ctx.fillStyle = 'rgba(255, 230, 180, 0.8)';
                 ctx.beginPath();
                 ctx.arc(sunX, sunY, sunR, 0, Math.PI * 2);
                 ctx.fill();
 
-                // clouds
-                for (let i = 0; i < 4; i++) {
-                    const cx = (i * 130 + time * 8) % (W + 80) - 40;
-                    const cy = 20 + i * 25 + Math.sin(time * 0.3 + i * 1.5) * 8;
-                    const cs = 0.6 + Math.sin(time * 0.2 + i) * 0.15;
-                    ctx.fillStyle = `rgba(255,255,255,${0.06 + Math.sin(time * 0.1 + i) * 0.02})`;
+                // Clouds
+                for (let i = 0; i < 5; i++) {
+                    const cx = (i * 140 + time * 6) % (W + 100) - 50;
+                    const cy = 10 + i * 20 + Math.sin(time * 0.2 + i * 1.2) * 10;
+                    const cs = 0.5 + Math.sin(time * 0.15 + i * 0.7) * 0.15;
+                    ctx.fillStyle = `rgba(255,255,255,${0.04 + Math.sin(time * 0.1 + i) * 0.015})`;
                     ctx.beginPath();
-                    ctx.arc(cx, cy, 18 * cs, 0, Math.PI * 2);
-                    ctx.arc(cx + 22 * cs, cy - 8 * cs, 22 * cs, 0, Math.PI * 2);
-                    ctx.arc(cx + 44 * cs, cy, 18 * cs, 0, Math.PI * 2);
-                    ctx.arc(cx + 22 * cs, cy + 4 * cs, 16 * cs, 0, Math.PI * 2);
+                    ctx.arc(cx, cy, 20 * cs, 0, Math.PI * 2);
+                    ctx.arc(cx + 24 * cs, cy - 8 * cs, 24 * cs, 0, Math.PI * 2);
+                    ctx.arc(cx + 48 * cs, cy, 20 * cs, 0, Math.PI * 2);
+                    ctx.arc(cx + 24 * cs, cy + 6 * cs, 18 * cs, 0, Math.PI * 2);
                     ctx.fill();
                 }
 
-                // ground / hills
-                ctx.fillStyle = 'rgba(40, 70, 40, 0.6)';
+                // Distant hills
+                ctx.fillStyle = 'rgba(30, 50, 30, 0.3)';
                 ctx.beginPath();
                 ctx.moveTo(0, H * 0.6);
                 for (let x = 0; x <= W; x += 2) {
-                    const y = H * 0.6 + Math.sin(x * 0.008 + time * 0.05) * 12 + Math.sin(x * 0.02 + time * 0.03) * 6;
+                    const y = H * 0.6 + Math.sin(x * 0.008 + time * 0.02) * 8 + Math.sin(x * 0.02 + time * 0.015) * 4;
                     ctx.lineTo(x, y);
                 }
                 ctx.lineTo(W, H);
                 ctx.lineTo(0, H);
                 ctx.fill();
 
-                ctx.fillStyle = 'rgba(50, 80, 50, 0.5)';
+                ctx.fillStyle = 'rgba(40, 60, 40, 0.25)';
                 ctx.beginPath();
-                ctx.moveTo(0, H * 0.65);
+                ctx.moveTo(0, H * 0.63);
                 for (let x = 0; x <= W; x += 2) {
-                    const y = H * 0.65 + Math.sin(x * 0.01 + time * 0.04 + 1) * 10 + Math.sin(x * 0.025 + time * 0.02) * 5;
+                    const y = H * 0.63 + Math.sin(x * 0.01 + time * 0.025 + 1.2) * 7 + Math.sin(x * 0.025 + time * 0.02) * 3;
                     ctx.lineTo(x, y);
                 }
                 ctx.lineTo(W, H);
                 ctx.lineTo(0, H);
                 ctx.fill();
 
-                // ROAD (5 lanes, perspective)
+                // ─── 3-LANE ROAD (perspective) ───
                 const vpX = W * 0.5;
-                const vpY = H * 0.38;
-                const roadW = W * 0.9;
+                const vpY = H * 0.32;
+                const roadW = W * 0.85;
+                const laneCount = 3;
 
-                // road surface
-                ctx.fillStyle = '#2a2a2e';
+                // Road surface
+                ctx.fillStyle = '#1a1a1e';
                 ctx.beginPath();
-                ctx.moveTo(vpX - 8, vpY);
-                ctx.lineTo(vpX + 8, vpY);
-                ctx.lineTo(vpX + roadW * 0.55, H);
-                ctx.lineTo(vpX - roadW * 0.55, H);
+                ctx.moveTo(vpX - 10, vpY);
+                ctx.lineTo(vpX + 10, vpY);
+                ctx.lineTo(vpX + roadW * 0.5, H);
+                ctx.lineTo(vpX - roadW * 0.5, H);
                 ctx.fill();
 
-                // road edge glow
-                ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-                ctx.lineWidth = 1;
+                // Road edge glow
+                ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+                ctx.lineWidth = 1.5;
                 ctx.beginPath();
-                ctx.moveTo(vpX - 8, vpY);
-                ctx.lineTo(vpX - roadW * 0.55, H);
+                ctx.moveTo(vpX - 10, vpY);
+                ctx.lineTo(vpX - roadW * 0.5, H);
                 ctx.stroke();
                 ctx.beginPath();
-                ctx.moveTo(vpX + 8, vpY);
-                ctx.lineTo(vpX + roadW * 0.55, H);
+                ctx.moveTo(vpX + 10, vpY);
+                ctx.lineTo(vpX + roadW * 0.5, H);
                 ctx.stroke();
 
-                // lane dividers (4 lines for 5 lanes)
-                const laneCount = 5;
+                // Lane dividers (3 lanes → 2 lines)
                 for (let lane = 1; lane < laneCount; lane++) {
                     const t = lane / laneCount;
-                    const leftX = vpX - 8 + (vpX - roadW * 0.55 - vpX + 8) * t;
-                    const rightX = vpX + 8 + (vpX + roadW * 0.55 - vpX - 8) * t;
+                    const leftX = vpX - 10 + (vpX - roadW * 0.5 - vpX + 10) * t;
+                    const rightX = vpX + 10 + (vpX + roadW * 0.5 - vpX - 10) * t;
                     const centerX = (leftX + rightX) / 2;
 
-                    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-                    ctx.lineWidth = 1.5;
-                    ctx.setLineDash([12, 18]);
+                    // Dashed lines with animation (scroll)
+                    const dashLen = 20;
+                    const gapLen = 25;
+                    const totalDash = dashLen + gapLen;
+                    const offset = (scrollOffset * 80) % totalDash;
+
+                    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([dashLen, gapLen]);
+                    ctx.lineDashOffset = -offset;
                     ctx.beginPath();
-                    ctx.moveTo(centerX, vpY + 10);
+                    ctx.moveTo(centerX, vpY + 12);
                     ctx.lineTo(centerX, H);
                     ctx.stroke();
                     ctx.setLineDash([]);
                 }
 
-                // road edge lines
-                ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-                ctx.lineWidth = 2;
+                // Road edge lines (solid)
+                ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+                ctx.lineWidth = 2.5;
                 ctx.beginPath();
-                ctx.moveTo(vpX - 8, vpY);
-                ctx.lineTo(vpX - roadW * 0.55 + 4, H);
+                ctx.moveTo(vpX - 10, vpY);
+                ctx.lineTo(vpX - roadW * 0.5 + 6, H);
                 ctx.stroke();
                 ctx.beginPath();
-                ctx.moveTo(vpX + 8, vpY);
-                ctx.lineTo(vpX + roadW * 0.55 - 4, H);
+                ctx.moveTo(vpX + 10, vpY);
+                ctx.lineTo(vpX + roadW * 0.5 - 6, H);
                 ctx.stroke();
 
-                // ─── OTHER CARS ON ROAD ───
-                const carPositions = [
-                    { lane: 0, offset: 0.2, speed: 0.4, color: '#c0392b', size: 0.7 },
-                    { lane: 1, offset: 0.5, speed: -0.3, color: '#2980b9', size: 0.8 },
-                    { lane: 2, offset: 0.8, speed: 0.5, color: '#27ae60', size: 0.6 },
-                    { lane: 3, offset: 0.1, speed: -0.6, color: '#8e44ad', size: 0.7 },
-                    { lane: 4, offset: 0.6, speed: 0.35, color: '#d35400', size: 0.65 },
-                    { lane: 0, offset: 0.9, speed: -0.45, color: '#2c3e50', size: 0.5 },
-                    { lane: 3, offset: 0.4, speed: 0.55, color: '#e74c3c', size: 0.6 },
+                // ─── TRAFFIC CARS IN LEFT & RIGHT LANES ───
+                // Each car: lane (0=left, 2=right), vertical position, speed, color
+                const cars = [
+                    { lane: 0, yPos: 0.1, speed: 0.6, color: '#c0392b', size: 0.7 },
+                    { lane: 0, yPos: 0.6, speed: 0.4, color: '#2980b9', size: 0.65 },
+                    { lane: 0, yPos: 0.85, speed: 0.7, color: '#27ae60', size: 0.6 },
+                    { lane: 2, yPos: 0.25, speed: -0.5, color: '#8e44ad', size: 0.7 },
+                    { lane: 2, yPos: 0.5, speed: -0.35, color: '#d35400', size: 0.65 },
+                    { lane: 2, yPos: 0.75, speed: -0.6, color: '#2c3e50', size: 0.6 },
+                    { lane: 0, yPos: 0.35, speed: 0.55, color: '#e74c3c', size: 0.55 },
+                    { lane: 2, yPos: 0.95, speed: -0.45, color: '#16a085', size: 0.5 },
+                    { lane: 0, yPos: 0.0, speed: 0.8, color: '#f39c12', size: 0.5 },
+                    { lane: 2, yPos: 0.05, speed: -0.7, color: '#1abc9c', size: 0.5 },
                 ];
 
-                const driveProgress = Math.max(0, Math.min((progress - 0.3) / 0.7, 1));
-                const speedFactor = 0.5 + driveProgress * 0.5;
+                const speedFactor = 0.8 + Math.sin(time * 0.1) * 0.1;
 
-                for (const cp of carPositions) {
-                    const laneT = (cp.lane + 0.5) / laneCount;
-                    const leftX = vpX - 8 + (vpX - roadW * 0.55 - vpX + 8) * laneT;
-                    const rightX = vpX + 8 + (vpX + roadW * 0.55 - vpX - 8) * laneT;
+                for (const car of cars) {
+                    // Compute lane horizontal position with perspective
+                    const laneT = (car.lane + 0.5) / laneCount; // 0.166, 0.5, 0.833
+                    const leftX = vpX - 10 + (vpX - roadW * 0.5 - vpX + 10) * laneT;
+                    const rightX = vpX + 10 + (vpX + roadW * 0.5 - vpX - 10) * laneT;
                     const centerX = (leftX + rightX) / 2;
                     const laneWidth = rightX - leftX;
 
-                    // vertical position on road (perspective)
-                    const rawPos = (cp.offset + time * cp.speed * speedFactor * 0.08) % 1;
-                    const yPos = vpY + (H - vpY) * rawPos;
+                    // Vertical position with wrap-around
+                    let rawY = (car.yPos + time * car.speed * speedFactor * 0.04) % 1;
+                    if (rawY < 0) rawY += 1;
+                    const yPos = vpY + (H - vpY) * rawY;
 
-                    if (yPos > vpY + 10 && yPos < H - 5) {
-                        const scale = 0.15 + 0.85 * (1 - (yPos - vpY) / (H - vpY));
-                        const carW = laneWidth * 0.5 * scale * 0.8;
-                        const carH = carW * 0.45;
-
-                        // car body
-                        const cx = centerX;
-                        const cy = yPos;
-                        const s = scale * 0.9;
+                    // Only draw if within visible road
+                    if (yPos > vpY + 8 && yPos < H - 2) {
+                        const scale = 0.12 + 0.88 * (1 - (yPos - vpY) / (H - vpY));
+                        const carW = laneWidth * 0.45 * scale * 0.75;
+                        const carH = carW * 0.4;
 
                         ctx.save();
-                        ctx.translate(cx, cy);
-                        ctx.scale(s, s);
+                        ctx.translate(centerX, yPos);
+                        ctx.scale(scale, scale);
 
-                        // shadow
-                        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                        // Shadow
+                        ctx.fillStyle = 'rgba(0,0,0,0.12)';
                         ctx.beginPath();
-                        ctx.ellipse(0, carH * 1.1, carW * 0.7, carH * 0.15, 0, 0, Math.PI * 2);
+                        ctx.ellipse(0, carH * 1.2, carW * 0.6, carH * 0.12, 0, 0, Math.PI * 2);
                         ctx.fill();
 
-                        // body
-                        ctx.fillStyle = cp.color;
-                        ctx.shadowColor = 'rgba(0,0,0,0.2)';
-                        ctx.shadowBlur = 6;
-                        const bw = carW * 1.8;
+                        // Car body
+                        const bw = carW * 1.9;
                         const bh = carH * 1.2;
+                        ctx.shadowColor = 'rgba(0,0,0,0.15)';
+                        ctx.shadowBlur = 6;
+                        ctx.fillStyle = car.color;
                         ctx.beginPath();
                         roundRect(-bw / 2, -bh / 2, bw, bh, 4);
                         ctx.fill();
 
-                        // roof/window
-                        ctx.fillStyle = 'rgba(100,180,255,0.15)';
+                        // Roof / window (dark tint)
+                        ctx.fillStyle = 'rgba(30,40,50,0.3)';
                         ctx.shadowBlur = 0;
                         ctx.beginPath();
-                        roundRect(-bw * 0.3, -bh * 0.7, bw * 0.6, bh * 0.4, 3);
+                        roundRect(-bw * 0.28, -bh * 0.65, bw * 0.56, bh * 0.35, 3);
                         ctx.fill();
 
-                        // lights
-                        ctx.fillStyle = 'rgba(255,200,100,0.3)';
+                        // Headlights / taillights
+                        const isGoingDown = car.speed > 0;
+                        const lightX = isGoingDown ? bw * 0.42 : -bw * 0.42;
+                        ctx.fillStyle = isGoingDown ? 'rgba(255,200,100,0.25)' : 'rgba(255,30,30,0.25)';
                         ctx.beginPath();
-                        ctx.arc(bw * 0.45, -bh * 0.2, 3, 0, Math.PI * 2);
+                        ctx.arc(lightX, -bh * 0.15, 3, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.beginPath();
-                        ctx.arc(bw * 0.45, bh * 0.2, 3, 0, Math.PI * 2);
+                        ctx.arc(lightX, bh * 0.15, 3, 0, Math.PI * 2);
                         ctx.fill();
 
-                        // wheels
+                        // Wheels
                         ctx.fillStyle = '#1a1a1a';
-                        ctx.shadowBlur = 4;
+                        ctx.shadowBlur = 3;
                         ctx.beginPath();
-                        ctx.arc(-bw * 0.35, bh * 0.55, 4, 0, Math.PI * 2);
+                        ctx.arc(-bw * 0.32, bh * 0.55, 4, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.beginPath();
-                        ctx.arc(bw * 0.35, bh * 0.55, 4, 0, Math.PI * 2);
+                        ctx.arc(bw * 0.32, bh * 0.55, 4, 0, Math.PI * 2);
                         ctx.fill();
 
                         ctx.restore();
                     }
                 }
+
+                // Return the road's vanishing point info for car placement
+                return { vpX, vpY, roadW };
             }
 
-            // ─── DRAW CONVERTIBLE FROM BEHIND ───
-            function drawConvertible(progress, time, guyLean, armAround, driveProgress) {
-                const cx = W * 0.5;
-                const cy = H * 0.7 + Math.sin(time * 0.5) * 2;
+            // ─── DRAW CONVERTIBLE (from behind, in middle lane) ───
+            function drawConvertible(time, roadInfo, scrollOffset, ladySkinTone) {
+                const { vpX, vpY, roadW } = roadInfo;
 
-                const carW = W * 0.52;
-                const carH = carW * 0.45;
+                // Middle lane position
+                const laneT = 0.5;
+                const leftX = vpX - 10 + (vpX - roadW * 0.5 - vpX + 10) * laneT;
+                const rightX = vpX + 10 + (vpX + roadW * 0.5 - vpX - 10) * laneT;
+                const centerX = (leftX + rightX) / 2;
+                const laneWidth = rightX - leftX;
+
+                // Car vertical position (fixed in middle of screen)
+                const yPos = H * 0.62 + Math.sin(time * 0.3) * 2;
+
+                // Size based on perspective
+                const scale = 0.55 + 0.45 * (1 - (yPos - vpY) / (H - vpY));
+                const carW = laneWidth * 0.5 * scale * 0.7;
+                const carH = carW * 0.42;
 
                 ctx.save();
-                ctx.translate(cx, cy);
+                ctx.translate(centerX, yPos);
 
-                // shadow
+                // Shadow
                 ctx.fillStyle = 'rgba(0,0,0,0.15)';
                 ctx.beginPath();
-                ctx.ellipse(0, carH * 0.55, carW * 0.7, carH * 0.12, 0, 0, Math.PI * 2);
+                ctx.ellipse(0, carH * 0.55, carW * 0.7, carH * 0.1, 0, 0, Math.PI * 2);
                 ctx.fill();
 
                 // ─── CAR BODY ───
-                // rear bumper
+                // Rear bumper
                 ctx.fillStyle = '#1a1a1e';
-                ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                ctx.shadowBlur = 15;
+                ctx.shadowColor = 'rgba(0,0,0,0.2)';
+                ctx.shadowBlur = 12;
                 ctx.beginPath();
-                roundRect(-carW * 0.48, -carH * 0.2, carW * 0.96, carH * 0.6, 8);
+                roundRect(-carW * 0.48, -carH * 0.2, carW * 0.96, carH * 0.6, 6);
                 ctx.fill();
 
-                // main body (red convertible)
+                // Main body (deep red convertible)
                 const bodyColor = '#b31b1b';
                 ctx.fillStyle = bodyColor;
-                ctx.shadowBlur = 10;
+                ctx.shadowBlur = 8;
                 ctx.beginPath();
-                roundRect(-carW * 0.44, -carH * 0.4, carW * 0.88, carH * 0.8, 6);
+                roundRect(-carW * 0.44, -carH * 0.4, carW * 0.88, carH * 0.8, 5);
                 ctx.fill();
 
-                // rear deck
+                // Rear deck
                 ctx.fillStyle = '#8a1515';
                 ctx.beginPath();
-                roundRect(-carW * 0.4, -carH * 0.38, carW * 0.8, carH * 0.3, 4);
+                roundRect(-carW * 0.4, -carH * 0.38, carW * 0.8, carH * 0.28, 4);
                 ctx.fill();
 
-                // trunk line
-                ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+                // Trunk line
+                ctx.strokeStyle = 'rgba(255,255,255,0.03)';
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(-carW * 0.35, -carH * 0.12);
@@ -689,9 +705,9 @@
                 ctx.stroke();
 
                 // ─── TAILLIGHTS ───
-                const tlColor = 'rgba(255,30,30,0.7)';
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = 'rgba(255,0,0,0.3)';
+                const tlColor = 'rgba(255,30,30,0.6)';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = 'rgba(255,0,0,0.2)';
                 ctx.fillStyle = tlColor;
                 ctx.beginPath();
                 roundRect(-carW * 0.4, -carH * 0.22, carW * 0.08, carH * 0.12, 3);
@@ -700,11 +716,10 @@
                 roundRect(carW * 0.32, -carH * 0.22, carW * 0.08, carH * 0.12, 3);
                 ctx.fill();
 
-                // brake lights (brighter when driving)
-                const brake = driveProgress > 0.3 ? 0.6 : 0.2;
-                ctx.fillStyle = `rgba(255,50,50,${brake})`;
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = `rgba(255,0,0,${brake * 0.3})`;
+                // Brake lights (glowing)
+                ctx.fillStyle = 'rgba(255,50,50,0.5)';
+                ctx.shadowBlur = 18;
+                ctx.shadowColor = 'rgba(255,0,0,0.2)';
                 ctx.beginPath();
                 roundRect(-carW * 0.38, -carW * 0.04, carW * 0.06, carW * 0.06, 2);
                 ctx.fill();
@@ -714,24 +729,24 @@
 
                 ctx.shadowBlur = 0;
 
-                // ─── SEATS (from behind) ───
+                // ─── SEATS ───
                 const seatW = carW * 0.28;
                 const seatH = carH * 0.5;
                 const seatY = -carH * 0.3;
 
-                // driver seat (left side) - guy
+                // Driver seat (left side)
                 ctx.fillStyle = '#2a2a2e';
                 ctx.beginPath();
                 roundRect(-carW * 0.3, seatY, seatW, seatH, 4);
                 ctx.fill();
 
-                // passenger seat (right side) - lady
+                // Passenger seat (right side)
                 ctx.fillStyle = '#2a2a2e';
                 ctx.beginPath();
                 roundRect(carW * 0.02, seatY, seatW, seatH, 4);
                 ctx.fill();
 
-                // headrests
+                // Headrests
                 ctx.fillStyle = '#1a1a1e';
                 ctx.beginPath();
                 roundRect(-carW * 0.26, seatY - seatH * 0.35, seatW * 0.35, seatH * 0.2, 3);
@@ -740,167 +755,166 @@
                 roundRect(carW * 0.06, seatY - seatH * 0.35, seatW * 0.35, seatH * 0.2, 3);
                 ctx.fill();
 
-                // ─── CHARACTERS (from behind) ───
+                // ─── CHARACTERS ───
 
-                // GUY (driver, left side) - dark brown skin
+                // GUY (driver, left) – dark brown skin
                 const guyX = -carW * 0.18;
                 const guyY = seatY - seatH * 0.1;
 
-                // guy body from behind
                 ctx.save();
                 ctx.translate(guyX, guyY);
 
-                // shoulders / body
-                const bodyW = seatW * 0.75;
-                const bodyH = seatH * 0.7;
+                // Body
+                const bW = seatW * 0.75;
+                const bH = seatH * 0.7;
                 ctx.fillStyle = '#3a2a1a';
                 ctx.beginPath();
-                roundRect(-bodyW / 2, -bodyH * 0.1, bodyW, bodyH, 8);
+                roundRect(-bW / 2, -bH * 0.1, bW, bH, 8);
                 ctx.fill();
-
-                // shirt (dark)
                 ctx.fillStyle = '#1a1a2a';
                 ctx.beginPath();
-                roundRect(-bodyW * 0.4, -bodyH * 0.05, bodyW * 0.8, bodyH * 0.7, 4);
+                roundRect(-bW * 0.4, -bH * 0.05, bW * 0.8, bH * 0.7, 4);
                 ctx.fill();
 
-                // head (dark brown skin)
+                // Head – dark brown
                 const headR = seatW * 0.3;
-                ctx.fillStyle = '#6a3a2a';
+                ctx.fillStyle = '#5a3a2a';
                 ctx.beginPath();
-                ctx.arc(0, -bodyH * 0.35, headR, 0, Math.PI * 2);
+                ctx.arc(0, -bH * 0.35, headR, 0, Math.PI * 2);
                 ctx.fill();
 
-                // hair (short, dark)
+                // Hair
                 ctx.fillStyle = '#2a1a0a';
                 ctx.beginPath();
-                ctx.arc(0, -bodyH * 0.45, headR * 0.9, Math.PI, 2 * Math.PI);
+                ctx.arc(0, -bH * 0.45, headR * 0.9, Math.PI, 2 * Math.PI);
                 ctx.fill();
                 ctx.beginPath();
-                ctx.arc(-headR * 0.5, -bodyH * 0.4, headR * 0.4, 0, Math.PI * 2);
+                ctx.arc(-headR * 0.5, -bH * 0.4, headR * 0.4, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.beginPath();
-                ctx.arc(headR * 0.5, -bodyH * 0.4, headR * 0.4, 0, Math.PI * 2);
+                ctx.arc(headR * 0.5, -bH * 0.4, headR * 0.4, 0, Math.PI * 2);
                 ctx.fill();
 
-                // arm (left arm on steering wheel, right arm around lady)
-                ctx.strokeStyle = '#6a3a2a';
-                ctx.lineWidth = 6;
+                // Arm (left on steering wheel, right around lady)
+                ctx.strokeStyle = '#5a3a2a';
+                ctx.lineWidth = 5;
                 ctx.lineCap = 'round';
 
-                // left arm (on steering wheel)
+                // Left arm
                 ctx.beginPath();
-                ctx.moveTo(-bodyW * 0.4, -bodyH * 0.1);
-                ctx.lineTo(-bodyW * 0.6, -bodyH * 0.25);
+                ctx.moveTo(-bW * 0.4, -bH * 0.1);
+                ctx.lineTo(-bW * 0.6, -bH * 0.25);
                 ctx.stroke();
 
-                // right arm - goes around lady if armAround > 0
-                const armExtend = 0.3 + armAround * 0.5;
+                // Right arm – around lady
+                const armExtend = 0.5 + Math.sin(time * 0.2) * 0.05;
                 ctx.beginPath();
-                ctx.moveTo(bodyW * 0.4, -bodyH * 0.1);
-                ctx.lineTo(bodyW * 0.4 + carW * 0.15 * armExtend, -bodyH * 0.2 - carH * 0.05 * armAround);
+                ctx.moveTo(bW * 0.4, -bH * 0.1);
+                ctx.lineTo(bW * 0.4 + carW * 0.18 * armExtend, -bH * 0.2 - carH * 0.08);
                 ctx.stroke();
 
-                // if arm around, draw hand on her shoulder
-                if (armAround > 0.3) {
-                    ctx.fillStyle = '#6a3a2a';
-                    ctx.beginPath();
-                    ctx.arc(bodyW * 0.4 + carW * 0.15 * armExtend, -bodyH * 0.2 - carH * 0.05 * armAround, 4, 0, Math.PI * 2);
-                    ctx.fill();
-                }
+                // Hand on her shoulder
+                ctx.fillStyle = '#5a3a2a';
+                ctx.beginPath();
+                ctx.arc(bW * 0.4 + carW * 0.18 * armExtend, -bH * 0.2 - carH * 0.08, 4, 0, Math.PI * 2);
+                ctx.fill();
 
                 ctx.restore();
 
-                // ─── LADY (passenger, right side) - white skin ───
+                // ─── LADY (passenger, right) – darker skin (tan/medium) ───
                 const ladyX = carW * 0.18;
                 const ladyY = seatY - seatH * 0.1;
 
                 ctx.save();
                 ctx.translate(ladyX, ladyY);
 
-                // lean in toward guy
-                const leanX = -guyLean * 8;
-                const leanRot = -guyLean * 0.04;
-
+                // Lean in toward guy (gentle sway)
+                const leanX = -4 + Math.sin(time * 0.3) * 1.5;
+                const leanRot = -0.02 + Math.sin(time * 0.25) * 0.01;
                 ctx.translate(leanX, 0);
                 ctx.rotate(leanRot);
 
-                // shoulders / body
-                const lBodyW = seatW * 0.7;
-                const lBodyH = seatH * 0.65;
-                ctx.fillStyle = '#f0d5c0';
+                // Body – medium/tan skin
+                const lBW = seatW * 0.7;
+                const lBH = seatH * 0.65;
+                ctx.fillStyle = '#d4a88a';
                 ctx.beginPath();
-                roundRect(-lBodyW / 2, -lBodyH * 0.1, lBodyW, lBodyH, 8);
+                roundRect(-lBW / 2, -lBH * 0.1, lBW, lBH, 8);
                 ctx.fill();
 
-                // dress (light pink/white)
-                ctx.fillStyle = '#f5d0d8';
+                // Dress (soft pink)
+                ctx.fillStyle = '#e8a0b8';
                 ctx.beginPath();
-                roundRect(-lBodyW * 0.45, -lBodyH * 0.05, lBodyW * 0.9, lBodyH * 0.75, 4);
+                roundRect(-lBW * 0.45, -lBH * 0.05, lBW * 0.9, lBH * 0.75, 4);
                 ctx.fill();
 
-                // head (white skin)
+                // Head – tan/medium skin
                 const lHeadR = seatW * 0.28;
-                ctx.fillStyle = '#f0d5c0';
+                ctx.fillStyle = '#d4a88a';
                 ctx.beginPath();
-                ctx.arc(0, -lBodyH * 0.35, lHeadR, 0, Math.PI * 2);
+                ctx.arc(0, -lBH * 0.35, lHeadR, 0, Math.PI * 2);
                 ctx.fill();
 
-                // hair (long, blonde/light brown)
-                ctx.fillStyle = '#c8a060';
-                // hair flowing down
+                // Hair (flowing, light brown)
+                ctx.fillStyle = '#b8885a';
                 ctx.beginPath();
-                ctx.arc(0, -lBodyH * 0.45, lHeadR * 1.0, Math.PI, 2 * Math.PI);
+                ctx.arc(0, -lBH * 0.45, lHeadR * 1.0, Math.PI, 2 * Math.PI);
                 ctx.fill();
-                // long hair strands
                 for (let i = -3; i <= 3; i++) {
                     const angle = Math.PI / 2 + i * 0.12;
                     const hx = Math.sin(angle) * lHeadR * 0.8;
-                    const hy = -lBodyH * 0.35 + Math.cos(angle) * lHeadR * 0.8;
+                    const hy = -lBH * 0.35 + Math.cos(angle) * lHeadR * 0.8;
                     ctx.beginPath();
                     ctx.moveTo(hx, hy);
-                    const len = 20 + Math.sin(i * 0.7 + time) * 5;
-                    ctx.quadraticCurveTo(hx + i * 4, hy + len * 0.6, hx + i * 2, hy + len);
-                    ctx.strokeStyle = '#c8a060';
-                    ctx.lineWidth = 3;
+                    const len = 18 + Math.sin(i * 0.7 + time * 0.5) * 4;
+                    ctx.quadraticCurveTo(hx + i * 3, hy + len * 0.6, hx + i * 1.5, hy + len);
+                    ctx.strokeStyle = '#b8885a';
+                    ctx.lineWidth = 2.5;
                     ctx.stroke();
                 }
 
-                // hair bow
+                // Hair bow
                 ctx.fillStyle = '#f5a0b8';
                 ctx.beginPath();
-                ctx.ellipse(lHeadR * 0.7, -lBodyH * 0.5, 6, 4, 0.4, 0, Math.PI * 2);
+                ctx.ellipse(lHeadR * 0.7, -lBH * 0.5, 5, 3.5, 0.4, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.beginPath();
-                ctx.ellipse(lHeadR * 0.8, -lBodyH * 0.48, 6, 4, -0.4, 0, Math.PI * 2);
+                ctx.ellipse(lHeadR * 0.8, -lBH * 0.48, 5, 3.5, -0.4, 0, Math.PI * 2);
                 ctx.fill();
 
-                // blush
-                ctx.fillStyle = 'rgba(245,160,184,0.15)';
+                // Blush
+                ctx.fillStyle = 'rgba(200,120,130,0.15)';
                 ctx.beginPath();
-                ctx.arc(-lHeadR * 0.5, -lBodyH * 0.3, 4, 0, Math.PI * 2);
+                ctx.arc(-lHeadR * 0.5, -lBH * 0.3, 4, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.beginPath();
-                ctx.arc(lHeadR * 0.5, -lBodyH * 0.3, 4, 0, Math.PI * 2);
+                ctx.arc(lHeadR * 0.5, -lBH * 0.3, 4, 0, Math.PI * 2);
                 ctx.fill();
+
+                // Smile
+                ctx.strokeStyle = '#8a5a4a';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(0, -lBH * 0.24, 4, 0.1, Math.PI - 0.1);
+                ctx.stroke();
 
                 ctx.restore();
 
-                // ─── STEERING WHEEL (visible from behind, left side) ───
+                // ─── STEERING WHEEL ───
                 ctx.save();
                 ctx.translate(-carW * 0.25, seatY + seatH * 0.05);
-                ctx.fillStyle = 'rgba(30,30,35,0.3)';
+                ctx.fillStyle = 'rgba(30,30,35,0.25)';
                 ctx.beginPath();
                 ctx.ellipse(0, 0, carW * 0.08, carW * 0.04, 0.2, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = 'rgba(40,40,45,0.2)';
+                ctx.fillStyle = 'rgba(40,40,45,0.15)';
                 ctx.beginPath();
                 ctx.ellipse(0, 0, carW * 0.06, carW * 0.03, 0.2, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.restore();
 
-                // ─── WINDSHIELD (from behind, subtle) ───
-                ctx.strokeStyle = 'rgba(150,200,255,0.03)';
+                // ─── WINDSHIELD (subtle) ───
+                ctx.strokeStyle = 'rgba(150,200,255,0.02)';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(-carW * 0.32, -carH * 0.45);
@@ -908,598 +922,147 @@
                 ctx.stroke();
 
                 // ─── REAR VIEW MIRROR ───
-                ctx.fillStyle = 'rgba(40,40,45,0.1)';
+                ctx.fillStyle = 'rgba(40,40,45,0.08)';
                 ctx.beginPath();
                 ctx.ellipse(0, -carH * 0.45, carW * 0.04, carW * 0.025, 0, 0, Math.PI * 2);
                 ctx.fill();
 
                 // ─── LICENSE PLATE ───
-                ctx.fillStyle = 'rgba(255,255,255,0.03)';
-                ctx.fillRect(-carW * 0.06, carH * 0.3, carW * 0.12, carH * 0.06);
                 ctx.fillStyle = 'rgba(255,255,255,0.02)';
-                ctx.font = `${carH * 0.04}px sans-serif`;
+                ctx.fillRect(-carW * 0.06, carH * 0.3, carW * 0.12, carH * 0.06);
+                ctx.fillStyle = 'rgba(255,255,255,0.015)';
+                ctx.font = `${carH * 0.035}px sans-serif`;
                 ctx.textAlign = 'center';
-                ctx.fillText('RUTH 21', 0, carH * 0.345);
+                ctx.textBaseline = 'middle';
+                ctx.fillText('RUTH 21', 0, carH * 0.33);
 
                 ctx.restore();
-
-                // ─── BILLBOARD (top area) ───
-                drawBillboard(progress, time);
             }
 
             // ─── BILLBOARD ───
-            function drawBillboard(progress, time) {
-                const msgIndex = Math.floor((time * 0.2) % BILLBOARD_MSGS.length);
+            function drawBillboard(time) {
+                const msgIndex = Math.floor((time * 0.15) % BILLBOARD_MSGS.length);
                 const msg = BILLBOARD_MSGS[msgIndex];
                 const nextMsg = BILLBOARD_MSGS[(msgIndex + 1) % BILLBOARD_MSGS.length];
-                const blend = (time * 0.2) % 1;
+                const blend = (time * 0.15) % 1;
 
-                const bx = W * 0.08;
-                const by = H * 0.04;
-                const bw = W * 0.84;
-                const bh = H * 0.12;
+                const bx = W * 0.06;
+                const by = H * 0.03;
+                const bw = W * 0.88;
+                const bh = H * 0.13;
 
-                // billboard frame
                 ctx.save();
 
-                // shadow
-                ctx.shadowColor = 'rgba(0,0,0,0.2)';
-                ctx.shadowBlur = 20;
-                ctx.fillStyle = 'rgba(20,18,25,0.6)';
+                // Billboard shadow
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 25;
+                ctx.fillStyle = 'rgba(15,12,20,0.5)';
                 ctx.beginPath();
-                roundRect(bx, by, bw, bh, 6);
+                roundRect(bx, by, bw, bh, 8);
                 ctx.fill();
                 ctx.shadowBlur = 0;
 
-                // border glow
-                ctx.strokeStyle = 'rgba(255,200,150,0.04)';
+                // Frame
+                ctx.strokeStyle = 'rgba(255,200,150,0.03)';
                 ctx.lineWidth = 1;
                 ctx.beginPath();
-                roundRect(bx, by, bw, bh, 6);
+                roundRect(bx, by, bw, bh, 8);
                 ctx.stroke();
 
-                // gradient background
+                // Inner gradient
                 const grad = ctx.createLinearGradient(bx, by, bx, by + bh);
-                grad.addColorStop(0, 'rgba(40,20,50,0.5)');
-                grad.addColorStop(0.5, 'rgba(60,30,70,0.4)');
-                grad.addColorStop(1, 'rgba(40,20,50,0.5)');
+                grad.addColorStop(0, 'rgba(30,15,40,0.5)');
+                grad.addColorStop(0.3, 'rgba(50,25,60,0.4)');
+                grad.addColorStop(0.7, 'rgba(50,25,60,0.4)');
+                grad.addColorStop(1, 'rgba(30,15,40,0.5)');
                 ctx.fillStyle = grad;
                 ctx.beginPath();
-                roundRect(bx + 4, by + 4, bw - 8, bh - 8, 4);
+                roundRect(bx + 4, by + 4, bw - 8, bh - 8, 6);
                 ctx.fill();
 
-                // message text with crossfade
-                const alpha1 = 1 - blend;
-                const alpha2 = blend;
-
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.font = `bold ${bh * 0.35}px "Playfair Display", serif`;
-
-                // current message
-                ctx.fillStyle = `rgba(255,220,200,${alpha1 * 0.7})`;
-                ctx.fillText(msg, W * 0.5, by + bh * 0.5);
-
-                // next message (fading in)
-                ctx.fillStyle = `rgba(255,220,200,${alpha2 * 0.7})`;
-                ctx.fillText(nextMsg, W * 0.5, by + bh * 0.5);
-
-                // small decorative line
-                ctx.strokeStyle = `rgba(255,200,150,${0.05 + Math.sin(time * 0.5) * 0.02})`;
+                // Decorative line
+                ctx.strokeStyle = `rgba(255,200,150,${0.04 + Math.sin(time * 0.3) * 0.015})`;
                 ctx.lineWidth = 1;
                 ctx.beginPath();
-                ctx.moveTo(W * 0.3, by + bh * 0.82);
-                ctx.lineTo(W * 0.7, by + bh * 0.82);
+                ctx.moveTo(bx + 20, by + bh - 10);
+                ctx.lineTo(bx + bw - 20, by + bh - 10);
                 ctx.stroke();
 
-                ctx.restore();
-            }
-
-            // ─── SCENE 0: GUY WALKS IN WITH FLOWERS ───
-            function drawScene0(progress, time) {
-                // background
-                const grad = ctx.createLinearGradient(0, 0, 0, H);
-                grad.addColorStop(0, '#1a0a2a');
-                grad.addColorStop(0.4, '#2a1a3a');
-                grad.addColorStop(0.7, '#4a2a3a');
-                grad.addColorStop(1, '#2a1a0a');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, W, H);
-
-                // ground
-                ctx.fillStyle = 'rgba(30,25,20,0.6)';
-                ctx.fillRect(0, H * 0.75, W, H * 0.25);
-
-                // car (parked)
-                drawConvertible(0, time, 0, 0, 0);
-
-                // guy walking in from right
-                const walkX = W * 0.6 + (1 - progress) * W * 0.5;
-                const walkY = H * 0.6 - Math.sin(progress * 8) * 4;
-                const step = Math.sin(progress * 10) * 0.3;
-
-                // draw guy walking
-                ctx.save();
-                ctx.translate(walkX, walkY);
-
-                // shadow
-                ctx.fillStyle = 'rgba(0,0,0,0.15)';
-                ctx.beginPath();
-                ctx.ellipse(0, 20, 16, 4, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                // body
-                ctx.fillStyle = '#3a2a1a';
-                ctx.beginPath();
-                roundRect(-10, -16, 20, 32, 4);
-                ctx.fill();
-
-                // shirt
-                ctx.fillStyle = '#1a1a2a';
-                ctx.beginPath();
-                roundRect(-8, -14, 16, 24, 3);
-                ctx.fill();
-
-                // legs
-                ctx.strokeStyle = '#2a1a0a';
-                ctx.lineWidth = 5;
-                ctx.lineCap = 'round';
-                ctx.beginPath();
-                ctx.moveTo(-4, 14);
-                ctx.lineTo(-4 + Math.sin(step) * 6, 28 + Math.cos(step) * 4);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(4, 14);
-                ctx.lineTo(4 + Math.sin(-step) * 6, 28 + Math.cos(-step) * 4);
-                ctx.stroke();
-
-                // arms (carrying flowers)
-                ctx.strokeStyle = '#6a3a2a';
-                ctx.lineWidth = 4;
-                // right arm holding flowers forward
-                ctx.beginPath();
-                ctx.moveTo(10, -8);
-                ctx.lineTo(20 + Math.sin(progress * 6) * 2, -2);
-                ctx.stroke();
-                // left arm swinging
-                ctx.beginPath();
-                ctx.moveTo(-10, -8);
-                ctx.lineTo(-18 + Math.sin(step) * 4, -2);
-                ctx.stroke();
-
-                // head (dark brown)
-                ctx.fillStyle = '#6a3a2a';
-                ctx.beginPath();
-                ctx.arc(0, -24, 12, 0, Math.PI * 2);
-                ctx.fill();
-
-                // hair
-                ctx.fillStyle = '#2a1a0a';
-                ctx.beginPath();
-                ctx.arc(0, -28, 13, Math.PI, 2 * Math.PI);
-                ctx.fill();
-
-                // flowers in hand
-                ctx.fillStyle = '#f5a0b8';
-                ctx.beginPath();
-                ctx.arc(22 + Math.sin(progress * 6) * 2, -6 + Math.sin(progress * 4) * 2, 6, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#f5c6a0';
-                ctx.beginPath();
-                ctx.arc(26 + Math.sin(progress * 6 + 1) * 2, -4 + Math.sin(progress * 4 + 1) * 2, 4, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#c78bdb';
-                ctx.beginPath();
-                ctx.arc(24 + Math.sin(progress * 6 + 2) * 2, -10 + Math.sin(progress * 4 + 2) * 2, 5, 0, Math.PI * 2);
-                ctx.fill();
-
-                // smile
-                ctx.strokeStyle = '#3a1a0a';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.arc(0, -20, 5, 0.1, Math.PI - 0.1);
-                ctx.stroke();
-
-                ctx.restore();
-
-                // "For you 💐" text
-                const alpha = Math.min(progress * 2, 1);
-                ctx.fillStyle = `rgba(255,200,180,${alpha * 0.15})`;
-                ctx.font = '14px "Patrick Hand", cursive';
-                ctx.textAlign = 'center';
-                ctx.fillText('💐 For you, my love', W * 0.5, H * 0.12);
-            }
-
-            // ─── SCENE 1: OPENING DOOR, LADY GETS IN ───
-            function drawScene1(progress, time) {
-                // background
-                const grad = ctx.createLinearGradient(0, 0, 0, H);
-                grad.addColorStop(0, '#1a0a2a');
-                grad.addColorStop(0.4, '#2a1a3a');
-                grad.addColorStop(0.7, '#4a2a3a');
-                grad.addColorStop(1, '#2a1a0a');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, W, H);
-
-                ctx.fillStyle = 'rgba(30,25,20,0.6)';
-                ctx.fillRect(0, H * 0.75, W, H * 0.25);
-
-                // car
-                drawConvertible(0, time, 0, 0, 0);
-
-                // guy at passenger door (right side of car, left side of screen)
-                const doorX = W * 0.4;
-                const doorY = H * 0.62;
-
-                // guy standing by door
-                ctx.save();
-                ctx.translate(doorX, doorY);
-
-                // shadow
-                ctx.fillStyle = 'rgba(0,0,0,0.12)';
-                ctx.beginPath();
-                ctx.ellipse(0, 18, 14, 3, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                // body
-                ctx.fillStyle = '#3a2a1a';
-                ctx.beginPath();
-                roundRect(-9, -14, 18, 28, 4);
-                ctx.fill();
-
-                ctx.fillStyle = '#1a1a2a';
-                ctx.beginPath();
-                roundRect(-7, -12, 14, 20, 3);
-                ctx.fill();
-
-                // legs
-                ctx.strokeStyle = '#2a1a0a';
-                ctx.lineWidth = 4;
-                ctx.lineCap = 'round';
-                ctx.beginPath();
-                ctx.moveTo(-3, 12);
-                ctx.lineTo(-3, 26);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(3, 12);
-                ctx.lineTo(3, 26);
-                ctx.stroke();
-
-                // arms (holding door open)
-                ctx.strokeStyle = '#6a3a2a';
-                ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.moveTo(10, -6);
-                ctx.lineTo(20, -2);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(-10, -6);
-                ctx.lineTo(-16, 0);
-                ctx.stroke();
-
-                // head
-                ctx.fillStyle = '#6a3a2a';
-                ctx.beginPath();
-                ctx.arc(0, -22, 11, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.fillStyle = '#2a1a0a';
-                ctx.beginPath();
-                ctx.arc(0, -26, 12, Math.PI, 2 * Math.PI);
-                ctx.fill();
-
-                // smile
-                ctx.strokeStyle = '#3a1a0a';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.arc(0, -18, 4, 0.1, Math.PI - 0.1);
-                ctx.stroke();
-
-                ctx.restore();
-
-                // lady getting in (appears from left side)
-                const ladyAppear = Math.min(progress * 2, 1);
-                const ladyX = W * 0.45 - (1 - ladyAppear) * 40;
-                const ladyY = H * 0.55 - Math.sin(progress * 6) * 3;
-
-                ctx.save();
-                ctx.translate(ladyX, ladyY);
-
-                // shadow
-                ctx.fillStyle = 'rgba(0,0,0,0.1)';
-                ctx.beginPath();
-                ctx.ellipse(0, 22, 12, 3, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                // body/dress
-                ctx.fillStyle = '#f0d5c0';
-                ctx.beginPath();
-                roundRect(-8, -12, 16, 24, 4);
-                ctx.fill();
-
-                ctx.fillStyle = '#f5d0d8';
-                ctx.beginPath();
-                roundRect(-7, -10, 14, 20, 3);
-                ctx.fill();
-
-                // legs
-                ctx.strokeStyle = '#f0d5c0';
-                ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.moveTo(-3, 10);
-                ctx.lineTo(-3 + Math.sin(progress * 4) * 2, 24);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(3, 10);
-                ctx.lineTo(3 + Math.sin(-progress * 4) * 2, 24);
-                ctx.stroke();
-
-                // head
-                ctx.fillStyle = '#f0d5c0';
-                ctx.beginPath();
-                ctx.arc(0, -20, 10, 0, Math.PI * 2);
-                ctx.fill();
-
-                // hair
-                ctx.fillStyle = '#c8a060';
-                ctx.beginPath();
-                ctx.arc(0, -24, 11, Math.PI, 2 * Math.PI);
-                ctx.fill();
-                for (let i = -2; i <= 2; i++) {
-                    ctx.beginPath();
-                    ctx.moveTo(i * 4, -18);
-                    ctx.quadraticCurveTo(i * 6, -6, i * 3, 2);
-                    ctx.strokeStyle = '#c8a060';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
-
-                // blush
-                ctx.fillStyle = 'rgba(245,160,184,0.12)';
-                ctx.beginPath();
-                ctx.arc(-5, -16, 3, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(5, -16, 3, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.restore();
-
-                // door opening animation (visual cue)
-                const doorAngle = -0.6 + (1 - progress) * 0.6;
-                ctx.save();
-                ctx.translate(W * 0.42, H * 0.6);
-                ctx.rotate(doorAngle);
-                ctx.fillStyle = 'rgba(30,30,35,0.15)';
-                ctx.fillRect(-2, -20, 4, 30);
-                ctx.restore();
-
-                // "After you 🌹" text
-                const alpha2 = Math.min(progress * 1.5, 1);
-                ctx.fillStyle = `rgba(255,200,180,${alpha2 * 0.12})`;
-                ctx.font = '13px "Patrick Hand", cursive';
-                ctx.textAlign = 'center';
-                ctx.fillText('🌹 After you, my lady', W * 0.5, H * 0.1);
-            }
-
-            // ─── SCENE 2: GUY WALKS TO DRIVER SIDE ───
-            function drawScene2(progress, time) {
-                const grad = ctx.createLinearGradient(0, 0, 0, H);
-                grad.addColorStop(0, '#1a0a2a');
-                grad.addColorStop(0.4, '#2a1a3a');
-                grad.addColorStop(0.7, '#4a2a3a');
-                grad.addColorStop(1, '#2a1a0a');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, W, H);
-
-                ctx.fillStyle = 'rgba(30,25,20,0.6)';
-                ctx.fillRect(0, H * 0.75, W, H * 0.25);
-
-                // car with lady inside
-                drawConvertible(0, time, 0, 0, 0);
-
-                // guy walking around the back to driver side
-                const walkProg = Math.min(progress * 1.2, 1);
-                const walkX = W * 0.35 + walkProg * W * 0.3;
-                const walkY = H * 0.6 - Math.sin(walkProg * 6) * 3;
-
-                ctx.save();
-                ctx.translate(walkX, walkY);
-
-                // shadow
-                ctx.fillStyle = 'rgba(0,0,0,0.1)';
-                ctx.beginPath();
-                ctx.ellipse(0, 18, 12, 3, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                // body
-                ctx.fillStyle = '#3a2a1a';
-                ctx.beginPath();
-                roundRect(-8, -12, 16, 26, 4);
-                ctx.fill();
-                ctx.fillStyle = '#1a1a2a';
-                ctx.beginPath();
-                roundRect(-6, -10, 12, 20, 3);
-                ctx.fill();
-
-                // legs walking
-                const step2 = Math.sin(walkProg * 8) * 0.4;
-                ctx.strokeStyle = '#2a1a0a';
-                ctx.lineWidth = 4;
-                ctx.lineCap = 'round';
-                ctx.beginPath();
-                ctx.moveTo(-3, 12);
-                ctx.lineTo(-3 + Math.sin(step2) * 5, 24 + Math.cos(step2) * 3);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(3, 12);
-                ctx.lineTo(3 + Math.sin(-step2) * 5, 24 + Math.cos(-step2) * 3);
-                ctx.stroke();
-
-                // arms
-                ctx.strokeStyle = '#6a3a2a';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.moveTo(-8, -4);
-                ctx.lineTo(-14 + Math.sin(walkProg * 4) * 3, 2);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(8, -4);
-                ctx.lineTo(14 + Math.sin(walkProg * 4 + 1) * 3, 2);
-                ctx.stroke();
-
-                // head
-                ctx.fillStyle = '#6a3a2a';
-                ctx.beginPath();
-                ctx.arc(0, -20, 10, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#2a1a0a';
-                ctx.beginPath();
-                ctx.arc(0, -24, 11, Math.PI, 2 * Math.PI);
-                ctx.fill();
-
-                // smile
-                ctx.strokeStyle = '#3a1a0a';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.arc(0, -16, 4, 0.1, Math.PI - 0.1);
-                ctx.stroke();
-
-                ctx.restore();
-
-                // "Let's go! 🚗" text
-                const alpha = Math.min(progress * 1.5, 1);
-                ctx.fillStyle = `rgba(255,200,180,${alpha * 0.1})`;
-                ctx.font = '13px "Patrick Hand", cursive';
-                ctx.textAlign = 'center';
-                ctx.fillText('🚗 Let\'s go!', W * 0.5, H * 0.1);
-            }
-
-            // ─── SCENE 3: DRIVING ───
-            function drawScene3(progress, time) {
-                const driveProg = Math.min(progress, 1);
-                drawRoad(driveProg, time);
-                drawConvertible(progress, time, 0, 0, driveProg);
-
-                // speed lines
-                if (driveProg > 0.3) {
-                    const intensity = (driveProg - 0.3) * 0.6;
-                    for (let i = 0; i < 10; i++) {
-                        const lx = (i / 10) * W + Math.sin(time * 2 + i * 1.5) * 20;
-                        const ly = H * 0.4 + Math.random() * H * 0.3;
-                        ctx.strokeStyle = `rgba(255,255,255,${intensity * 0.01 + Math.random() * 0.01})`;
-                        ctx.lineWidth = 1 + Math.random();
-                        ctx.beginPath();
-                        ctx.moveTo(lx, ly);
-                        ctx.lineTo(lx + 10 + Math.random() * 20, ly);
-                        ctx.stroke();
-                    }
-                }
-            }
-
-            // ─── SCENE 4: ROMANTIC MOMENT ───
-            function drawScene4(progress, time) {
-                const driveProg = 0.7 + progress * 0.3;
-                drawRoad(Math.min(driveProg, 1), time);
-
-                const leanIn = Math.min(progress * 2.5, 1);
-                const armAround = Math.min((progress - 0.2) * 3, 1);
-
-                drawConvertible(progress, time, leanIn, armAround, Math.min(driveProg, 1));
-
-                // hearts floating
-                for (let i = 0; i < 6; i++) {
-                    const hx = W * 0.2 + Math.sin(time * 1.5 + i * 2.1) * W * 0.3 + i * 15;
-                    const hy = H * 0.15 + Math.sin(time * 1.2 + i * 1.7) * 30 + i * 8;
-                    const hs = 0.4 + Math.sin(time + i * 0.7) * 0.15;
-                    const alpha = 0.06 + Math.sin(time * 1.5 + i) * 0.03 + 0.04;
-                    ctx.fillStyle = `rgba(245,160,184,${alpha})`;
-                    ctx.font = `${14 * hs}px sans-serif`;
-                    ctx.textAlign = 'center';
-                    ctx.fillText('❤️', hx, hy);
-                }
-
-                // "You've got a friend in me" text overlay
-                const textAlpha = 0.08 + Math.sin(time * 0.5) * 0.03;
-                ctx.fillStyle = `rgba(255,220,200,${textAlpha})`;
-                ctx.font = 'bold 16px "Patrick Hand", cursive';
-                ctx.textAlign = 'center';
-                ctx.fillText('💕 You\'ve got a friend in me 💕', W * 0.5, H * 0.08);
-            }
-
-            // ─── SCENE 5: FINALE ───
-            function drawScene5(progress, time) {
-                const driveProg = 0.85 + progress * 0.15;
-                drawRoad(Math.min(driveProg, 1), time);
-
-                const leanIn = 1;
-                const armAround = 1;
-                drawConvertible(progress, time, leanIn, armAround, Math.min(driveProg, 1));
-
-                // big heart
-                const heartScale = 1 + Math.sin(time * 1.5) * 0.04;
-                ctx.save();
-                ctx.translate(W * 0.5, H * 0.32);
-                ctx.scale(heartScale, heartScale);
-                ctx.fillStyle = 'rgba(245,160,184,0.04)';
-                ctx.font = '80px sans-serif';
+                // Message text with crossfade
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('❤️', 0, 0);
+                const fontSize = Math.min(bh * 0.3, 18);
+                ctx.font = `bold ${fontSize}px "Playfair Display", serif`;
+
+                // Current message
+                ctx.fillStyle = `rgba(255,220,200,${(1 - blend) * 0.75})`;
+                ctx.fillText(msg, W * 0.5, by + bh * 0.48);
+
+                // Next message (fading in)
+                ctx.fillStyle = `rgba(255,220,200,${blend * 0.75})`;
+                ctx.fillText(nextMsg, W * 0.5, by + bh * 0.48);
+
+                // Small hearts on corners
+                ctx.font = '12px sans-serif';
+                ctx.fillStyle = `rgba(245,160,184,${0.05 + Math.sin(time * 0.5) * 0.02})`;
+                ctx.fillText('💕', bx + 16, by + 16);
+                ctx.fillText('💕', bx + bw - 16, by + 16);
+                ctx.fillText('💕', bx + 16, by + bh - 16);
+                ctx.fillText('💕', bx + bw - 16, by + bh - 16);
+
                 ctx.restore();
-
-                // "Forever & Always"
-                const fa = 0.08 + Math.sin(time * 0.8) * 0.03;
-                ctx.fillStyle = `rgba(255,215,200,${fa})`;
-                ctx.font = 'bold 18px "Playfair Display", serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('✨ Forever & Always ✨', W * 0.5, H * 0.88);
-
-                // small hearts
-                for (let i = 0; i < 12; i++) {
-                    const hx = W * 0.1 + Math.sin(time * 1.3 + i * 2.3) * W * 0.4 + i * 6;
-                    const hy = H * 0.1 + Math.sin(time * 1.0 + i * 1.9) * H * 0.25 + i * 5;
-                    const hs = 0.2 + Math.sin(time + i * 0.5) * 0.08 + 0.12;
-                    ctx.fillStyle = `rgba(245,160,184,${0.02 + Math.sin(time * 1.5 + i) * 0.015 + 0.015})`;
-                    ctx.font = `${8 * hs}px sans-serif`;
-                    ctx.textAlign = 'center';
-                    ctx.fillText('❤️', hx, hy);
-                }
-
-                // "The Beginning" text
-                if (progress > 0.3) {
-                    const ba = (progress - 0.3) * 1.5;
-                    ctx.fillStyle = `rgba(255,215,0,${ba * 0.05})`;
-                    ctx.font = '12px "Patrick Hand", cursive';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('🌟 The Beginning 🌟', W * 0.5, H * 0.92);
-                }
             }
 
-            // ─── SCENE DISPATCH ───
-            function drawScene(sceneIdx, progress, time) {
-                switch (sceneIdx) {
-                    case 0:
-                        drawScene0(progress, time);
-                        break;
-                    case 1:
-                        drawScene1(progress, time);
-                        break;
-                    case 2:
-                        drawScene2(progress, time);
-                        break;
-                    case 3:
-                        drawScene3(progress, time);
-                        break;
-                    case 4:
-                        drawScene4(progress, time);
-                        break;
-                    case 5:
-                        drawScene5(progress, time);
-                        break;
-                    default:
-                        break;
+            // ─── MAIN RENDER ───
+            function render(timestamp) {
+                if (!isPlaying) return;
+
+                const now = performance.now();
+                elapsed = (now - startTime) / 1000;
+
+                if (elapsed > totalDuration) {
+                    elapsed = totalDuration;
                 }
+
+                document.getElementById('progressFill').style.width = (elapsed / totalDuration * 100) + '%';
+
+                // Clear
+                ctx.clearRect(0, 0, W, H);
+                ctx.fillStyle = '#0d0a12';
+                ctx.fillRect(0, 0, W, H);
+
+                // Scroll offset for road animation
+                const scrollOffset = elapsed * 0.6;
+
+                // Draw road
+                const roadInfo = drawRoad(elapsed, scrollOffset);
+
+                // Draw billboard (on top)
+                drawBillboard(elapsed);
+
+                // Draw convertible (with lady skin tone adjusted)
+                drawConvertible(elapsed, roadInfo, scrollOffset);
+
+                // ─── LYRICS ───
+                updateLyrics(elapsed);
+
+                if (audio && !audio.paused) {
+                    try {
+                        const audioTime = audio.currentTime;
+                        // drift correction if needed
+                    } catch (_) {}
+                }
+
+                if (elapsed >= totalDuration) {
+                    isPlaying = false;
+                    if (audio) audio.pause();
+                    document.getElementById('lyricOverlay').classList.add('show');
+                    document.getElementById('lyricText').innerHTML = '💕 <span class="highlight">Forever & Always</span> 💕';
+                    document.getElementById('lyricTime').textContent = '♥ 2:05';
+                    return;
+                }
+
+                animFrame = requestAnimationFrame(render);
             }
 
             // ─── UPDATE LYRICS ───
@@ -1529,80 +1092,6 @@
                 } else {
                     overlay.classList.remove('show');
                 }
-            }
-
-            // ─── RENDER ───
-            function render(timestamp) {
-                if (!isPlaying) return;
-
-                const now = performance.now();
-                elapsed = (now - startTime) / 1000;
-
-                if (elapsed > totalDuration) {
-                    elapsed = totalDuration;
-                }
-
-                document.getElementById('progressFill').style.width = (elapsed / totalDuration * 100) + '%';
-
-                // determine scene
-                let sceneIdx = 0;
-                let sceneProg = 0;
-                const sceneTimes = [
-                    { start: 0, end: 2.5 },
-                    { start: 2.5, end: 5.0 },
-                    { start: 5.0, end: 7.5 },
-                    { start: 7.5, end: 11.0 },
-                    { start: 11.0, end: 16.0 },
-                    { start: 16.0, end: 22.0 },
-                ];
-
-                for (let i = 0; i < sceneTimes.length; i++) {
-                    if (elapsed >= sceneTimes[i].start && elapsed < sceneTimes[i].end) {
-                        sceneIdx = i;
-                        sceneProg = (elapsed - sceneTimes[i].start) / (sceneTimes[i].end - sceneTimes[i].start);
-                        break;
-                    }
-                    if (elapsed >= sceneTimes[i].end && i === sceneTimes.length - 1) {
-                        sceneIdx = i;
-                        sceneProg = 1;
-                    }
-                    if (elapsed >= sceneTimes[i].end && i < sceneTimes.length - 1) {
-                        // continue to next
-                    }
-                }
-                // clamp
-                if (elapsed >= sceneTimes[sceneTimes.length - 1].end) {
-                    sceneIdx = sceneTimes.length - 1;
-                    sceneProg = 1;
-                }
-
-                ctx.clearRect(0, 0, W, H);
-
-                // draw black background first
-                ctx.fillStyle = '#0d0a12';
-                ctx.fillRect(0, 0, W, H);
-
-                drawScene(sceneIdx, sceneProg, elapsed);
-
-                updateLyrics(elapsed);
-
-                if (audio && !audio.paused) {
-                    try {
-                        const audioTime = audio.currentTime;
-                        // drift correction if needed
-                    } catch (_) {}
-                }
-
-                if (elapsed >= totalDuration) {
-                    isPlaying = false;
-                    if (audio) audio.pause();
-                    document.getElementById('lyricOverlay').classList.add('show');
-                    document.getElementById('lyricText').innerHTML = '💕 <span class="highlight">Forever & Always</span> 💕';
-                    document.getElementById('lyricTime').textContent = '♥ 2:05';
-                    return;
-                }
-
-                animFrame = requestAnimationFrame(render);
             }
 
             // ─── START / STOP ───
@@ -1664,8 +1153,8 @@
             // ─── INIT ───
             resetStory();
 
-            console.log('🌸 Day 08 · Story Animation · Ruth\'s 21st');
-            console.log('💕 A gentle walk, flowers, and a ride into forever');
+            console.log('🌸 Day 08 · Driving Story · Ruth\'s 21st');
+            console.log('💕 3-lane road with traffic, billboard, and romantic vibe');
         })();
     </script>
 
