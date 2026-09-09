@@ -3,1169 +3,1331 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Day 08 · Ruth's 21st · Musical Tiles</title>
+    <title>Day 08 · Ruth's 21st · Our Story</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-        }
-
-        :root {
-            --pink: #f5a0b8;
-            --purple: #c78bdb;
-            --peach: #f5c6a0;
-            --cream: #fcf6f0;
-            --text: #2d2a3a;
-            --radius: 16px;
-            --lane-color: rgba(255, 255, 255, 0.25);
-            --tile-radius: 10px;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: #1a1625;
-            color: #fff;
-            min-height: 100dvh;
+            background: #0d0a12;
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: 100dvh;
+            font-family: 'Inter', sans-serif;
             overflow: hidden;
             touch-action: none;
         }
 
-        .bg {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            background:
-                radial-gradient(ellipse at 20% 30%, rgba(248, 164, 184, 0.15) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 70%, rgba(199, 139, 219, 0.12) 0%, transparent 60%),
-                radial-gradient(ellipse at 50% 50%, rgba(245, 198, 160, 0.08) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        /* ─── GAME WRAPPER ─── */
-        .game-wrapper {
+        .story-container {
             position: relative;
-            z-index: 1;
             width: 100%;
-            max-width: 420px;
-            margin: 0 auto;
-            padding: 10px 10px 16px;
-            background: rgba(26, 22, 37, 0.85);
-            backdrop-filter: blur(20px);
-            border-radius: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+            max-width: 480px;
+            aspect-ratio: 9 / 16;
+            background: #1a1625;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.04);
         }
 
-        /* ─── HEADER ─── */
-        .game-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 4px 12px 10px 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        /* ─── CANVAS ─── */
+        #storyCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none;
         }
 
-        .game-header .brand {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .game-header .brand .name {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.1rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .game-header .brand .day {
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: rgba(199, 139, 219, 0.5);
-            font-weight: 600;
-            padding: 2px 10px;
-            border-radius: 20px;
-            background: rgba(199, 139, 219, 0.08);
-        }
-
-        .game-header .stats {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .game-header .stats .stat-item {
+        /* ─── LYRIC OVERLAY ─── */
+        .lyric-overlay {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
             text-align: center;
+            pointer-events: none;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 14px 20px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            opacity: 0;
+            transform: translateX(-50%) translateY(10px);
         }
 
-        .game-header .stats .stat-item .num {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.3rem;
-            font-weight: 700;
-            line-height: 1;
-            color: #fff;
+        .lyric-overlay.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
 
-        .game-header .stats .stat-item .num.pink {
+        .lyric-overlay .lyric-text {
+            font-family: 'Patrick Hand', cursive;
+            font-size: clamp(0.85rem, 3.2vw, 1.3rem);
+            color: rgba(255, 255, 255, 0.9);
+            letter-spacing: 0.02em;
+            line-height: 1.5;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .lyric-overlay .lyric-text .highlight {
             background: linear-gradient(135deg, #f8a4b8, #c78bdb);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-        }
-
-        .game-header .stats .stat-item .label {
-            font-size: 0.45rem;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: rgba(255, 255, 255, 0.3);
-            font-weight: 600;
-            display: block;
-            margin-top: 1px;
-        }
-
-        /* ─── GAME BOARD ─── */
-        .game-board {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 360 / 600;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 20px;
-            overflow: hidden;
-            margin-top: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            touch-action: none;
-        }
-
-        /* lanes */
-        .lane {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 25%;
-            border-right: 1px solid rgba(255, 255, 255, 0.03);
-            pointer-events: none;
-        }
-        .lane:nth-child(1) {
-            left: 0%;
-        }
-        .lane:nth-child(2) {
-            left: 25%;
-        }
-        .lane:nth-child(3) {
-            left: 50%;
-        }
-        .lane:nth-child(4) {
-            left: 75%;
-            border-right: none;
-        }
-
-        /* lane labels (subtle) */
-        .lane-label {
-            position: absolute;
-            bottom: 6px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.4rem;
-            color: rgba(255, 255, 255, 0.06);
             font-weight: 700;
-            letter-spacing: 0.1em;
+        }
+
+        .lyric-overlay .lyric-time {
+            font-size: 0.5rem;
+            color: rgba(255, 255, 255, 0.15);
+            font-weight: 600;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            pointer-events: none;
+            margin-top: 4px;
+            display: block;
         }
 
-        /* target line */
-        .target-line {
+        /* ─── CONTROLS ─── */
+        .controls {
             position: absolute;
-            bottom: 16%;
-            left: 4%;
-            right: 4%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, rgba(248, 164, 184, 0.2), rgba(199, 139, 219, 0.2), transparent);
-            border-radius: 10px;
-            pointer-events: none;
-            box-shadow: 0 0 24px rgba(199, 139, 219, 0.06);
-            z-index: 2;
-        }
-        .target-line .glow {
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 24px;
-            background: radial-gradient(ellipse, rgba(199, 139, 219, 0.15), transparent);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        /* ─── TILES ─── */
-        .tile {
-            position: absolute;
-            width: 23%;
-            border-radius: var(--tile-radius);
-            cursor: pointer;
-            touch-action: none;
-            transition: transform 0.05s, box-shadow 0.05s;
-            will-change: transform, top;
-            z-index: 3;
+            bottom: 12px;
+            right: 16px;
+            z-index: 20;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Patrick Hand', cursive;
-            font-size: clamp(0.5rem, 1.4vw, 0.7rem);
-            color: rgba(255, 255, 255, 0.5);
-            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-            letter-spacing: 0.02em;
-            text-align: center;
-            padding: 2px;
-            line-height: 1.1;
-            word-break: break-word;
-            background: linear-gradient(145deg, rgba(248, 164, 184, 0.35), rgba(199, 139, 219, 0.25));
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .controls button {
+            pointer-events: all;
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(2px);
-            overflow: hidden;
+            border-radius: 30px;
+            padding: 6px 14px;
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 0.6rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: 0.3s ease;
+            backdrop-filter: blur(8px);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
         }
 
-        .tile::after {
-            content: '';
+        .controls button:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .controls button:active {
+            transform: scale(0.92);
+        }
+
+        /* ─── PROGRESS BAR ─── */
+        .progress-bar {
             position: absolute;
-            inset: 0;
-            border-radius: var(--tile-radius);
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent);
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.03);
+            z-index: 15;
             pointer-events: none;
         }
 
-        .tile .tile-inner {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
+        .progress-bar .fill {
             height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f8a4b8, #c78bdb, #f5c6a0);
+            border-radius: 0 2px 2px 0;
+            transition: width 0.1s linear;
         }
 
-        .tile .tile-emoji {
-            font-size: clamp(0.8rem, 2.5vw, 1.2rem);
-            line-height: 1;
-            margin-bottom: 1px;
-            opacity: 0.5;
-        }
-
-        .tile .tile-lyric {
-            font-size: clamp(0.35rem, 1vw, 0.55rem);
-            opacity: 0.4;
-            font-weight: 400;
-            max-width: 90%;
-        }
-
-        /* tile states */
-        .tile.hit {
-            animation: tileHit 0.2s ease forwards;
-            border-color: rgba(248, 164, 184, 0.4);
-        }
-        @keyframes tileHit {
-            0% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(248, 164, 184, 0.4);
-            }
-            50% {
-                transform: scale(0.85);
-                box-shadow: 0 0 40px rgba(248, 164, 184, 0.3);
-            }
-            100% {
-                transform: scale(0);
-                opacity: 0;
-            }
-        }
-
-        .tile.miss {
-            animation: tileMiss 0.3s ease forwards;
-            border-color: rgba(255, 80, 80, 0.3);
-        }
-        @keyframes tileMiss {
-            0% {
-                transform: scale(1);
-                background: rgba(255, 80, 80, 0.2);
-            }
-            100% {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-        }
-
-        .tile .ripple {
-            position: absolute;
-            inset: -4px;
-            border-radius: var(--tile-radius);
-            border: 2px solid rgba(248, 164, 184, 0.2);
-            animation: rippleOut 0.4s ease-out forwards;
-            pointer-events: none;
-        }
-        @keyframes rippleOut {
-            0% {
-                transform: scale(0.8);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(1.4);
-                opacity: 0;
-            }
-        }
-
-        /* ─── OVERLAYS ─── */
-        .overlay {
+        /* ─── START OVERLAY ─── */
+        .start-overlay {
             position: absolute;
             inset: 0;
-            z-index: 10;
+            z-index: 50;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: rgba(26, 22, 37, 0.75);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            padding: 24px;
+            background: rgba(13, 10, 18, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 40px 30px;
             text-align: center;
-            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .start-overlay.hidden {
             opacity: 0;
             pointer-events: none;
-            transform: scale(0.96);
+            transform: scale(1.04);
         }
 
-        .overlay.open {
-            opacity: 1;
-            pointer-events: all;
-            transform: scale(1);
+        .start-overlay .big-emoji {
+            font-size: 4rem;
+            margin-bottom: 6px;
+            animation: float 2.8s ease-in-out infinite;
         }
 
-        .overlay .big-emoji {
-            font-size: 3.6rem;
-            margin-bottom: 8px;
-            animation: float 2.5s ease-in-out infinite;
-        }
         @keyframes float {
             0%,
             100% {
                 transform: translateY(0);
             }
             50% {
-                transform: translateY(-10px);
+                transform: translateY(-12px);
             }
         }
 
-        .overlay h2 {
+        .start-overlay h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
+            font-size: 2.4rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            line-height: 1.1;
+            margin-bottom: 4px;
+        }
+
+        .start-overlay .sub {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.3);
             margin-bottom: 6px;
         }
 
-        .overlay p {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
+        .start-overlay .story-desc {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.2);
             max-width: 280px;
             line-height: 1.6;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             font-weight: 300;
+            letter-spacing: 0.02em;
         }
 
-        .overlay .sub-message {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 18px;
-        }
-
-        .overlay .final-score {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.8rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1;
-            margin-bottom: 2px;
-        }
-
-        .overlay .final-label {
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: rgba(255, 255, 255, 0.2);
-            font-weight: 600;
-        }
-
-        .btn-primary {
-            padding: 12px 44px;
+        .start-overlay .btn-play {
+            padding: 14px 52px;
             border-radius: 60px;
             border: none;
             background: linear-gradient(135deg, #f8a4b8, #c78bdb);
             color: #fff;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-family: 'Inter', sans-serif;
             cursor: pointer;
-            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.2);
+            box-shadow: 0 8px 40px rgba(199, 139, 219, 0.2);
             transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             letter-spacing: 0.02em;
             touch-action: manipulation;
-            margin-top: 4px;
-        }
-        .btn-primary:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.3);
-        }
-        .btn-primary:active {
-            transform: scale(0.95);
         }
 
-        .btn-secondary {
-            padding: 10px 28px;
-            border-radius: 60px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            background: rgba(255, 255, 255, 0.04);
-            color: rgba(255, 255, 255, 0.4);
-            font-weight: 600;
-            font-size: 0.75rem;
+        .start-overlay .btn-play:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 14px 50px rgba(199, 139, 219, 0.3);
+        }
+
+        .start-overlay .btn-play:active {
+            transform: scale(0.94);
+        }
+
+        .start-overlay .btn-back {
+            margin-top: 12px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 0.7rem;
             font-family: 'Inter', sans-serif;
             cursor: pointer;
             transition: 0.3s ease;
-            touch-action: manipulation;
-            margin-top: 8px;
-        }
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        /* ─── COMBO DISPLAY ─── */
-        .combo-display {
-            position: absolute;
-            top: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 5;
-            font-family: 'Patrick Hand', cursive;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.15);
-            letter-spacing: 0.06em;
-            transition: 0.3s ease;
-            pointer-events: none;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 3px 14px;
+            padding: 4px 16px;
             border-radius: 20px;
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.03);
-        }
-        .combo-display .combo-num {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .combo-display.active {
-            color: rgba(255, 255, 255, 0.4);
-        }
-        .combo-display.burst {
-            animation: comboBurst 0.5s ease;
-        }
-        @keyframes comboBurst {
-            0%,
-            100% {
-                transform: translateX(-50%) scale(1);
-            }
-            50% {
-                transform: translateX(-50%) scale(1.15);
-                color: rgba(255, 255, 255, 0.8);
-            }
+            text-decoration: none;
         }
 
-        /* ─── SCORE POPUP ─── */
-        .score-popup {
-            position: fixed;
-            pointer-events: none;
-            z-index: 100;
-            font-family: 'Playfair Display', serif;
-            font-size: 1.6rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: scoreFloat 0.8s ease-out forwards;
-        }
-        @keyframes scoreFloat {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(0.5);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-80px) scale(1.2);
-            }
-        }
-
-        /* ─── WISH MINI ─── */
-        .wish-mini {
-            margin-top: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .wish-mini button {
-            background: none;
-            border: none;
-            font-family: 'Patrick Hand', cursive;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.2);
-            cursor: pointer;
-            transition: 0.3s ease;
-            padding: 4px 14px;
-            border-radius: 20px;
+        .start-overlay .btn-back:hover {
+            color: rgba(255, 255, 255, 0.3);
             background: rgba(255, 255, 255, 0.02);
-        }
-        .wish-mini button:hover {
-            color: rgba(199, 139, 219, 0.6);
-            background: rgba(199, 139, 219, 0.06);
-        }
-        .wish-mini .wish-response {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 0.85rem;
-            color: rgba(199, 139, 219, 0.5);
-            min-height: 1.6rem;
-            opacity: 0;
-            transition: 0.5s ease;
-            transform: translateY(6px);
-        }
-        .wish-mini .wish-response.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* ─── SPARKLES ─── */
-        .sparkle-burst {
-            position: fixed;
-            pointer-events: none;
-            font-size: 1.2rem;
-            animation: burst 0.8s ease-out forwards;
-            z-index: 999;
-        }
-        @keyframes burst {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(0.2) rotate(0deg);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg);
-            }
-        }
-
-        .confetti-piece {
-            position: fixed;
-            pointer-events: none;
-            z-index: 998;
-            width: 6px;
-            height: 6px;
-            border-radius: 2px;
-            animation: confettiFall linear forwards;
-        }
-        @keyframes confettiFall {
-            0% {
-                opacity: 1;
-                transform: translateY(0) rotate(0deg) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(100vh) rotate(720deg) scale(0.2);
-            }
         }
 
         /* ─── RESPONSIVE ─── */
-        @media (max-width: 480px) {
-            .game-wrapper {
-                padding: 6px 6px 12px;
-                border-radius: 24px;
+        @media (max-width: 420px) {
+            .story-container {
+                border-radius: 0;
+                max-width: 100%;
             }
-            .game-board {
-                border-radius: 16px;
+            .start-overlay h1 {
+                font-size: 2rem;
             }
-            .game-header .brand .name {
-                font-size: 0.95rem;
+            .start-overlay .big-emoji {
+                font-size: 3.2rem;
             }
-            .game-header .stats .stat-item .num {
-                font-size: 1.1rem;
+            .lyric-overlay {
+                bottom: 20px;
+                padding: 10px 14px 12px;
+                width: 92%;
             }
-            .overlay h2 {
-                font-size: 1.4rem;
-            }
-            .overlay .big-emoji {
-                font-size: 2.8rem;
-            }
-            .btn-primary {
-                padding: 10px 32px;
-                font-size: 0.85rem;
-            }
-            .tile .tile-lyric {
-                display: none;
-            }
-            .tile .tile-emoji {
-                font-size: 1.2rem;
-            }
-            .tile {
-                border-radius: 6px;
-            }
-            .target-line {
-                bottom: 14%;
+            .lyric-overlay .lyric-text {
+                font-size: 0.8rem;
             }
         }
 
-        @media (max-width: 380px) {
-            .game-header .brand .name {
-                font-size: 0.8rem;
+        @media (max-height: 700px) {
+            .start-overlay h1 {
+                font-size: 1.8rem;
             }
-            .game-header .stats .stat-item .num {
-                font-size: 0.95rem;
+            .start-overlay .big-emoji {
+                font-size: 2.8rem;
             }
-            .game-header .stats .stat-item .label {
-                font-size: 0.35rem;
+            .start-overlay .story-desc {
+                font-size: 0.65rem;
+                margin-bottom: 14px;
             }
-            .overlay h2 {
-                font-size: 1.2rem;
-            }
-            .overlay p {
-                font-size: 0.75rem;
-            }
-            .btn-primary {
-                padding: 8px 24px;
-                font-size: 0.75rem;
+            .start-overlay .btn-play {
+                padding: 10px 40px;
+                font-size: 0.85rem;
             }
         }
 
         @media (orientation: landscape) and (max-height: 500px) {
-            .game-board {
-                aspect-ratio: 420 / 320;
-                max-height: 70vh;
-            }
-            .game-wrapper {
+            .story-container {
                 max-width: 80vh;
+                aspect-ratio: 9 / 16;
             }
-        }
-
-        /* scrollbar hide */
-        ::-webkit-scrollbar {
-            display: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="bg" aria-hidden="true"></div>
+    <div class="story-container" id="container">
+        <!-- CANVAS -->
+        <canvas id="storyCanvas"></canvas>
 
-    <div class="game-wrapper">
-        <!-- HEADER -->
-        <div class="game-header">
-            <div class="brand">
-                <span class="name">Ruth</span>
-                <span class="day">day 08</span>
-            </div>
-            <div class="stats">
-                <div class="stat-item">
-                    <span class="num pink" id="scoreDisplay">0</span>
-                    <span class="label">score</span>
-                </div>
-                <div class="stat-item">
-                    <span class="num" id="highScoreDisplay">0</span>
-                    <span class="label">best</span>
-                </div>
-            </div>
+        <!-- LYRIC OVERLAY -->
+        <div class="lyric-overlay" id="lyricOverlay">
+            <div class="lyric-text" id="lyricText">🎵 <span class="highlight">You've got a friend in me</span></div>
+            <span class="lyric-time" id="lyricTime">0:00</span>
         </div>
 
-        <!-- BOARD -->
-        <div class="game-board" id="gameBoard">
-            <!-- lanes -->
-            <div class="lane"><span class="lane-label">♩</span></div>
-            <div class="lane"><span class="lane-label">♪</span></div>
-            <div class="lane"><span class="lane-label">♫</span></div>
-            <div class="lane"><span class="lane-label">♬</span></div>
-
-            <!-- target line -->
-            <div class="target-line"><div class="glow"></div></div>
-
-            <!-- combo -->
-            <div class="combo-display" id="comboDisplay">combo <span class="combo-num" id="comboNum">0</span></div>
-
-            <!-- tiles container -->
-            <div id="tilesContainer" style="position:absolute;inset:0;pointer-events:none;z-index:3;"></div>
-
-            <!-- OVERLAY: START -->
-            <div class="overlay open" id="startOverlay">
-                <div class="big-emoji">🎵</div>
-                <h2>Musical Tiles</h2>
-                <p>Tap the tiles as they fall to the beat of<br /><em style="color:rgba(255,255,255,0.4);font-style:italic;">"You've Got a Friend in Me"</em></p>
-                <div class="sub-message">💕 for Ruth · 21st celebration 💕</div>
-                <button class="btn-primary" id="startBtn">♫ start game</button>
-                <button class="btn-secondary" id="backBtn">← back to celebration</button>
-            </div>
-
-            <!-- OVERLAY: GAME OVER -->
-            <div class="overlay" id="gameOverOverlay">
-                <div class="big-emoji">💔</div>
-                <h2>nice try!</h2>
-                <div class="final-score" id="finalScore">0</div>
-                <div class="final-label">tiles tapped</div>
-                <p id="finalMessage" style="margin-top:6px;font-size:0.8rem;">you've got a friend in me 💕</p>
-                <button class="btn-primary" id="restartBtn">↻ play again</button>
-                <button class="btn-secondary" id="goHomeBtn">← home</button>
-            </div>
-
-            <!-- OVERLAY: COMPLETE (all tiles passed?) -->
-            <div class="overlay" id="completeOverlay">
-                <div class="big-emoji">🌟</div>
-                <h2>you're a star!</h2>
-                <p style="font-family:'Patrick Hand',cursive;font-size:1.1rem;color:rgba(255,255,255,0.5);">
-                    "none of them will ever love you<br />the way I do" 💖
-                </p>
-                <div class="final-score" id="completeScore">0</div>
-                <div class="final-label">tiles mastered</div>
-                <button class="btn-primary" id="completeRestartBtn">♫ play again</button>
-                <button class="btn-secondary" id="completeHomeBtn">← home</button>
-            </div>
+        <!-- PROGRESS -->
+        <div class="progress-bar">
+            <div class="fill" id="progressFill"></div>
         </div>
 
-        <!-- WISH MINI -->
-        <div class="wish-mini">
-            <button id="wishMiniBtn">💫 send a little love</button>
-            <div class="wish-response" id="wishResponse"></div>
+        <!-- CONTROLS -->
+        <div class="controls">
+            <button id="restartBtn">↻ restart</button>
+        </div>
+
+        <!-- START OVERLAY -->
+        <div class="start-overlay" id="startOverlay">
+            <div class="big-emoji">💕</div>
+            <h1>Our Story</h1>
+            <div class="sub">— Ruth's 21st Celebration —</div>
+            <div class="story-desc">
+                From a walk in the field to forever together<br />
+                ✨ A love story in 2 minutes ✨
+            </div>
+            <button class="btn-play" id="playBtn">▶ play story</button>
+            <button class="btn-back" id="homeBtn">← back to celebration</button>
         </div>
     </div>
 
     <!-- ─── AUDIO ─── -->
-    <audio id="player" preload="metadata" loop></audio>
+    <audio id="player" preload="metadata"></audio>
 
     <script>
         (function() {
             'use strict';
 
-            // ─── CONFIG ───
-            const COLS = 4;
-            const TILE_HEIGHT_RATIO = 0.14; // height of tile relative to board height
-            const TARGET_Y_RATIO = 0.82; // where the target line sits
-            const BASE_INTERVAL = 1100; // ms between tile spawns (at start)
-            const MIN_INTERVAL = 320;
-            const SPEED_INCREASE_PER_SCORE = 1.8; // ms faster per point
-            const MAX_TILES_ON_SCREEN = 14;
+            // ─── SETUP ───
+            const canvas = document.getElementById('storyCanvas');
+            const ctx = canvas.getContext('2d');
+            const container = document.getElementById('container');
+
+            let W, H;
+
+            function resize() {
+                const rect = container.getBoundingClientRect();
+                canvas.width = rect.width * devicePixelRatio;
+                canvas.height = rect.height * devicePixelRatio;
+                canvas.style.width = rect.width + 'px';
+                canvas.style.height = rect.height + 'px';
+                W = canvas.width;
+                H = canvas.height;
+                ctx.scale(devicePixelRatio, devicePixelRatio);
+                // store logical size
+                W = rect.width;
+                H = rect.height;
+                // reset transform
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(devicePixelRatio, devicePixelRatio);
+            }
+
+            resize();
+            window.addEventListener('resize', resize);
+
+            // ─── AUDIO ───
+            const audio = document.getElementById('player');
+            audio.src = 'friend.mp3';
+            audio.preload = 'metadata';
+            audio.onerror = () => {
+                console.warn('Audio not available — story plays with visual only');
+            };
 
             // ─── STATE ───
-            let boardEl = document.getElementById('gameBoard');
-            let tilesContainer = document.getElementById('tilesContainer');
-            let scoreDisplay = document.getElementById('scoreDisplay');
-            let highScoreDisplay = document.getElementById('highScoreDisplay');
-            let comboNum = document.getElementById('comboNum');
-            let comboDisplay = document.getElementById('comboDisplay');
-
-            let score = 0;
-            let highScore = parseInt(localStorage.getItem('ruthTilesHigh') || '0', 10);
-            let combo = 0;
-            let maxCombo = 0;
             let isPlaying = false;
-            let isGameOver = false;
-            let isComplete = false;
-            let tileInterval = null;
-            let animationFrame = null;
-            let tiles = [];
-            let spawnInterval = BASE_INTERVAL;
-            let lastSpawnTime = 0;
-            let gameTime = 0;
-            let boardRect = null;
+            let startTime = 0;
+            let elapsed = 0;
+            let animFrame = null;
+            let currentScene = 0;
+            let sceneProgress = 0;
 
-            // audio
-            let audio = document.getElementById('player');
-
-            // DOM refs
-            const startOverlay = document.getElementById('startOverlay');
-            const gameOverOverlay = document.getElementById('gameOverOverlay');
-            const completeOverlay = document.getElementById('completeOverlay');
-            const startBtn = document.getElementById('startBtn');
-            const restartBtn = document.getElementById('restartBtn');
-            const completeRestartBtn = document.getElementById('completeRestartBtn');
-            const goHomeBtn = document.getElementById('goHomeBtn');
-            const completeHomeBtn = document.getElementById('completeHomeBtn');
-            const backBtn = document.getElementById('backBtn');
-            const finalScore = document.getElementById('finalScore');
-            const completeScore = document.getElementById('completeScore');
-            const finalMessage = document.getElementById('finalMessage');
-
-            // ─── LYRICS / EMOJIS FOR TILES ───
-            const TILE_DATA = [
-                { emoji: '🎵', lyric: "friend in me" },
-                { emoji: '🎶', lyric: "friend in me" },
-                { emoji: '🌅', lyric: "road ahead" },
-                { emoji: '🛤️', lyric: "miles away" },
-                { emoji: '💭', lyric: "remember" },
-                { emoji: '🤝', lyric: "friend in me" },
-                { emoji: '💕', lyric: "friend in me" },
-                { emoji: '🌟', lyric: "troubles" },
-                { emoji: '💪', lyric: "anything" },
-                { emoji: '🤗', lyric: "stick together" },
-                { emoji: '🎵', lyric: "friend in me" },
-                { emoji: '🎶', lyric: "friend in me" },
-                { emoji: '🧠', lyric: "smarter" },
-                { emoji: '💪', lyric: "stronger" },
-                { emoji: '❤️', lyric: "love you" },
-                { emoji: '👫', lyric: "me and you" },
-                { emoji: '🌱', lyric: "never die" },
-                { emoji: '✨', lyric: "destiny" },
-                { emoji: '🎵', lyric: "friend in me" },
-                { emoji: '🎶', lyric: "friend in me" },
-                { emoji: '💖', lyric: "friend in me" },
+            // ─── LYRICS WITH TIMESTAMPS (seconds) ───
+            const LYRICS = [
+                { time: 0.0, text: "🎵 You've got a friend in me" },
+                { time: 4.5, text: "🎵 You've got a friend in me" },
+                { time: 9.0, text: "When the road looks rough ahead" },
+                { time: 13.5, text: "And you're miles and miles from your nice warm bed" },
+                { time: 19.0, text: "You just remember what your old pal said" },
+                { time: 24.0, text: "Boy, you've got a friend in me" },
+                { time: 28.5, text: "Yeah, you've got a friend in me" },
+                { time: 33.0, text: "If you've got troubles, I've got 'em too" },
+                { time: 38.0, text: "There isn't anything I wouldn't do for you" },
+                { time: 43.0, text: "We stick together and we see it through" },
+                { time: 48.0, text: "'Cause you've got a friend in me" },
+                { time: 52.5, text: "Yeah, you've got a friend in me" },
+                { time: 57.0, text: "Some other folks might be a little bit smarter" },
+                { time: 62.0, text: "Bigger and stronger too, maybe" },
+                { time: 67.0, text: "But none of them will ever love you the way I do" },
+                { time: 73.0, text: "It's me and you, boy, and as the years go by" },
+                { time: 78.5, text: "Our friendship will never die" },
+                { time: 83.5, text: "You're gonna see it's our destiny" },
+                { time: 88.5, text: "You've got a friend in me" },
+                { time: 93.5, text: "You've got a friend in me" },
+                { time: 98.5, text: "You've got a friend in me" },
             ];
 
-            function getTileData(index) {
-                return TILE_DATA[index % TILE_DATA.length];
-            }
+            // ─── SCENE DEFINITIONS (time ranges in seconds) ───
+            const SCENES = [
+                { start: 0, end: 18, label: 'field' },
+                { start: 18, end: 36, label: 'car' },
+                { start: 36, end: 56, label: 'date' },
+                { start: 56, end: 76, label: 'propose' },
+                { start: 76, end: 96, label: 'wedding' },
+                { start: 96, end: 115, label: 'family' },
+                { start: 115, end: 125, label: 'finale' },
+            ];
 
-            // ─── HELPERS ───
-            function getBoardRect() {
-                return boardEl.getBoundingClientRect();
-            }
+            // ─── DRAWING HELPERS ───
+            function drawPerson(x, y, scale, color, isFemale, armAngle, legAngle, emotion) {
+                const s = scale || 1;
+                const c = color || '#e8d5c4';
+                const isF = isFemale || false;
+                const arm = armAngle || 0;
+                const leg = legAngle || 0;
+                const em = emotion || 'neutral';
 
-            function getTileWidth() {
-                return boardEl.offsetWidth * 0.23;
-            }
+                ctx.save();
+                ctx.translate(x, y);
 
-            function getTileHeight() {
-                return boardEl.offsetHeight * TILE_HEIGHT_RATIO;
-            }
+                // shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.08)';
+                ctx.beginPath();
+                ctx.ellipse(0, 28 * s, 18 * s, 4 * s, 0, 0, Math.PI * 2);
+                ctx.fill();
 
-            function getTargetY() {
-                return boardEl.offsetHeight * TARGET_Y_RATIO;
-            }
+                // legs
+                ctx.strokeStyle = c;
+                ctx.lineWidth = 4 * s;
+                ctx.lineCap = 'round';
+                const legLen = 22 * s;
+                ctx.beginPath();
+                ctx.moveTo(-5 * s, 18 * s);
+                ctx.lineTo(-5 * s + Math.sin(leg) * legLen, 18 * s + Math.cos(leg) * legLen);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(5 * s, 18 * s);
+                ctx.lineTo(5 * s + Math.sin(-leg) * legLen, 18 * s + Math.cos(-leg) * legLen);
+                ctx.stroke();
 
-            // ─── TILE CLASS ───
-            class Tile {
-                constructor(col, dataIndex) {
-                    this.col = col;
-                    this.dataIndex = dataIndex;
-                    const data = getTileData(dataIndex);
-                    this.emoji = data.emoji;
-                    this.lyric = data.lyric;
-                    this.x = col * 25 + 1; // %
-                    this.y = -getTileHeight();
-                    this.width = getTileWidth();
-                    this.height = getTileHeight();
-                    this.speed = 0;
-                    this.alive = true;
-                    this.hit = false;
-                    this.missed = false;
-                    this.el = null;
-                    this.id = 'tile_' + Date.now() + '_' + Math.random();
+                // body
+                ctx.fillStyle = isF ? '#f5a0b8' : '#6a7a8a';
+                ctx.beginPath();
+                ctx.roundRect(-10 * s, -20 * s, 20 * s, 40 * s, 6 * s);
+                ctx.fill();
 
-                    this.createEl();
-                }
+                // arms
+                ctx.strokeStyle = c;
+                ctx.lineWidth = 4 * s;
+                const armLen = 18 * s;
+                ctx.beginPath();
+                ctx.moveTo(-10 * s, -12 * s);
+                ctx.lineTo(-10 * s - Math.sin(arm) * armLen, -12 * s + Math.cos(arm) * armLen);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(10 * s, -12 * s);
+                ctx.lineTo(10 * s + Math.sin(arm) * armLen, -12 * s + Math.cos(arm) * armLen);
+                ctx.stroke();
 
-                createEl() {
-                    const el = document.createElement('div');
-                    el.className = 'tile';
-                    el.style.left = this.x + '%';
-                    el.style.top = this.y + 'px';
-                    el.style.width = this.width + 'px';
-                    el.style.height = this.height + 'px';
-                    el.style.background =
-                        `linear-gradient(145deg, rgba(248,164,184,${0.2 + Math.random() * 0.15}), rgba(199,139,219,${0.15 + Math.random() * 0.15}))`;
-                    el.style.border = '1px solid rgba(255,255,255,0.04)';
-                    el.style.borderRadius = '10px';
+                // head
+                ctx.fillStyle = c;
+                ctx.beginPath();
+                ctx.arc(0, -28 * s, 14 * s, 0, Math.PI * 2);
+                ctx.fill();
 
-                    // inner
-                    const inner = document.createElement('div');
-                    inner.className = 'tile-inner';
-
-                    const emojiSpan = document.createElement('span');
-                    emojiSpan.className = 'tile-emoji';
-                    emojiSpan.textContent = this.emoji;
-
-                    const lyricSpan = document.createElement('span');
-                    lyricSpan.className = 'tile-lyric';
-                    lyricSpan.textContent = this.lyric.length > 14 ? this.lyric.slice(0, 14) + '…' : this.lyric;
-
-                    inner.appendChild(emojiSpan);
-                    inner.appendChild(lyricSpan);
-                    el.appendChild(inner);
-
-                    // store ref
-                    this.el = el;
-                    this.el.dataset.tileId = this.id;
-
-                    // add click/touch
-                    el.addEventListener('pointerdown', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        this.handleTap(e);
-                    });
-
-                    tilesContainer.appendChild(el);
-                }
-
-                handleTap(e) {
-                    if (!this.alive || this.hit || this.missed || !isPlaying || isGameOver) return;
-                    const targetY = getTargetY();
-                    const tileCenter = this.y + this.height / 2;
-                    const dist = Math.abs(tileCenter - targetY);
-                    const tolerance = this.height * 0.7;
-
-                    if (dist < tolerance) {
-                        // HIT!
-                        this.hit = true;
-                        this.alive = false;
-                        this.el.classList.add('hit');
-                        // ripple
-                        const ripple = document.createElement('div');
-                        ripple.className = 'ripple';
-                        this.el.appendChild(ripple);
-                        setTimeout(() => ripple.remove(), 400);
-
-                        // score
-                        const bonus = Math.max(1, Math.floor(10 - dist / (tolerance / 10)));
-                        const points = 1 + Math.floor(combo / 5);
-                        score += points;
-                        combo++;
-                        if (combo > maxCombo) maxCombo = combo;
-                        updateUI();
-
-                        // popup score
-                        showScorePopup(e.clientX || e.pageX, e.clientY || e.pageY, '+' + points);
-
-                        // sound click (tiny)
-                        playClick();
-
-                        // spawn speed up
-                        adjustSpeed();
-
-                        // remove after animation
-                        setTimeout(() => {
-                            if (this.el && this.el.parentNode) {
-                                this.el.remove();
-                            }
-                        }, 300);
-
-                        // check win condition (score target)
-                        if (score >= 50) {
-                            completeGame();
-                        }
-
-                    } else if (tileCenter > targetY + tolerance) {
-                        // missed - too late
-                        this.miss();
-                    }
-                }
-
-                miss() {
-                    if (this.missed || this.hit || !this.alive) return;
-                    this.missed = true;
-                    this.alive = false;
-                    this.el.classList.add('miss');
-                    combo = 0;
-                    updateUI();
-
-                    setTimeout(() => {
-                        if (this.el && this.el.parentNode) {
-                            this.el.remove();
-                        }
-                    }, 300);
-
-                    // game over if not complete
-                    if (!isComplete) {
-                        gameOver();
-                    }
-                }
-
-                update(deltaTime, speed) {
-                    if (!this.alive) return;
-                    const targetY = getTargetY();
-                    this.y += speed * deltaTime * 0.12;
-                    this.el.style.top = this.y + 'px';
-
-                    // check if passed target without being hit
-                    if (this.y > targetY + this.height * 0.8 && !this.hit && !this.missed) {
-                        this.miss();
-                    }
-
-                    // remove if way off screen
-                    if (this.y > boardEl.offsetHeight + 100) {
-                        this.alive = false;
-                        if (this.el && this.el.parentNode) {
-                            this.el.remove();
-                        }
-                    }
-                }
-
-                destroy() {
-                    this.alive = false;
-                    if (this.el && this.el.parentNode) {
-                        this.el.remove();
-                    }
-                }
-            }
-
-            // ─── GAME LOGIC ───
-            let spawnCounter = 0;
-            let tileDataIndex = 0;
-
-            function spawnTile() {
-                if (!isPlaying || isGameOver || isComplete) return;
-                const col = Math.floor(Math.random() * COLS);
-                const dataIndex = tileDataIndex % TILE_DATA.length;
-                const tile = new Tile(col, dataIndex);
-                tiles.push(tile);
-                tileDataIndex++;
-                spawnCounter++;
-
-                // limit tiles on screen
-                if (tiles.length > MAX_TILES_ON_SCREEN) {
-                    const oldest = tiles.shift();
-                    if (oldest && oldest.alive) {
-                        oldest.destroy();
-                    }
-                }
-            }
-
-            let lastTime = 0;
-            let currentSpeed = 1.0;
-
-            function gameLoop(time) {
-                if (!isPlaying) return;
-                const delta = lastTime ? (time - lastTime) : 16;
-                lastTime = time;
-                gameTime += delta;
-
-                // spawn
-                if (gameTime - lastSpawnTime > spawnInterval) {
-                    spawnTile();
-                    lastSpawnTime = gameTime;
-                }
-
-                // update tiles
-                const speed = currentSpeed;
-                for (let i = tiles.length - 1; i >= 0; i--) {
-                    const tile = tiles[i];
-                    if (!tile.alive) {
-                        tiles.splice(i, 1);
-                        continue;
-                    }
-                    tile.update(delta, speed);
-                }
-
-                animationFrame = requestAnimationFrame(gameLoop);
-            }
-
-            function adjustSpeed() {
-                // speed up as score increases
-                const reduction = score * SPEED_INCREASE_PER_SCORE;
-                spawnInterval = Math.max(MIN_INTERVAL, BASE_INTERVAL - reduction);
-                // also increase tile fall speed slightly
-                currentSpeed = 1.0 + (score / 60) * 0.3;
-                currentSpeed = Math.min(currentSpeed, 2.0);
-            }
-
-            function updateUI() {
-                scoreDisplay.textContent = score;
-                comboNum.textContent = combo;
-                if (combo > 2) {
-                    comboDisplay.classList.add('active');
-                    if (combo % 5 === 0) {
-                        comboDisplay.classList.remove('burst');
-                        void comboDisplay.offsetWidth;
-                        comboDisplay.classList.add('burst');
-                    }
+                // hair (female)
+                if (isF) {
+                    ctx.fillStyle = '#6a3a2a';
+                    ctx.beginPath();
+                    ctx.arc(0, -32 * s, 16 * s, Math.PI, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(-10 * s, -30 * s, 8 * s, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(10 * s, -30 * s, 8 * s, 0, Math.PI * 2);
+                    ctx.fill();
+                    // bow
+                    ctx.fillStyle = '#f5a0b8';
+                    ctx.beginPath();
+                    ctx.ellipse(12 * s, -38 * s, 5 * s, 3 * s, 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(14 * s, -36 * s, 5 * s, 3 * s, -0.3, 0, Math.PI * 2);
+                    ctx.fill();
                 } else {
-                    comboDisplay.classList.remove('active');
+                    // male hair
+                    ctx.fillStyle = '#4a3a2a';
+                    ctx.beginPath();
+                    ctx.arc(0, -32 * s, 15 * s, Math.PI, 2 * Math.PI);
+                    ctx.fill();
                 }
-                if (highScore < score) {
-                    highScore = score;
-                    localStorage.setItem('ruthTilesHigh', String(highScore));
+
+                // eyes
+                ctx.fillStyle = '#2d1a0a';
+                ctx.beginPath();
+                ctx.arc(-5 * s, -30 * s, 2 * s, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(5 * s, -30 * s, 2 * s, 0, Math.PI * 2);
+                ctx.fill();
+
+                // smile
+                ctx.strokeStyle = '#2d1a0a';
+                ctx.lineWidth = 1.5 * s;
+                ctx.beginPath();
+                if (em === 'happy') {
+                    ctx.arc(0, -26 * s, 6 * s, 0.1, Math.PI - 0.1);
+                } else if (em === 'love') {
+                    ctx.arc(0, -27 * s, 5 * s, 0.1, Math.PI - 0.1);
+                } else {
+                    ctx.arc(0, -26 * s, 4 * s, 0.2, Math.PI - 0.2);
                 }
-                highScoreDisplay.textContent = highScore;
+                ctx.stroke();
+
+                // blush (female)
+                if (isF) {
+                    ctx.fillStyle = 'rgba(245,160,184,0.2)';
+                    ctx.beginPath();
+                    ctx.arc(-9 * s, -26 * s, 4 * s, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(9 * s, -26 * s, 4 * s, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.restore();
             }
 
-            function showScorePopup(x, y, text) {
-                const el = document.createElement('div');
-                el.className = 'score-popup';
-                el.textContent = text;
-                el.style.left = x + 'px';
-                el.style.top = y + 'px';
-                el.style.transform = 'translate(-50%, -50%)';
-                document.body.appendChild(el);
-                setTimeout(() => el.remove(), 800);
+            // roundRect polyfill for canvas
+            if (!CanvasRenderingContext2D.prototype.roundRect) {
+                CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                    if (r > w / 2) r = w / 2;
+                    if (r > h / 2) r = h / 2;
+                    this.moveTo(x + r, y);
+                    this.lineTo(x + w - r, y);
+                    this.quadraticCurveTo(x + w, y, x + w, y + r);
+                    this.lineTo(x + w, y + h - r);
+                    this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                    this.lineTo(x + r, y + h);
+                    this.quadraticCurveTo(x, y + h, x, y + h - r);
+                    this.lineTo(x, y + r);
+                    this.quadraticCurveTo(x, y, x + r, y);
+                    this.closePath();
+                    return this;
+                };
             }
 
-            function playClick() {
-                // tiny audio feedback using oscillator
-                try {
-                    const ctx = new(window.AudioContext || window.webkitAudioContext)();
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.frequency.value = 1200 + Math.random() * 300;
-                    osc.type = 'sine';
-                    gain.gain.setValueAtTime(0.04, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
-                    osc.start(ctx.currentTime);
-                    osc.stop(ctx.currentTime + 0.06);
-                } catch (_) {}
+            // ─── SCENE DRAWING FUNCTIONS ───
+
+            function drawField(sceneProgress) {
+                // sky gradient
+                const grad = ctx.createLinearGradient(0, 0, 0, H);
+                grad.addColorStop(0, '#87CEEB');
+                grad.addColorStop(0.5, '#b8d4e8');
+                grad.addColorStop(0.75, '#e8d5b0');
+                grad.addColorStop(1, '#7a9a5a');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, W, H);
+
+                // sun
+                ctx.fillStyle = '#FFD700';
+                ctx.shadowColor = '#FFD700';
+                ctx.shadowBlur = 40;
+                ctx.beginPath();
+                ctx.arc(W * 0.8, H * 0.12, 35, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // clouds
+                drawCloud(W * 0.15, H * 0.08, 0.8);
+                drawCloud(W * 0.55, H * 0.05, 1.0);
+                drawCloud(W * 0.35, H * 0.18, 0.6);
+
+                // hills
+                ctx.fillStyle = '#6a8a4a';
+                ctx.beginPath();
+                ctx.ellipse(W * 0.1, H * 0.75, W * 0.4, H * 0.2, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#5a7a3a';
+                ctx.beginPath();
+                ctx.ellipse(W * 0.7, H * 0.78, W * 0.5, H * 0.22, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // flowers
+                for (let i = 0; i < 30; i++) {
+                    const fx = (i / 30) * W + Math.sin(i * 1.7) * 20;
+                    const fy = H * 0.75 + Math.sin(i * 2.3) * 30 + 20;
+                    drawFlower(fx, fy, 3 + Math.sin(i) * 2);
+                }
+
+                // path
+                ctx.strokeStyle = 'rgba(160,140,100,0.3)';
+                ctx.lineWidth = 8;
+                ctx.setLineDash([8, 12]);
+                ctx.beginPath();
+                ctx.moveTo(W * 0.2, H);
+                ctx.quadraticCurveTo(W * 0.25, H * 0.7, W * 0.35, H * 0.55);
+                ctx.quadraticCurveTo(W * 0.45, H * 0.4, W * 0.6, H * 0.35);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // couple walking
+                const walkCycle = Math.sin(sceneProgress * 4) * 0.4;
+                const px = W * 0.2 + sceneProgress * W * 0.45;
+                const py = H * 0.52 + Math.sin(sceneProgress * 2) * 4;
+
+                // girl (Ruth)
+                drawPerson(px, py, 1.1, '#f0d5c0', true, walkCycle, walkCycle * 0.7, 'happy');
+                // boy
+                drawPerson(px + 30, py + 4, 1.15, '#e0c8b0', false, -walkCycle * 0.6, -walkCycle * 0.5, 'happy');
+
+                // hearts floating
+                for (let i = 0; i < 5; i++) {
+                    const hx = px + 10 + Math.sin(sceneProgress * 3 + i * 2) * 40;
+                    const hy = py - 40 + i * 10 + Math.sin(sceneProgress * 2 + i) * 15;
+                    const hs = 0.6 + Math.sin(sceneProgress + i) * 0.2;
+                    ctx.fillStyle = `rgba(245,160,184,${0.15 + Math.sin(sceneProgress * 2 + i) * 0.05})`;
+                    ctx.font = `${16 * hs}px sans-serif`;
+                    ctx.fillText('❤️', hx, hy);
+                }
+
+                // butterflies
+                for (let i = 0; i < 3; i++) {
+                    const bx = W * 0.1 + sceneProgress * W * 0.6 + i * 40 + Math.sin(sceneProgress * 3 + i * 2) * 30;
+                    const by = H * 0.2 + i * 30 + Math.sin(sceneProgress * 2.5 + i * 1.5) * 20;
+                    const bs = 0.5 + Math.sin(sceneProgress * 2 + i) * 0.2;
+                    ctx.fillStyle = `rgba(199,139,219,${0.2 + Math.sin(sceneProgress + i) * 0.1})`;
+                    ctx.font = `${18 * bs}px sans-serif`;
+                    ctx.fillText('🦋', bx, by);
+                }
             }
 
-            // ─── GAME STATE ───
-            function startGame() {
-                // reset
-                score = 0;
-                combo = 0;
-                maxCombo = 0;
-                tiles = [];
-                spawnCounter = 0;
-                tileDataIndex = 0;
-                gameTime = 0;
-                lastSpawnTime = 0;
-                spawnInterval = BASE_INTERVAL;
-                currentSpeed = 1.0;
-                isGameOver = false;
-                isComplete = false;
+            function drawCloud(x, y, s) {
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.beginPath();
+                ctx.arc(x, y, 20 * s, 0, Math.PI * 2);
+                ctx.arc(x + 25 * s, y - 10 * s, 25 * s, 0, Math.PI * 2);
+                ctx.arc(x + 50 * s, y, 20 * s, 0, Math.PI * 2);
+                ctx.arc(x + 25 * s, y + 5 * s, 18 * s, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            function drawFlower(x, y, s) {
+                const colors = ['#f5a0b8', '#c78bdb', '#f5c6a0', '#ff6b9d', '#d4b8e0'];
+                const c = colors[Math.floor(Math.random() * colors.length)];
+                ctx.fillStyle = c;
+                for (let i = 0; i < 5; i++) {
+                    const a = (i / 5) * Math.PI * 2;
+                    ctx.beginPath();
+                    ctx.arc(x + Math.cos(a) * 5 * s, y + Math.sin(a) * 5 * s, 4 * s, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.arc(x, y, 2 * s, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            function drawCar(sceneProgress) {
+                // road
+                ctx.fillStyle = '#4a5a4a';
+                ctx.fillRect(0, H * 0.7, W, H * 0.3);
+                ctx.fillStyle = '#3a4a3a';
+                ctx.fillRect(0, H * 0.82, W, 4);
+
+                // landscape
+                ctx.fillStyle = '#5a7a3a';
+                ctx.fillRect(0, 0, W, H * 0.7);
+                // mountains
+                ctx.fillStyle = '#4a6a3a';
+                ctx.beginPath();
+                ctx.moveTo(0, H * 0.7);
+                ctx.lineTo(W * 0.15, H * 0.3);
+                ctx.lineTo(W * 0.3, H * 0.5);
+                ctx.lineTo(W * 0.45, H * 0.25);
+                ctx.lineTo(W * 0.6, H * 0.45);
+                ctx.lineTo(W * 0.75, H * 0.2);
+                ctx.lineTo(W * 0.9, H * 0.4);
+                ctx.lineTo(W, H * 0.35);
+                ctx.lineTo(W, H * 0.7);
+                ctx.fill();
+
+                // road line
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([20, 30]);
+                ctx.beginPath();
+                ctx.moveTo(0, H * 0.82);
+                ctx.lineTo(W, H * 0.82);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // car
+                const cx = W * 0.3 + sceneProgress * W * 0.4;
+                const cy = H * 0.7;
+
+                ctx.save();
+                ctx.translate(cx, cy);
+
+                // car body
+                ctx.fillStyle = '#e85050';
+                ctx.shadowColor = 'rgba(0,0,0,0.2)';
+                ctx.shadowBlur = 20;
+                ctx.beginPath();
+                ctx.roundRect(-40, -20, 80, 30, 6);
+                ctx.fill();
+
+                // roof
+                ctx.fillStyle = '#c03838';
+                ctx.beginPath();
+                ctx.roundRect(-25, -38, 50, 22, 8);
+                ctx.fill();
+
+                // windows
+                ctx.fillStyle = 'rgba(150,200,255,0.4)';
+                ctx.beginPath();
+                ctx.roundRect(-20, -34, 18, 12, 4);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.roundRect(4, -34, 18, 12, 4);
+                ctx.fill();
+
+                // wheels
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#222';
+                ctx.beginPath();
+                ctx.arc(-25, 12, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(25, 12, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#444';
+                ctx.beginPath();
+                ctx.arc(-25, 12, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(25, 12, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // headlights
+                ctx.fillStyle = '#FFD700';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#FFD700';
+                ctx.beginPath();
+                ctx.arc(42, -10, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(42, 2, 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.shadowBlur = 0;
+
+                // people in car (silhouettes)
+                ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                ctx.beginPath();
+                ctx.arc(-10, -40, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(12, -40, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                // hearts trailing
+                for (let i = 0; i < 4; i++) {
+                    const hx = -50 - i * 25 + Math.sin(sceneProgress * 3 + i) * 10;
+                    const hy = -10 + Math.sin(sceneProgress * 2 + i * 1.5) * 15;
+                    ctx.fillStyle = `rgba(245,160,184,${0.2 - i * 0.03})`;
+                    ctx.font = `${14 - i * 2}px sans-serif`;
+                    ctx.fillText('❤️', hx, hy);
+                }
+
+                ctx.restore();
+
+                // speed lines
+                for (let i = 0; i < 6; i++) {
+                    const lx = (i / 6) * W + sceneProgress * 40 % 80;
+                    ctx.strokeStyle = `rgba(255,255,255,${0.05 + Math.sin(i + sceneProgress) * 0.02})`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(lx, H * 0.74 + i * 8);
+                    ctx.lineTo(lx + 20, H * 0.74 + i * 8);
+                    ctx.stroke();
+                }
+            }
+
+            function drawDate(sceneProgress) {
+                // restaurant interior
+                ctx.fillStyle = '#2a1a1a';
+                ctx.fillRect(0, 0, W, H);
+
+                // wall
+                ctx.fillStyle = '#3a2828';
+                ctx.fillRect(0, 0, W, H * 0.7);
+
+                // table
+                ctx.fillStyle = '#5a3a2a';
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 20;
+                ctx.beginPath();
+                ctx.roundRect(W * 0.2, H * 0.5, W * 0.6, H * 0.08, 4);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // candle
+                const candleX = W * 0.5;
+                const candleY = H * 0.45;
+                ctx.fillStyle = '#f5e6c8';
+                ctx.beginPath();
+                ctx.roundRect(candleX - 3, candleY - 20, 6, 20, 2);
+                ctx.fill();
+                // flame
+                const flicker = Math.sin(sceneProgress * 8) * 2;
+                ctx.fillStyle = '#FF6B00';
+                ctx.shadowColor = '#FF6B00';
+                ctx.shadowBlur = 30;
+                ctx.beginPath();
+                ctx.ellipse(candleX, candleY - 22 + flicker, 5, 10 + Math.sin(sceneProgress * 5) * 2, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#FFD700';
+                ctx.shadowBlur = 40;
+                ctx.beginPath();
+                ctx.ellipse(candleX, candleY - 24 + flicker, 3, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // wine glasses
+                ctx.strokeStyle = 'rgba(200,180,255,0.15)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(W * 0.3, H * 0.44);
+                ctx.lineTo(W * 0.28, H * 0.38);
+                ctx.lineTo(W * 0.32, H * 0.38);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(W * 0.7, H * 0.44);
+                ctx.lineTo(W * 0.68, H * 0.38);
+                ctx.lineTo(W * 0.72, H * 0.38);
+                ctx.closePath();
+                ctx.stroke();
+
+                // people at table
+                // girl (Ruth) - left side
+                drawPerson(W * 0.3, H * 0.55, 1.1, '#f0d5c0', true, -0.2, 0, 'love');
+                // boy - right side
+                drawPerson(W * 0.7, H * 0.55, 1.15, '#e0c8b0', false, 0.2, 0, 'love');
+
+                // hearts floating
+                for (let i = 0; i < 8; i++) {
+                    const hx = W * 0.3 + Math.sin(sceneProgress * 2 + i * 1.2) * 80 + i * 12;
+                    const hy = H * 0.2 + Math.sin(sceneProgress * 1.5 + i * 1.8) * 40 + i * 6;
+                    const hs = 0.4 + Math.sin(sceneProgress + i * 0.7) * 0.15;
+                    ctx.fillStyle = `rgba(245,160,184,${0.1 + Math.sin(sceneProgress * 2 + i) * 0.05 + 0.1})`;
+                    ctx.font = `${14 * hs}px sans-serif`;
+                    ctx.fillText('❤️', hx, hy);
+                }
+
+                // decorative lights
+                for (let i = 0; i < 12; i++) {
+                    const lx = (i / 12) * W + 10;
+                    const ly = 10 + Math.sin(i * 1.3) * 12;
+                    ctx.fillStyle = `rgba(255,200,100,${0.1 + Math.sin(sceneProgress * 2 + i) * 0.05})`;
+                    ctx.beginPath();
+                    ctx.arc(lx, ly, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function drawPropose(sceneProgress) {
+                // romantic sunset
+                const grad = ctx.createLinearGradient(0, 0, 0, H);
+                grad.addColorStop(0, '#1a0a2a');
+                grad.addColorStop(0.3, '#5a1a3a');
+                grad.addColorStop(0.55, '#d45a3a');
+                grad.addColorStop(0.75, '#e8a050');
+                grad.addColorStop(1, '#2a1a0a');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, W, H);
+
+                // sun
+                ctx.fillStyle = '#FF6B35';
+                ctx.shadowColor = '#FF6B35';
+                ctx.shadowBlur = 60;
+                ctx.beginPath();
+                ctx.arc(W * 0.5, H * 0.35, 50, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // stars
+                for (let i = 0; i < 30; i++) {
+                    const sx = (i * 137.5) % W;
+                    const sy = (i * 97.3) % (H * 0.4);
+                    const ss = 0.5 + Math.sin(sceneProgress * 2 + i) * 0.3;
+                    ctx.fillStyle = `rgba(255,255,255,${0.1 + ss * 0.15})`;
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, 1 + ss, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // ground
+                ctx.fillStyle = '#1a1a0a';
+                ctx.beginPath();
+                ctx.ellipse(W * 0.5, H * 0.85, W * 0.7, H * 0.15, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // couple
+                const px = W * 0.5;
+                const py = H * 0.65;
+
+                // boy kneeling
+                const kneelProgress = Math.min(sceneProgress * 1.5, 1);
+                const kneeY = py + 10 * (1 - kneelProgress);
+                drawPerson(px - 20, kneeY, 1.1, '#e0c8b0', false, -0.5 + kneelProgress * 0.8, 0.3 * (1 - kneelProgress),
+                    'love');
+
+                // girl standing
+                drawPerson(px + 20, py - 4, 1.1, '#f0d5c0', true, 0.2, 0, 'love');
+
+                // ring sparkle
+                if (kneelProgress > 0.5) {
+                    const rs = (kneelProgress - 0.5) * 2;
+                    ctx.fillStyle = '#FFD700';
+                    ctx.shadowColor = '#FFD700';
+                    ctx.shadowBlur = 30;
+                    ctx.font = '28px sans-serif';
+                    ctx.fillText('💍', px - 20, py + 10);
+                    ctx.shadowBlur = 0;
+
+                    // sparkle rays
+                    for (let i = 0; i < 8; i++) {
+                        const a = (i / 8) * Math.PI * 2 + sceneProgress * 2;
+                        const r = 10 + Math.sin(sceneProgress * 4 + i) * 5;
+                        ctx.strokeStyle = `rgba(255,215,0,${0.1 + Math.sin(sceneProgress * 3 + i) * 0.05})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(px - 20 + Math.cos(a) * 5, py + 10 + Math.sin(a) * 5);
+                        ctx.lineTo(px - 20 + Math.cos(a) * r, py + 10 + Math.sin(a) * r);
+                        ctx.stroke();
+                    }
+                }
+
+                // "Will you marry me?" text
+                if (kneelProgress > 0.3) {
+                    const alpha = Math.min((kneelProgress - 0.3) * 3, 1);
+                    ctx.fillStyle = `rgba(255,255,255,${alpha * 0.5})`;
+                    ctx.font = 'bold 20px "Patrick Hand", cursive';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('💕 Will you marry me? 💕', W * 0.5, H * 0.15);
+                }
+
+                // hearts
+                for (let i = 0; i < 10; i++) {
+                    const hx = W * 0.2 + Math.sin(sceneProgress * 2 + i * 1.7) * W * 0.3 + i * 12;
+                    const hy = H * 0.2 + Math.sin(sceneProgress * 1.3 + i * 2.2) * 50;
+                    const hs = 0.3 + Math.sin(sceneProgress + i * 0.5) * 0.1 + 0.2;
+                    ctx.fillStyle = `rgba(245,160,184,${0.08 + Math.sin(sceneProgress * 2 + i) * 0.04 + 0.04})`;
+                    ctx.font = `${12 * hs}px sans-serif`;
+                    ctx.fillText('❤️', hx, hy);
+                }
+            }
+
+            function drawWedding(sceneProgress) {
+                // church / venue
+                const grad = ctx.createLinearGradient(0, 0, 0, H);
+                grad.addColorStop(0, '#f5f0e8');
+                grad.addColorStop(0.5, '#f0e8d8');
+                grad.addColorStop(1, '#e8dcc8');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, W, H);
+
+                // arches
+                ctx.strokeStyle = 'rgba(180,160,140,0.3)';
+                ctx.lineWidth = 3;
+                for (let i = 0; i < 5; i++) {
+                    const ax = W * 0.1 + i * W * 0.2;
+                    ctx.beginPath();
+                    ctx.arc(ax, H * 0.35, 30, Math.PI, 0);
+                    ctx.stroke();
+                }
+
+                // aisle
+                ctx.fillStyle = 'rgba(200,180,160,0.1)';
+                ctx.fillRect(W * 0.4, H * 0.2, W * 0.2, H * 0.7);
+
+                // flowers on aisle
+                for (let i = 0; i < 10; i++) {
+                    const fx = W * 0.35 + (i % 2) * W * 0.3;
+                    const fy = H * 0.25 + i * H * 0.055;
+                    drawFlower(fx, fy, 3);
+                }
+
+                // couple at altar
+                const px = W * 0.5;
+                const py = H * 0.38;
+
+                // bride (Ruth)
+                drawPerson(px - 20, py, 1.15, '#f5e8d8', true, 0.1, 0, 'happy');
+                // veil
+                ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                ctx.beginPath();
+                ctx.ellipse(px - 20, py - 34, 20, 12, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // groom
+                drawPerson(px + 20, py, 1.2, '#e0c8b0', false, -0.1, 0, 'happy');
+
+                // rings on hands (close together)
+                ctx.fillStyle = '#FFD700';
+                ctx.shadowColor = '#FFD700';
+                ctx.shadowBlur = 8;
+                ctx.font = '14px sans-serif';
+                ctx.fillText('💍', px - 6, py + 6);
+                ctx.shadowBlur = 0;
+
+                // confetti
+                for (let i = 0; i < 20; i++) {
+                    const cx = (i * 137.5 + sceneProgress * 20) % W;
+                    const cy = (i * 97.3 + sceneProgress * 30) % (H * 0.5);
+                    const cs = 3 + Math.sin(i + sceneProgress * 2) * 2;
+                    const colors = ['#f5a0b8', '#c78bdb', '#f5c6a0', '#FFD700', '#ff6b9d', '#87CEEB'];
+                    ctx.fillStyle = colors[i % colors.length];
+                    ctx.globalAlpha = 0.4 + Math.sin(sceneProgress + i) * 0.1;
+                    ctx.fillRect(cx, cy, cs, cs * 0.6);
+                    ctx.globalAlpha = 1;
+                }
+
+                // "I do" text
+                const alpha = Math.sin(sceneProgress * 2) * 0.3 + 0.4;
+                ctx.fillStyle = `rgba(199,139,219,${alpha})`;
+                ctx.font = 'bold 16px "Patrick Hand", cursive';
+                ctx.textAlign = 'center';
+                ctx.fillText('💕 I do 💕', W * 0.5, H * 0.12);
+            }
+
+            function drawFamily(sceneProgress) {
+                // warm home scene
+                const grad = ctx.createLinearGradient(0, 0, 0, H);
+                grad.addColorStop(0, '#f5e8d0');
+                grad.addColorStop(0.5, '#e8dcc8');
+                grad.addColorStop(1, '#d8ccb8');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, W, H);
+
+                // window
+                ctx.fillStyle = 'rgba(135,206,235,0.08)';
+                ctx.fillRect(W * 0.1, H * 0.05, W * 0.8, H * 0.35);
+                ctx.strokeStyle = 'rgba(180,160,140,0.15)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(W * 0.1, H * 0.05, W * 0.8, H * 0.35);
+                ctx.beginPath();
+                ctx.moveTo(W * 0.5, H * 0.05);
+                ctx.lineTo(W * 0.5, H * 0.4);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(W * 0.1, H * 0.225);
+                ctx.lineTo(W * 0.9, H * 0.225);
+                ctx.stroke();
+
+                // family: parents + 4 kids
+                const familyY = H * 0.6;
+                const spacing = W * 0.13;
+
+                // dad
+                drawPerson(W * 0.2, familyY, 1.15, '#e0c8b0', false, 0.1, 0, 'happy');
+                // mom (Ruth)
+                drawPerson(W * 0.35, familyY - 4, 1.1, '#f0d5c0', true, -0.1, 0, 'happy');
+
+                // 4 kids
+                const kidColors = ['#f5d5c0', '#e8c8b8', '#f0d0b8', '#e0c0a8'];
+                for (let i = 0; i < 4; i++) {
+                    const kx = W * 0.52 + i * spacing;
+                    const ky = familyY + 20 + Math.sin(i * 1.5) * 6;
+                    const ks = 0.6 + i * 0.04;
+                    const isGirl = i % 2 === 0;
+                    drawPerson(kx, ky, ks, kidColors[i % kidColors.length], isGirl, Math.sin(sceneProgress * 2 + i) * 0.3,
+                        Math.sin(sceneProgress * 1.5 + i) * 0.2, 'happy');
+                    // kid label
+                    ctx.fillStyle = 'rgba(0,0,0,0.04)';
+                    ctx.font = '8px sans-serif';
+                    ctx.textAlign = 'center';
+                    const names = ['👶', '🧒', '👦', '👧'];
+                    ctx.fillText(names[i], kx, ky + 28 * ks + 10);
+                }
+
+                // family heart
+                ctx.fillStyle = 'rgba(245,160,184,0.2)';
+                ctx.font = '36px sans-serif';
+                ctx.textAlign = 'center';
+                const heartPulse = 1 + Math.sin(sceneProgress * 2) * 0.05;
+                ctx.fillText('💕', W * 0.5, H * 0.12);
+
+                // kids toys scattered
+                const toys = ['🧸', '🚀', '🎨', '⚽'];
+                for (let i = 0; i < 4; i++) {
+                    const tx = W * 0.1 + i * W * 0.22 + Math.sin(sceneProgress + i) * 10;
+                    const ty = H * 0.82 + Math.sin(sceneProgress * 1.3 + i * 2) * 8;
+                    ctx.fillStyle = 'rgba(0,0,0,0.04)';
+                    ctx.font = '18px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(toys[i], tx, ty);
+                }
+            }
+
+            function drawFinale(sceneProgress) {
+                // grand finale - all the love
+                const grad = ctx.createLinearGradient(0, 0, 0, H);
+                grad.addColorStop(0, '#1a0a2a');
+                grad.addColorStop(0.3, '#2a0a3a');
+                grad.addColorStop(0.6, '#3a1a4a');
+                grad.addColorStop(0.8, '#2a0a3a');
+                grad.addColorStop(1, '#1a0a2a');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, W, H);
+
+                // stars
+                for (let i = 0; i < 50; i++) {
+                    const sx = (i * 137.5 + sceneProgress * 10) % W;
+                    const sy = (i * 97.3 + sceneProgress * 8) % H;
+                    const ss = 0.3 + Math.sin(sceneProgress * 2 + i * 1.3) * 0.3;
+                    ctx.fillStyle = `rgba(255,255,255,${0.05 + ss * 0.15})`;
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, 1 + ss * 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // big heart
+                const heartScale = 1 + Math.sin(sceneProgress * 1.5) * 0.04;
+                ctx.save();
+                ctx.translate(W * 0.5, H * 0.4);
+                ctx.scale(heartScale, heartScale);
+                ctx.fillStyle = 'rgba(245,160,184,0.08)';
+                ctx.font = '120px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('❤️', 0, 0);
+                ctx.fillStyle = 'rgba(199,139,219,0.05)';
+                ctx.font = '100px sans-serif';
+                ctx.fillText('💕', 0, 0);
+                ctx.restore();
+
+                // "forever" text
+                const alpha = 0.5 + Math.sin(sceneProgress * 1.2) * 0.2;
+                ctx.fillStyle = `rgba(255,255,255,${alpha * 0.15})`;
+                ctx.font = 'bold 28px "Playfair Display", serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('✨ Forever & Always ✨', W * 0.5, H * 0.72);
+
+                // small hearts floating
+                for (let i = 0; i < 15; i++) {
+                    const hx = W * 0.1 + Math.sin(sceneProgress * 1.7 + i * 2.1) * W * 0.35 + i * 8;
+                    const hy = H * 0.1 + Math.sin(sceneProgress * 1.2 + i * 1.7) * H * 0.3 + i * 6;
+                    const hs = 0.2 + Math.sin(sceneProgress + i * 0.6) * 0.08 + 0.15;
+                    ctx.fillStyle = `rgba(245,160,184,${0.04 + Math.sin(sceneProgress * 2 + i) * 0.02 + 0.02})`;
+                    ctx.font = `${10 * hs}px sans-serif`;
+                    ctx.fillText('❤️', hx, hy);
+                }
+
+                // couple silhouette in center
+                const px = W * 0.5;
+                const py = H * 0.55;
+                drawPerson(px - 25, py, 1.2, 'rgba(255,255,255,0.05)', true, 0.2, 0, 'love');
+                drawPerson(px + 25, py, 1.25, 'rgba(255,255,255,0.05)', false, -0.2, 0, 'love');
+
+                // "The End" with sparkle
+                if (sceneProgress > 0.5) {
+                    const endAlpha = (sceneProgress - 0.5) * 2;
+                    ctx.fillStyle = `rgba(255,215,0,${endAlpha * 0.08})`;
+                    ctx.font = '16px "Patrick Hand", cursive';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('🌟 The Beginning 🌟', W * 0.5, H * 0.88);
+                }
+            }
+
+            // ─── SCENE DISPATCH ───
+            function drawScene(sceneIndex, progress) {
+                switch (sceneIndex) {
+                    case 0:
+                        drawField(progress);
+                        break;
+                    case 1:
+                        drawCar(progress);
+                        break;
+                    case 2:
+                        drawDate(progress);
+                        break;
+                    case 3:
+                        drawPropose(progress);
+                        break;
+                    case 4:
+                        drawWedding(progress);
+                        break;
+                    case 5:
+                        drawFamily(progress);
+                        break;
+                    case 6:
+                        drawFinale(progress);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            // ─── MAIN LOOP ───
+            function updateLyrics(elapsed) {
+                const overlay = document.getElementById('lyricOverlay');
+                const textEl = document.getElementById('lyricText');
+                const timeEl = document.getElementById('lyricTime');
+
+                let currentLyric = null;
+                for (let i = LYRICS.length - 1; i >= 0; i--) {
+                    if (elapsed >= LYRICS[i].time) {
+                        currentLyric = LYRICS[i];
+                        break;
+                    }
+                }
+
+                if (currentLyric) {
+                    textEl.innerHTML = currentLyric.text;
+                    const mins = Math.floor(currentLyric.time / 60);
+                    const secs = Math.floor(currentLyric.time % 60);
+                    timeEl.textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
+                    overlay.classList.add('show');
+                } else {
+                    overlay.classList.remove('show');
+                }
+            }
+
+            function render(timestamp) {
+                if (!isPlaying) return;
+
+                const now = performance.now();
+                elapsed = (now - startTime) / 1000;
+                const totalDuration = 125; // seconds
+
+                // clamp
+                if (elapsed > totalDuration) {
+                    elapsed = totalDuration;
+                }
+
+                // progress
+                document.getElementById('progressFill').style.width = (elapsed / totalDuration * 100) + '%';
+
+                // find current scene
+                let sceneIdx = 0;
+                let sceneProg = 0;
+                for (let i = 0; i < SCENES.length; i++) {
+                    if (elapsed >= SCENES[i].start && elapsed < SCENES[i].end) {
+                        sceneIdx = i;
+                        sceneProg = (elapsed - SCENES[i].start) / (SCENES[i].end - SCENES[i].start);
+                        break;
+                    }
+                    if (elapsed >= SCENES[i].end) {
+                        sceneIdx = Math.min(i + 1, SCENES.length - 1);
+                        sceneProg = 0;
+                    }
+                }
+                // if at the very end
+                if (elapsed >= SCENES[SCENES.length - 1].end) {
+                    sceneIdx = SCENES.length - 1;
+                    sceneProg = 1;
+                }
+
+                currentScene = sceneIdx;
+                sceneProgress = sceneProg;
+
+                // clear
+                ctx.clearRect(0, 0, W, H);
+
+                // draw scene
+                drawScene(sceneIdx, sceneProg);
+
+                // lyrics
+                updateLyrics(elapsed);
+
+                // if audio is playing, sync
+                if (audio && !audio.paused) {
+                    try {
+                        const audioTime = audio.currentTime;
+                        if (Math.abs(audioTime - elapsed) > 0.5) {
+                            // drift correction
+                        }
+                    } catch (_) {}
+                }
+
+                if (elapsed >= totalDuration) {
+                    // story complete
+                    isPlaying = false;
+                    if (audio) audio.pause();
+                    document.getElementById('lyricOverlay').classList.add('show');
+                    document.getElementById('lyricText').innerHTML = '💕 <span class="highlight">Forever & Always</span> 💕';
+                    document.getElementById('lyricTime').textContent = '♥ 2:05';
+                    return;
+                }
+
+                animFrame = requestAnimationFrame(render);
+            }
+
+            // ─── START / STOP ───
+            function startStory() {
+                if (isPlaying) return;
                 isPlaying = true;
-
-                // clear tiles
-                tilesContainer.innerHTML = '';
-                tiles = [];
-
-                // hide overlays
-                startOverlay.classList.remove('open');
-                gameOverOverlay.classList.remove('open');
-                completeOverlay.classList.remove('open');
-
-                updateUI();
+                startTime = performance.now();
 
                 // play audio
                 if (audio) {
@@ -1173,209 +1335,57 @@
                     audio.play().catch(() => {});
                 }
 
-                // start loop
-                lastTime = 0;
-                if (animationFrame) cancelAnimationFrame(animationFrame);
-                animationFrame = requestAnimationFrame(gameLoop);
+                document.getElementById('startOverlay').classList.add('hidden');
 
-                // spawn first tile immediately
-                setTimeout(() => {
-                    if (isPlaying) spawnTile();
-                }, 200);
+                if (animFrame) cancelAnimationFrame(animFrame);
+                render(performance.now());
             }
 
-            function gameOver() {
-                if (isGameOver || isComplete) return;
-                isGameOver = true;
+            function stopStory() {
                 isPlaying = false;
-                if (animationFrame) cancelAnimationFrame(animationFrame);
-
-                // stop audio
                 if (audio) audio.pause();
-
-                // show game over
-                finalScore.textContent = score;
-                const msgs = [
-                    'you\'ve got a friend in me 💕',
-                    'so close! try again 🌟',
-                    'Ruth believes in you! ✨',
-                    'keep going, love 💖',
-                    'you\'re doing amazing 🌈',
-                    'friendship wins every time 🤗'
-                ];
-                finalMessage.textContent = msgs[Math.floor(Math.random() * msgs.length)];
-                gameOverOverlay.classList.add('open');
-
-                // update high score
-                if (score > highScore) {
-                    highScore = score;
-                    localStorage.setItem('ruthTilesHigh', String(highScore));
-                    highScoreDisplay.textContent = highScore;
-                }
-
-                // sparkles
-                sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 20);
+                if (animFrame) cancelAnimationFrame(animFrame);
             }
 
-            function completeGame() {
-                if (isComplete) return;
-                isComplete = true;
-                isPlaying = false;
-                if (animationFrame) cancelAnimationFrame(animationFrame);
-                if (audio) audio.pause();
-
-                completeScore.textContent = score;
-                completeOverlay.classList.add('open');
-
-                // big celebration
-                for (let i = 0; i < 6; i++) {
-                    setTimeout(() => {
-                        sparkleBurst(
-                            Math.random() * window.innerWidth,
-                            Math.random() * window.innerHeight,
-                            30 + Math.random() * 20
-                        );
-                    }, i * 200);
-                }
-                confettiBurst(window.innerWidth / 2, window.innerHeight / 2);
-
-                if (score > highScore) {
-                    highScore = score;
-                    localStorage.setItem('ruthTilesHigh', String(highScore));
-                    highScoreDisplay.textContent = highScore;
-                }
+            function resetStory() {
+                stopStory();
+                elapsed = 0;
+                currentScene = 0;
+                sceneProgress = 0;
+                document.getElementById('progressFill').style.width = '0%';
+                document.getElementById('lyricOverlay').classList.remove('show');
+                document.getElementById('startOverlay').classList.remove('hidden');
+                ctx.clearRect(0, 0, W, H);
+                // draw initial scene
+                drawScene(0, 0);
+                document.getElementById('lyricText').innerHTML = '🎵 <span class="highlight">You\'ve got a friend in me</span>';
+                document.getElementById('lyricTime').textContent = '0:00';
             }
 
             // ─── EVENTS ───
-            startBtn.addEventListener('click', startGame);
-            restartBtn.addEventListener('click', startGame);
-            completeRestartBtn.addEventListener('click', startGame);
-
-            goHomeBtn.addEventListener('click', () => {
-                window.location.href = 'index.html';
-            });
-            completeHomeBtn.addEventListener('click', () => {
-                window.location.href = 'index.html';
-            });
-            backBtn.addEventListener('click', () => {
+            document.getElementById('playBtn').addEventListener('click', startStory);
+            document.getElementById('restartBtn').addEventListener('click', resetStory);
+            document.getElementById('homeBtn').addEventListener('click', () => {
                 window.location.href = 'index.html';
             });
 
-            // keyboard
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    if (startOverlay.classList.contains('open')) startGame();
-                    else if (gameOverOverlay.classList.contains('open')) startGame();
-                    else if (completeOverlay.classList.contains('open')) startGame();
+                if (e.key === ' ' || e.key === 'Enter') {
+                    if (document.getElementById('startOverlay').classList.contains('hidden')) {
+                        if (!isPlaying) startStory();
+                    } else {
+                        startStory();
+                    }
                     e.preventDefault();
                 }
-                if (e.key === 'h' || e.key === 'H') {
-                    window.location.href = 'index.html';
-                }
-                if (e.key === 'r' || e.key === 'R') {
-                    if (!isPlaying && !startOverlay.classList.contains('open')) {
-                        startGame();
-                    }
-                }
-            });
-
-            // ─── WISH MINI ───
-            const WISHES = [
-                'Ruth, you are pure magic ✨', '21 looks stunning on you 💖',
-                'Every moment with you is a gift 🌟', 'Can’t wait to celebrate you! 🥳',
-                'You make the world brighter ❤️', 'Forever and always, Ruth 💫',
-                'So grateful for you 🌸', 'You deserve all the joy in the world 🦋',
-                'Happy 21st, beautiful soul 💗', 'Here’s to you and all your dreams 🌙',
-                'Sending you the biggest hug 🤗', 'You are so loved 💕',
-                'Your light shines so bright ⭐', 'Cheers to 21 years of you 🥂',
-                'Ruth, you are one of a kind 🌺', 'My heart beats for you ❤️‍🔥',
-                'You are my everything 💖', 'Forever yours, always and truly 💞'
-            ];
-
-            document.getElementById('wishMiniBtn').addEventListener('click', function(e) {
-                const cx = e.clientX || window.innerWidth / 2;
-                const cy = e.clientY || window.innerHeight / 2;
-                sparkleBurst(cx, cy, 25);
-                confettiBurst(cx, cy);
-
-                const msg = WISHES[Math.floor(Math.random() * WISHES.length)];
-                const resp = document.getElementById('wishResponse');
-                resp.textContent = msg;
-                resp.className = 'wish-response show';
-                setTimeout(() => {
-                    resp.className = 'wish-response';
-                }, 4000);
-            });
-
-            // ─── SPARKLE / CONFETTI ───
-            function sparkleBurst(cx, cy, count) {
-                const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊', '🌈', '🎵',
-                    '🎶'
-                ];
-                const total = count || 20 + Math.floor(Math.random() * 16);
-                for (let i = 0; i < total; i++) {
-                    const spark = document.createElement('div');
-                    spark.className = 'sparkle-burst';
-                    spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-                    const angle = Math.random() * 2 * Math.PI;
-                    const dist = 50 + Math.random() * 160;
-                    const tx = Math.cos(angle) * dist;
-                    const ty = Math.sin(angle) * dist - 40;
-                    spark.style.setProperty('--tx', tx + 'px');
-                    spark.style.setProperty('--ty', ty + 'px');
-                    spark.style.left = (cx || window.innerWidth / 2) + 'px';
-                    spark.style.top = (cy || window.innerHeight / 2) + 'px';
-                    spark.style.fontSize = 0.8 + Math.random() * 1.6 + 'rem';
-                    spark.style.animationDuration = 0.4 + Math.random() * 0.6 + 's';
-                    document.body.appendChild(spark);
-                    setTimeout(() => spark.remove(), 1200);
-                }
-            }
-
-            function confettiBurst(cx, cy) {
-                const colors = ['#f8a4b8', '#c78bdb', '#f5c6a0', '#ffd6d6', '#d4b8e0', '#fce7f3', '#ffb3c6', '#b8d4e3', '#ffd700',
-                    '#ff6b9d'
-                ];
-                const count = 40 + Math.floor(Math.random() * 30);
-                for (let i = 0; i < count; i++) {
-                    const piece = document.createElement('div');
-                    piece.className = 'confetti-piece';
-                    piece.style.left = (cx || window.innerWidth / 2) + 'px';
-                    piece.style.top = (cy || window.innerHeight / 2) + 'px';
-                    piece.style.width = (4 + Math.random() * 7) + 'px';
-                    piece.style.height = (4 + Math.random() * 7) + 'px';
-                    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-                    const angle = Math.random() * 2 * Math.PI;
-                    const dist = 60 + Math.random() * 300;
-                    piece.style.animationDuration = (1.0 + Math.random() * 1.6) + 's';
-                    piece.style.animationDelay = (Math.random() * 0.5) + 's';
-                    piece.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-                    piece.style.setProperty('--ty', Math.sin(angle) * dist - 140 + 'px');
-                    document.body.appendChild(piece);
-                    setTimeout(() => piece.remove(), 2800);
-                }
-            }
-
-            // ─── CLICK SPARKLES (ambient) ───
-            document.addEventListener('click', function(e) {
-                const tag = e.target.tagName.toLowerCase();
-                if (tag === 'button' || tag === 'a' || e.target.closest('.tile') || e.target.closest('.overlay')) return;
-                if (Math.random() > 0.35) return;
-                sparkleBurst(e.clientX, e.clientY, 4);
+                if (e.key === 'r' || e.key === 'R') resetStory();
+                if (e.key === 'h' || e.key === 'H') window.location.href = 'index.html';
             });
 
             // ─── INIT ───
-            highScoreDisplay.textContent = highScore;
+            resetStory();
 
-            // load audio
-            audio.src = 'friend.mp3';
-            audio.preload = 'metadata';
-            audio.onerror = () => {
-                console.warn('Audio not available — game still works!');
-            };
-
-            console.log('🌸 Day 08 · Musical Tiles · Ruth\'s 21st');
+            console.log('🌸 Day 08 · Story Animation · Ruth\'s 21st');
         })();
     </script>
 
