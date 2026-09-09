@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Crossword · Ruth's 21st</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <title>Day 08 · Ruth's 21st · Friend in Me</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
     <style>
+        /* ─── RESET ─── */
         * {
             margin: 0;
             padding: 0;
@@ -20,6 +21,7 @@
             --text: #2d2a3a;
             --shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
             --radius: 16px;
+            --tile-radius: 18px;
         }
 
         body {
@@ -27,7 +29,7 @@
             background: var(--cream);
             color: var(--text);
             min-height: 100vh;
-            padding: 20px;
+            padding: 16px;
             line-height: 1.5;
             display: flex;
             align-items: center;
@@ -45,13 +47,13 @@
             pointer-events: none;
         }
 
-        .wrapper {
+        .placeholder {
             position: relative;
             z-index: 1;
-            max-width: 920px;
+            max-width: 820px;
             width: 100%;
             margin: 0 auto;
-            padding: 30px 24px 40px;
+            padding: 28px 24px 36px;
             background: rgba(255, 255, 255, 0.55);
             backdrop-filter: blur(16px);
             border-radius: 32px;
@@ -60,6 +62,7 @@
             text-align: center;
         }
 
+        /* ─── HEADER ─── */
         .header .name {
             font-family: 'Playfair Display', serif;
             font-size: clamp(2rem, 6vw, 3.4rem);
@@ -80,11 +83,11 @@
             letter-spacing: 0.08em;
         }
 
-        .header .puzzle-title {
+        .header .day-badge {
             display: inline-block;
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(8px);
-            padding: 6px 24px;
+            padding: 6px 22px;
             border-radius: 60px;
             font-size: 0.85rem;
             font-weight: 600;
@@ -92,407 +95,441 @@
             border: 1px solid rgba(255, 255, 255, 0.6);
             box-shadow: 0 4px 20px rgba(194, 123, 158, 0.08);
             margin-top: 10px;
+            transition: 0.3s ease;
         }
 
-        .crossword-grid-wrap {
-            overflow-x: auto;
-            margin: 18px 0 12px;
-            padding: 4px 0;
-            -webkit-overflow-scrolling: touch;
+        .header .day-badge strong {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, #f5b8b8, #c78bdb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .crossword-grid {
-            display: grid;
-            gap: 2px;
-            margin: 0 auto;
-            width: fit-content;
-            background: rgba(199, 139, 219, 0.10);
-            padding: 8px;
-            border-radius: 12px;
-            border: 1px solid rgba(199, 139, 219, 0.12);
+        /* ─── SONG TITLE ─── */
+        .song-title {
+            margin: 12px 0 6px;
+        }
+        .song-title h2 {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.6rem;
+            color: #3d344a;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+        }
+        .song-title h2 em {
+            font-style: italic;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .cell {
-            width: 34px;
-            height: 34px;
+        /* ─── PROGRESS ─── */
+        .progress-wrap {
+            margin: 14px 0 18px;
             display: flex;
             align-items: center;
+            gap: 14px;
             justify-content: center;
-            background: #fff;
-            border-radius: 4px;
-            font-family: 'Inter', sans-serif;
-            font-weight: 700;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            color: var(--text);
-            transition: 0.15s ease;
-            border: 1px solid rgba(199, 139, 219, 0.15);
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+            flex-wrap: wrap;
+        }
+        .progress-track {
+            flex: 1;
+            min-width: 140px;
+            max-width: 340px;
+            height: 6px;
+            background: rgba(199, 139, 219, 0.18);
+            border-radius: 10px;
+            overflow: hidden;
             position: relative;
         }
-
-        .cell.black {
-            background: #2d2a3a;
-            border-color: #2d2a3a;
-        }
-
-        .cell .cell-input {
-            width: 100%;
+        .progress-fill {
             height: 100%;
-            border: none;
-            background: transparent;
-            text-align: center;
-            font-family: 'Inter', sans-serif;
-            font-weight: 700;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            color: var(--text);
-            outline: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: 0.1s ease;
+            width: 0%;
+            background: linear-gradient(90deg, #f8a4b8, #c78bdb, #f5c6a0);
+            border-radius: 10px;
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-
-        .cell .cell-input:focus {
-            background: rgba(199, 139, 219, 0.08);
-            box-shadow: inset 0 0 0 2px var(--purple);
-        }
-
-        .cell .cell-input.correct {
-            color: #4caf50;
-            background: rgba(76, 175, 80, 0.06);
-        }
-
-        .cell .cell-input.wrong {
-            color: #e74c3c;
-            background: rgba(231, 76, 60, 0.06);
-            animation: shake 0.3s ease;
-        }
-
-        .cell .cell-number {
-            position: absolute;
-            top: 1px;
-            left: 3px;
-            font-size: 0.5rem;
-            font-weight: 700;
+        .progress-label {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1rem;
             color: #b8a6c9;
-            pointer-events: none;
-            line-height: 1;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
+        }
+        .progress-label span {
+            color: #c27b9e;
+            font-size: 1.2rem;
         }
 
-        @keyframes shake {
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-            20% {
-                transform: translateX(-4px);
-            }
-            40% {
-                transform: translateX(4px);
-            }
-            60% {
-                transform: translateX(-3px);
-            }
-            80% {
-                transform: translateX(3px);
-            }
+        /* ─── TILE GRID ─── */
+        .tile-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 18px 0 22px;
         }
 
-        .cell .cell-input.highlighted {
-            background: rgba(199, 139, 219, 0.12);
-        }
-
-        .clues-section {
+        .tile {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(4px);
+            border: 2px solid rgba(199, 139, 219, 0.12);
+            border-radius: var(--tile-radius);
+            padding: 14px 8px 10px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+            position: relative;
+            min-height: 80px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            margin: 16px 0 20px;
-            text-align: left;
-            background: rgba(255, 255, 255, 0.4);
-            padding: 18px 20px;
-            border-radius: var(--radius);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            max-height: 360px;
-            overflow-y: auto;
-        }
-
-        .clues-section .clue-row {
-            display: flex;
-            align-items: baseline;
-            gap: 8px;
-            font-size: 0.9rem;
-            padding: 4px 0;
-            border-bottom: 1px solid rgba(199, 139, 219, 0.06);
-        }
-
-        .clues-section .clue-row:last-child {
-            border-bottom: none;
-        }
-
-        .clues-section .clue-num {
-            font-weight: 700;
-            color: var(--purple);
-            min-width: 28px;
-            font-size: 0.8rem;
-        }
-
-        .clues-section .clue-text {
-            flex: 1;
-            color: var(--text);
-            font-weight: 400;
-        }
-
-        .clues-section .clue-answer {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 0.85rem;
-            color: #b8a6c9;
-            min-width: 60px;
-            text-align: right;
-            opacity: 0.5;
-            font-weight: 600;
-        }
-
-        .clues-section .clue-answer.solved {
-            opacity: 1;
-            color: #4caf50;
-        }
-
-        .clues-section .clue-answer.wrong-answer {
-            opacity: 1;
-            color: #e74c3c;
-        }
-
-        .action-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            align-items: center;
             justify-content: center;
-            margin: 6px 0 16px;
+            text-align: center;
+            user-select: none;
         }
 
-        .action-bar button {
-            padding: 10px 28px;
-            border-radius: 60px;
-            border: none;
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            letter-spacing: 0.02em;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            color: #fff;
-            box-shadow: 0 6px 24px rgba(199, 139, 219, 0.20);
+        .tile:hover:not(.played):not(.locked) {
+            transform: translateY(-4px) scale(1.02);
+            border-color: rgba(199, 139, 219, 0.3);
+            box-shadow: 0 8px 28px rgba(199, 139, 219, 0.10);
+            background: rgba(255, 255, 255, 0.8);
         }
 
-        .action-bar button:hover {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 10px 36px rgba(199, 139, 219, 0.28);
-        }
-
-        .action-bar button:active {
+        .tile:active:not(.played):not(.locked) {
             transform: scale(0.95);
         }
 
-        .action-bar button.secondary {
-            background: rgba(199, 139, 219, 0.12);
-            color: var(--purple);
-            box-shadow: none;
+        .tile .tile-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #d4b8e0;
+            letter-spacing: 0.04em;
+            transition: 0.3s ease;
+            line-height: 1;
         }
 
-        .action-bar button.secondary:hover {
-            background: rgba(199, 139, 219, 0.22);
-            box-shadow: none;
+        .tile .tile-lyric {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.78rem;
+            color: #3d344a;
+            margin-top: 4px;
+            line-height: 1.3;
+            opacity: 0.7;
+            transition: 0.3s ease;
+            max-width: 100%;
+            word-break: break-word;
         }
 
-        .action-bar button.success {
-            background: linear-gradient(135deg, #66bb6a, #43a047);
-            box-shadow: 0 6px 24px rgba(76, 175, 80, 0.25);
+        /* ─── TILE STATES ─── */
+        .tile.played {
+            background: linear-gradient(135deg, rgba(248, 164, 184, 0.25), rgba(199, 139, 219, 0.20));
+            border-color: #c78bdb;
+            box-shadow: 0 0 0 2px rgba(199, 139, 219, 0.15), 0 8px 28px rgba(199, 139, 219, 0.06);
+            cursor: default;
+            transform: scale(0.98);
         }
-
-        .action-bar button.success:hover {
-            box-shadow: 0 10px 36px rgba(76, 175, 80, 0.35);
+        .tile.played .tile-num {
+            color: #c78bdb;
         }
-
-        .romantic-message {
-            margin: 16px 0 6px;
-            padding: 24px 28px;
-            background: linear-gradient(135deg, rgba(248, 164, 184, 0.12), rgba(199, 139, 219, 0.12));
-            border-radius: var(--radius);
-            border: 2px solid rgba(199, 139, 219, 0.25);
-            opacity: 0;
-            max-height: 0;
-            overflow: hidden;
-            transition: opacity 0.8s ease, max-height 0.8s ease, padding 0.6s ease, margin 0.6s ease;
-            padding: 0 28px;
-            margin: 0;
-        }
-
-        .romantic-message.show {
+        .tile.played .tile-lyric {
             opacity: 1;
-            max-height: 600px;
-            padding: 24px 28px;
-            margin: 16px 0 6px;
+            color: #6a4e7a;
+        }
+        .tile.played::after {
+            content: '♪';
+            position: absolute;
+            top: 4px;
+            right: 8px;
+            font-size: 0.8rem;
+            color: #c78bdb;
+            opacity: 0.5;
         }
 
-        .romantic-message .msg-heart {
-            font-size: 2.4rem;
+        .tile.active {
+            animation: tilePulse 0.8s ease;
+            border-color: #f8a4b8;
+            box-shadow: 0 0 0 4px rgba(248, 164, 184, 0.20), 0 8px 32px rgba(248, 164, 184, 0.10);
+        }
+
+        @keyframes tilePulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.04);
+            }
+        }
+
+        .tile.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+            filter: grayscale(0.5);
+        }
+
+        /* ─── NOW PLAYING ─── */
+        .now-playing {
+            margin: 6px 0 14px;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 60px;
+            border: 1px solid rgba(199, 139, 219, 0.08);
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            transition: 0.3s ease;
+        }
+        .now-playing .np-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #b8a6c9;
+            font-weight: 600;
+        }
+        .now-playing .np-text {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1rem;
+            color: #3d344a;
+            transition: 0.3s ease;
+            min-width: 60px;
+        }
+        .now-playing .np-text .highlight {
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .now-playing .np-emoji {
+            font-size: 1.3rem;
+            line-height: 1;
+        }
+
+        /* ─── ROMANTIC REVEAL ─── */
+        .reveal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            background: rgba(44, 40, 58, 0.6);
+            backdrop-filter: blur(12px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            animation: fadeIn 0.8s ease;
+        }
+        .reveal-overlay.open {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .reveal-card {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 40px 36px 44px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            position: relative;
+            animation: cardPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes cardPop {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .reveal-card .heart-big {
+            font-size: 4rem;
             display: block;
             margin-bottom: 8px;
+            animation: heartFloat 2s ease-in-out infinite;
         }
 
-        .romantic-message .msg-title {
+        @keyframes heartFloat {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .reveal-card h2 {
             font-family: 'Playfair Display', serif;
-            font-size: 1.6rem;
+            font-size: 2.2rem;
             font-weight: 700;
             background: linear-gradient(135deg, #f8a4b8, #c78bdb);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
 
-        .romantic-message .msg-body {
+        .reveal-card .message {
             font-family: 'Patrick Hand', cursive;
-            font-size: 1.15rem;
+            font-size: 1.2rem;
             color: #3d344a;
             line-height: 1.8;
-            -webkit-text-fill-color: #3d344a;
+            margin: 12px 0 20px;
+            padding: 0 8px;
         }
 
-        .romantic-message .msg-body strong {
-            color: var(--purple);
-            -webkit-text-fill-color: var(--purple);
-        }
-
-        .back-link {
+        .reveal-card .message .big-emoji {
+            font-size: 1.8rem;
             display: inline-block;
-            margin-top: 14px;
+            margin: 0 4px;
+        }
+
+        .reveal-card .close-btn {
+            display: inline-block;
+            padding: 10px 36px;
+            border-radius: 60px;
+            border: none;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.18);
+            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            letter-spacing: 0.02em;
+        }
+        .reveal-card .close-btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.28);
+        }
+        .reveal-card .close-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ─── BACK BUTTON ─── */
+        .back-row {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .back-btn {
+            display: inline-block;
             padding: 10px 32px;
             border-radius: 60px;
             border: none;
-            background: rgba(199, 139, 219, 0.10);
-            color: var(--purple);
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            color: #fff;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-family: 'Inter', sans-serif;
             cursor: pointer;
-            transition: 0.3s ease;
+            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.18);
+            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             text-decoration: none;
             letter-spacing: 0.02em;
-            border: 1px solid rgba(199, 139, 219, 0.15);
+        }
+        .back-btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.28);
+        }
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+        .back-btn span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .back-link:hover {
-            background: rgba(199, 139, 219, 0.18);
+        .reset-btn {
+            background: rgba(199, 139, 219, 0.12);
+            color: #b8a6c9;
+            box-shadow: none;
+        }
+        .reset-btn:hover {
+            background: rgba(199, 139, 219, 0.20);
+            box-shadow: 0 8px 24px rgba(199, 139, 219, 0.06);
             transform: translateY(-2px);
         }
 
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: rgba(199, 139, 219, 0.12);
-            border-radius: 4px;
-            margin: 6px 0 12px;
-            overflow: hidden;
+        /* ─── WISH MINI ─── */
+        .wish-mini {
+            margin-top: 14px;
         }
-
-        .progress-bar .fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--pink), var(--purple));
-            border-radius: 4px;
-            transition: width 0.5s ease;
-        }
-
-        .progress-text {
-            font-size: 0.75rem;
+        .wish-mini button {
+            background: none;
+            border: none;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.9rem;
             color: #b8a6c9;
-            font-weight: 600;
-            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: 0.3s ease;
+            padding: 4px 14px;
+            border-radius: 20px;
+        }
+        .wish-mini button:hover {
+            color: #c27b9e;
+            background: rgba(199, 139, 219, 0.06);
+        }
+        .wish-mini .wish-response {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1rem;
+            color: #c27b9e;
+            min-height: 1.8rem;
+            opacity: 0;
+            transition: 0.5s ease;
+            transform: translateY(6px);
+            margin-top: 4px;
+        }
+        .wish-mini .wish-response.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        @media (max-width: 600px) {
-            .wrapper {
-                padding: 18px 12px 28px;
-                border-radius: 24px;
-            }
-            .cell {
-                width: 28px;
-                height: 28px;
-            }
-            .cell .cell-input {
-                font-size: 0.85rem;
-            }
-            .cell .cell-number {
-                font-size: 0.4rem;
-                top: 0px;
-                left: 2px;
-            }
-            .crossword-grid {
-                gap: 1.5px;
-                padding: 5px;
-            }
-            .clues-section {
-                padding: 12px 14px;
-                max-height: 280px;
-            }
-            .clues-section .clue-row {
-                font-size: 0.78rem;
-            }
-            .action-bar button {
-                padding: 8px 18px;
-                font-size: 0.78rem;
-            }
-            .romantic-message .msg-title {
-                font-size: 1.2rem;
-            }
-            .romantic-message .msg-body {
-                font-size: 0.95rem;
-            }
-            .romantic-message.show {
-                padding: 16px 18px;
-            }
+        /* ─── SPARKLES ─── */
+        .sparkle-burst {
+            position: fixed;
+            pointer-events: none;
+            font-size: 1.4rem;
+            animation: burst 0.8s ease-out forwards;
+            z-index: 999;
         }
-
-        @media (max-width: 400px) {
-            .cell {
-                width: 22px;
-                height: 22px;
+        @keyframes burst {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(0.2) rotate(0deg);
             }
-            .cell .cell-input {
-                font-size: 0.7rem;
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg);
             }
-            .cell .cell-number {
-                font-size: 0.35rem;
-                top: 0px;
-                left: 1px;
-            }
-            .crossword-grid {
-                gap: 1px;
-                padding: 3px;
-            }
-            .clues-section .clue-row {
-                font-size: 0.7rem;
-                gap: 4px;
-            }
-            .clues-section .clue-num {
-                min-width: 20px;
-                font-size: 0.65rem;
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--cream);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            border-radius: 10px;
         }
 
         .confetti-piece {
@@ -504,7 +541,6 @@
             border-radius: 2px;
             animation: confettiFall linear forwards;
         }
-
         @keyframes confettiFall {
             0% {
                 opacity: 1;
@@ -516,23 +552,97 @@
             }
         }
 
-        .sparkle-burst {
-            position: fixed;
-            pointer-events: none;
-            font-size: 1.4rem;
-            animation: burst 0.8s ease-out forwards;
-            z-index: 999;
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 700px) {
+            .tile-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            .placeholder {
+                padding: 20px 14px 28px;
+                border-radius: 24px;
+            }
+            .header .name {
+                font-size: 2.4rem;
+            }
+            .reveal-card {
+                padding: 28px 20px 32px;
+            }
+            .reveal-card h2 {
+                font-size: 1.8rem;
+            }
+            .reveal-card .message {
+                font-size: 1rem;
+            }
         }
 
-        @keyframes burst {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(0.2) rotate(0deg);
+        @media (max-width: 480px) {
+            .tile-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
             }
-            100% {
-                opacity: 0;
-                transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg);
+            .tile {
+                padding: 10px 6px 8px;
+                min-height: 64px;
+                border-radius: 14px;
             }
+            .tile .tile-lyric {
+                font-size: 0.65rem;
+            }
+            .tile .tile-num {
+                font-size: 0.7rem;
+            }
+            .header .name {
+                font-size: 2rem;
+            }
+            .header .day-badge {
+                font-size: 0.75rem;
+                padding: 4px 16px;
+            }
+            .header .day-badge strong {
+                font-size: 1.3rem;
+            }
+            .song-title h2 {
+                font-size: 1.2rem;
+            }
+            .now-playing .np-text {
+                font-size: 0.85rem;
+            }
+            .back-btn {
+                padding: 8px 22px;
+                font-size: 0.8rem;
+            }
+            .reveal-card {
+                padding: 24px 16px 28px;
+            }
+            .reveal-card h2 {
+                font-size: 1.5rem;
+            }
+            .reveal-card .message {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .tile-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--cream);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            border-radius: 10px;
+        }
+
+        /* audio hidden */
+        #player {
+            display: none;
         }
     </style>
 </head>
@@ -540,573 +650,499 @@
 
     <div class="bg" aria-hidden="true"></div>
 
-    <div class="wrapper" id="app">
+    <div class="placeholder" id="app">
 
         <header class="header">
             <div class="name">Ruth</div>
-            <div class="sub">twenty‑one · a crossword for you</div>
-            <div class="puzzle-title">💕 solve · reveal </div>
-            <p>SCROLL BELOW AFTER YOU SOLVE IT</p>
-        
+            <div class="sub">twenty‑one · a celebration</div>
+            <div class="day-badge">
+                day <strong>08</strong> · music tiles
+            </div>
         </header>
 
-        <div class="progress-bar">
-            <div class="fill" id="progressFill"></div>
-        </div>
-        <div class="progress-text" id="progressText">0 / 13 solved</div>
-
-        <div class="crossword-grid-wrap">
-            <div class="crossword-grid" id="gridContainer"></div>
+        <div class="song-title">
+            <h2>🎵 <em>You've Got a Friend in Me</em> 🎵</h2>
         </div>
 
-        <div class="clues-section" id="cluesContainer"></div>
-
-        <div class="action-bar">
-            <button id="checkBtn">✅ check answers</button>
-            <button id="clearBtn" class="secondary">✕ clear</button>
-            <button id="hintBtn" class="secondary">💡 hint</button>
-            <button id="resetBtn" class="secondary">⟳ reset</button>
-        </div>
-
-        <div class="romantic-message" id="romanticMessage">
-            <span class="msg-heart">💖</span>
-            <div class="msg-title">Every answer tells a story…</div>
-            <div class="msg-body">
-                Each clue, each word, each little memory... they all lead back to <strong>you</strong>.
-                Getting to know you is an adventure, and i love every part of it.
-                Every day I discover something new to love about you.
-                You are my puzzle, my mystery, my forever baby girl.
-                <br /><br />
-                9 more days to go, <strong>mama.</strong> 💕
-                <br /><br />
-                <span style="font-size:1.4rem;">✨ Happy 21st, my love ✨</span>
+        <div class="progress-wrap">
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-label">
+                <span id="playedCount">0</span> / <span id="totalCount">0</span>
             </div>
         </div>
 
-        <a href="index.html" class="back-link">← back to home</a>
+        <div class="now-playing" id="nowPlaying">
+            <span class="np-label">♪ now playing</span>
+            <span class="np-emoji" id="npEmoji">🎵</span>
+            <span class="np-text" id="npText">tap a tile to begin</span>
+        </div>
+
+        <div class="tile-grid" id="tileGrid"></div>
+
+        <div class="back-row">
+            <a href="index.html" class="back-btn"><span>← back to celebration</span></a>
+            <button class="back-btn reset-btn" id="resetBtn"><span>↻ reset tiles</span></button>
+        </div>
+
+        <div class="wish-mini">
+            <button id="wishMiniBtn">💫 send a little love</button>
+            <div class="wish-response" id="wishResponse"></div>
+        </div>
 
     </div>
+
+    <!-- ─── REVEAL OVERLAY ─── -->
+    <div class="reveal-overlay" id="revealOverlay">
+        <div class="reveal-card">
+            <span class="heart-big">💖</span>
+            <h2>You've Got a Friend in Me</h2>
+            <div class="message">
+                <span class="big-emoji">🌅</span>
+                Ruth, my dearest friend —<br />
+                through every laugh, every tear, every quiet moment in between,<br />
+                you've been my anchor, my light, my home.<br /><br />
+                <span class="big-emoji">🌟</span>
+                This song says it all: <em>none of them will ever love you the way I do.</em><br />
+                You are not just my love — you are my best friend.<br /><br />
+                <span class="big-emoji">🕊️</span>
+                Here's to 21 years of you, and a lifetime of us.<br />
+                Forever and always,<br />
+                <strong style="font-family:'Playfair Display',serif;background:linear-gradient(135deg,#f8a4b8,#c78bdb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">your friend, your love, your everything.</strong>
+                <span class="big-emoji">💕</span>
+            </div>
+            <button class="close-btn" id="closeReveal">close &nbsp;×</button>
+        </div>
+    </div>
+
+    <!-- ─── AUDIO ─── -->
+    <audio id="player" preload="metadata"></audio>
 
     <script>
         (function() {
             'use strict';
 
-            // ─── WORD DATA ───
-            // Each entry: { word, clue, number, startRow, startCol, direction }
-            // direction: 'across' or 'down'
+            // ─── SONG DATA (default lyrics + timings for "You've Got a Friend in Me") ───
+            // These will be used if the SRT file can't be loaded.
+            // Timings are in seconds: [start, end]
+            const DEFAULT_SEGMENTS = [{
+                id: 1,
+                start: 0.0,
+                end: 5.5,
+                text: "You've got a friend in me"
+            }, {
+                id: 2,
+                start: 5.5,
+                end: 10.5,
+                text: "You've got a friend in me"
+            }, {
+                id: 3,
+                start: 10.5,
+                end: 15.0,
+                text: "When the road looks rough ahead"
+            }, {
+                id: 4,
+                start: 15.0,
+                end: 20.5,
+                text: "And you're miles and miles from your nice warm bed"
+            }, {
+                id: 5,
+                start: 20.5,
+                end: 26.0,
+                text: "You just remember what your old pal said"
+            }, {
+                id: 6,
+                start: 26.0,
+                end: 31.0,
+                text: "Boy, you've got a friend in me"
+            }, {
+                id: 7,
+                start: 31.0,
+                end: 36.0,
+                text: "Yeah, you've got a friend in me"
+            }, {
+                id: 8,
+                start: 36.0,
+                end: 41.5,
+                text: "If you've got troubles, I've got 'em too"
+            }, {
+                id: 9,
+                start: 41.5,
+                end: 47.0,
+                text: "There isn't anything I wouldn't do for you"
+            }, {
+                id: 10,
+                start: 47.0,
+                end: 52.5,
+                text: "We stick together and we see it through"
+            }, {
+                id: 11,
+                start: 52.5,
+                end: 58.0,
+                text: "'Cause you've got a friend in me"
+            }, {
+                id: 12,
+                start: 58.0,
+                end: 63.0,
+                text: "Yeah, you've got a friend in me"
+            }, {
+                id: 13,
+                start: 63.0,
+                end: 69.0,
+                text: "Some other folks might be a little bit smarter"
+            }, {
+                id: 14,
+                start: 69.0,
+                end: 75.0,
+                text: "Bigger and stronger too, maybe"
+            }, {
+                id: 15,
+                start: 75.0,
+                end: 81.5,
+                text: "But none of them will ever love you the way I do"
+            }, {
+                id: 16,
+                start: 81.5,
+                end: 87.0,
+                text: "It's me and you, boy, and as the years go by"
+            }, {
+                id: 17,
+                start: 87.0,
+                end: 93.0,
+                text: "Our friendship will never die"
+            }, {
+                id: 18,
+                start: 93.0,
+                end: 99.0,
+                text: "You're gonna see it's our destiny"
+            }, {
+                id: 19,
+                start: 99.0,
+                end: 105.0,
+                text: "You've got a friend in me"
+            }, {
+                id: 20,
+                start: 105.0,
+                end: 111.0,
+                text: "You've got a friend in me"
+            }, {
+                id: 21,
+                start: 111.0,
+                end: 117.0,
+                text: "You've got a friend in me"
+            }, ];
 
-            const WORDS = [{
-                word: 'IVY',
-                clue: 'A Baby Girl\'s Name',
-                number: 1,
-                startRow: 0,
-                startCol: 4,
-                direction: 'down'
-            }, {
-                word: 'PATRICKSTAR',
-                clue: 'A Nickelodeon Character',
-                number: 2,
-                startRow: 0,
-                startCol: 0,
-                direction: 'across'
-            }, {
-                word: 'MULO',
-                clue: 'A Girl\'s BestFriend',
-                number: 3,
-                startRow: 0, // changed to avoid conflict with AIRFRESHENER
-                startCol: 15, // moved to the right
-                direction: 'down'
-            }, {
-                word: 'HUNGRY',
-                clue: 'Never say in DM',
-                number: 4,
-                startRow: 1,
-                startCol: 12,
-                direction: 'down'
-            }, {
-                word: 'UPSET',
-                clue: 'For the 77th time, im',
-                number: 5,
-                startRow: 1,
-                startCol: 13,
-                direction: 'down'
-            }, {
-                word: 'MONEY',
-                clue: 'Stop Sending back',
-                number: 6,
-                startRow: 1,
-                startCol: 14,
-                direction: 'down'
-            }, {
-                word: 'BRUNO',
-                clue: 'We never talk about',
-                number: 7,
-                startRow: 7,
-                startCol: 10,
-                direction: 'down'
-            }, {
-                word: 'SANDYS',
-                clue: 'First Date',
-                number: 8,
-                startRow: 7,
-                startCol: 11,
-                direction: 'down'
-            }, {
-                word: 'BABYGIRL',
-                clue: 'Tukiya\'s',
-                number: 9,
-                startRow: 7,
-                startCol: 12,
-                direction: 'down'
-            }, {
-                word: 'AIRFRESHENER',
-                clue: 'Pregnant Woman\'s Perfume (fill this last)',
-                number: 10,
-                startRow: 3,
-                startCol: 0,
-                direction: 'across'
-            }, {
-                word: 'YOURSELF',
-                clue: 'Keep your hands to',
-                number: 11,
-                startRow: 7,
-                startCol: 13,
-                direction: 'down'
-            }, {
-                word: 'G3',
-                clue: 'Ive gone to study',
-                number: 12,
-                startRow: 7,
-                startCol: 14,
-                direction: 'down'
-            }, {
-                word: 'GIVEMEMONEY',
-                clue: 'My Dad doesn\'t', // updated clue
-                number: 13,
-                startRow: 6,
-                startCol: 0,
-                direction: 'across'
-            }];
+            // ─── STATE ───
+            let segments = [];
+            let played = new Set();
+            let totalTiles = 0;
+            let audio = document.getElementById('player');
+            let currentTile = null;
+            let isPlaying = false;
 
-            // ─── BUILD GRID ───
-            let maxRow = 0,
-                maxCol = 0;
-            WORDS.forEach(w => {
-                const len = w.word.length;
-                const endRow = w.direction === 'down' ? w.startRow + len - 1 : w.startRow;
-                const endCol = w.direction === 'across' ? w.startCol + len - 1 : w.startCol;
-                if (endRow > maxRow) maxRow = endRow;
-                if (endCol > maxCol) maxCol = endCol;
-            });
-            // Add padding
-            const rows = maxRow + 2;
-            const cols = maxCol + 2;
+            const grid = document.getElementById('tileGrid');
+            const progressFill = document.getElementById('progressFill');
+            const playedCountEl = document.getElementById('playedCount');
+            const totalCountEl = document.getElementById('totalCount');
+            const npText = document.getElementById('npText');
+            const npEmoji = document.getElementById('npEmoji');
+            const revealOverlay = document.getElementById('revealOverlay');
+            const closeReveal = document.getElementById('closeReveal');
+            const resetBtn = document.getElementById('resetBtn');
+            const wishMiniBtn = document.getElementById('wishMiniBtn');
+            const wishResponse = document.getElementById('wishResponse');
 
-            // Initialize grid with null (empty)
-            let grid = [];
-            for (let r = 0; r < rows; r++) {
-                grid[r] = [];
-                for (let c = 0; c < cols; c++) {
-                    grid[r][c] = null;
+            // ─── WISHES ───
+            const WISHES = [
+                'Ruth, you are pure magic ✨',
+                '21 looks stunning on you 💖',
+                'Every moment with you is a gift 🌟',
+                'Can’t wait to celebrate you! 🥳',
+                'You make the world brighter ❤️',
+                'Forever and always, Ruth 💫',
+                'So grateful for you 🌸',
+                'You deserve all the joy in the world 🦋',
+                'Happy 21st, beautiful soul 💗',
+                'Here’s to you and all your dreams 🌙',
+                'Sending you the biggest hug 🤗',
+                'You are so loved 💕',
+                'Your light shines so bright ⭐',
+                'Cheers to 21 years of you 🥂',
+                'Ruth, you are one of a kind 🌺',
+                'My heart beats for you ❤️‍🔥',
+                'You are my everything 💖',
+                'Forever yours, always and truly 💞'
+            ];
+
+            // ─── SRT PARSER ───
+            function parseSRT(text) {
+                const blocks = text.trim().split(/\n\s*\n/);
+                const result = [];
+                for (const block of blocks) {
+                    const lines = block.split('\n').filter(l => l.trim() !== '');
+                    if (lines.length < 3) continue;
+                    // id
+                    const id = parseInt(lines[0], 10) || result.length + 1;
+                    // timestamp: 00:00:01,234 --> 00:00:04,567
+                    const timeMatch = lines[1].match(/(\d{2}):(\d{2}):(\d{2}),(\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2}),(\d{3})/);
+                    if (!timeMatch) continue;
+                    const start = parseInt(timeMatch[1]) * 3600 +
+                        parseInt(timeMatch[2]) * 60 +
+                        parseInt(timeMatch[3]) +
+                        parseInt(timeMatch[4]) / 1000;
+                    const end = parseInt(timeMatch[5]) * 3600 +
+                        parseInt(timeMatch[6]) * 60 +
+                        parseInt(timeMatch[7]) +
+                        parseInt(timeMatch[8]) / 1000;
+                    const textLines = lines.slice(2).join(' ');
+                    result.push({ id, start, end, text: textLines });
                 }
+                return result;
             }
 
-            // Place words
-            WORDS.forEach((w, idx) => {
-                const len = w.word.length;
-                for (let i = 0; i < len; i++) {
-                    const r = w.direction === 'down' ? w.startRow + i : w.startRow;
-                    const c = w.direction === 'across' ? w.startCol + i : w.startCol;
-                    const letter = w.word[i];
-                    if (grid[r][c] === null) {
-                        grid[r][c] = { letter, wordIndex: idx, word: w };
-                    } else {
-                        // If conflict, we trust our layout – but we avoid conflict now.
-                    }
-                }
-            });
+            // ─── LOAD SRT ───
+            function loadSRT() {
+                return fetch('friend.srt')
+                    .then(res => {
+                        if (!res.ok) throw new Error('SRT not found');
+                        return res.text();
+                    })
+                    .then(text => {
+                        const parsed = parseSRT(text);
+                        if (parsed.length > 0) return parsed;
+                        throw new Error('No valid SRT entries');
+                    })
+                    .catch(() => {
+                        console.warn('Using default segments');
+                        return DEFAULT_SEGMENTS;
+                    });
+            }
 
-            // ─── RENDER GRID ───
-            const gridContainer = document.getElementById('gridContainer');
-            const clueContainer = document.getElementById('cluesContainer');
-
-            // Track input elements for each cell
-            const cellInputs = {};
-
-            function renderGrid() {
-                const isMobile = window.innerWidth < 600;
-                const isTiny = window.innerWidth < 400;
-                const cellSize = isTiny ? 22 : isMobile ? 28 : 34;
-                gridContainer.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
-                gridContainer.innerHTML = '';
-
-                // Collect numbers for cells
-                const cellNumbers = {};
-                WORDS.forEach(w => {
-                    const r = w.startRow;
-                    const c = w.startCol;
-                    const key = `${r},${c}`;
-                    if (!cellNumbers[key]) {
-                        cellNumbers[key] = w.number;
-                    }
+            // ─── LOAD AUDIO ───
+            function loadAudio() {
+                return new Promise((resolve, reject) => {
+                    audio.src = 'friend.mp3';
+                    audio.preload = 'metadata';
+                    audio.onloadedmetadata = () => resolve(audio);
+                    audio.onerror = () => {
+                        console.warn('Audio file not found, using fallback mode');
+                        resolve(null);
+                    };
+                    // if it takes too long, just resolve
+                    setTimeout(() => resolve(audio), 2000);
                 });
-
-                for (let r = 0; r < rows; r++) {
-                    for (let c = 0; c < cols; c++) {
-                        const cell = document.createElement('div');
-                        cell.className = 'cell';
-                        cell.dataset.row = r;
-                        cell.dataset.col = c;
-
-                        const data = grid[r][c];
-                        if (data === null) {
-                            cell.classList.add('black');
-                            gridContainer.appendChild(cell);
-                            continue;
-                        }
-
-                        // White cell
-                        const key = `${r},${c}`;
-                        if (cellNumbers[key]) {
-                            const num = document.createElement('span');
-                            num.className = 'cell-number';
-                            num.textContent = cellNumbers[key];
-                            cell.appendChild(num);
-                        }
-
-                        const input = document.createElement('input');
-                        input.type = 'text';
-                        input.maxLength = 1;
-                        input.className = 'cell-input';
-                        input.dataset.row = r;
-                        input.dataset.col = c;
-                        input.dataset.letter = data.letter;
-                        input.dataset.wordIndex = data.wordIndex;
-                        input.autocomplete = 'off';
-                        input.spellcheck = false;
-
-                        // Restore saved value
-                        const saved = getSavedState();
-                        const val = saved ? saved[`${r},${c}`] : null;
-                        if (val) {
-                            input.value = val;
-                        }
-
-                        // Store reference
-                        const key2 = `${r},${c}`;
-                        cellInputs[key2] = input;
-
-                        // ─── INPUT HANDLING ───
-                        input.addEventListener('input', function(e) {
-                            const val = this.value.toUpperCase();
-                            this.value = val;
-                            if (val.length === 1) {
-                                // Move to next cell in the same word direction
-                                const row = parseInt(this.dataset.row);
-                                const col = parseInt(this.dataset.col);
-                                const wIdx = parseInt(this.dataset.wordIndex);
-                                const wordData = WORDS[wIdx];
-                                if (wordData) {
-                                    const dir = wordData.direction;
-                                    let nextR = row,
-                                        nextC = col;
-                                    if (dir === 'across') nextC = col + 1;
-                                    else nextR = row + 1;
-                                    const nextKey = `${nextR},${nextC}`;
-                                    const nextInput = cellInputs[nextKey];
-                                    if (nextInput) {
-                                        nextInput.focus();
-                                        nextInput.select();
-                                    }
-                                }
-                            }
-                            // Save state
-                            saveState();
-                            checkProgress();
-                        });
-
-                        // ─── KEYBOARD NAVIGATION (Backspace, arrows) ───
-                        input.addEventListener('keydown', function(e) {
-                            const key = e.key;
-                            const row = parseInt(this.dataset.row);
-                            const col = parseInt(this.dataset.col);
-                            const wIdx = parseInt(this.dataset.wordIndex);
-                            const wordData = WORDS[wIdx];
-                            if (!wordData) return;
-
-                            // Helper to get previous cell in the word
-                            function getPrevCell() {
-                                const dir = wordData.direction;
-                                let prevR = row,
-                                    prevC = col;
-                                if (dir === 'across') prevC = col - 1;
-                                else prevR = row - 1;
-                                const key = `${prevR},${prevC}`;
-                                return cellInputs[key] || null;
-                            }
-
-                            function getNextCell() {
-                                const dir = wordData.direction;
-                                let nextR = row,
-                                    nextC = col;
-                                if (dir === 'across') nextC = col + 1;
-                                else nextR = row + 1;
-                                const key = `${nextR},${nextC}`;
-                                return cellInputs[key] || null;
-                            }
-
-                            if (key === 'Backspace') {
-                                e.preventDefault();
-                                if (this.value === '') {
-                                    // Move to previous cell and clear it
-                                    const prev = getPrevCell();
-                                    if (prev) {
-                                        prev.value = '';
-                                        prev.focus();
-                                        prev.select();
-                                        // Trigger input event to update state
-                                        const ev = new Event('input', { bubbles: true });
-                                        prev.dispatchEvent(ev);
-                                    }
-                                } else {
-                                    // Clear current cell
-                                    this.value = '';
-                                    // Trigger input to update state
-                                    const ev = new Event('input', { bubbles: true });
-                                    this.dispatchEvent(ev);
-                                }
-                            } else if (key === 'ArrowLeft') {
-                                e.preventDefault();
-                                const prev = getPrevCell();
-                                if (prev) { prev.focus();
-                                    prev.select(); }
-                            } else if (key === 'ArrowRight') {
-                                e.preventDefault();
-                                const next = getNextCell();
-                                if (next) { next.focus();
-                                    next.select(); }
-                            } else if (key === 'ArrowUp' || key === 'ArrowDown') {
-                                // For simplicity, we can ignore vertical arrows or implement basic
-                                // Not critical.
-                            }
-                        });
-
-                        // Focus highlight
-                        input.addEventListener('focus', function() {
-                            const row = parseInt(this.dataset.row);
-                            const col = parseInt(this.dataset.col);
-                            const wIdx = parseInt(this.dataset.wordIndex);
-                            const wordData = WORDS[wIdx];
-                            if (wordData) {
-                                const len = wordData.word.length;
-                                for (let i = 0; i < len; i++) {
-                                    const r2 = wordData.direction === 'down' ? wordData.startRow + i : wordData
-                                        .startRow;
-                                    const c2 = wordData.direction === 'across' ? wordData.startCol + i : wordData
-                                        .startCol;
-                                    const k = `${r2},${c2}`;
-                                    const el = cellInputs[k];
-                                    if (el) el.classList.add('highlighted');
-                                }
-                            }
-                        });
-
-                        input.addEventListener('blur', function() {
-                            document.querySelectorAll('.cell-input.highlighted').forEach(el => {
-                                el.classList.remove('highlighted');
-                            });
-                        });
-
-                        cell.appendChild(input);
-                        gridContainer.appendChild(cell);
-                    }
-                }
             }
 
-            // ─── LOCAL STORAGE ───
-            const STORAGE_KEY = 'crosswordState_ruth21';
+            // ─── BUILD TILES ───
+            function buildTiles(segData) {
+                segments = segData;
+                totalTiles = segments.length;
+                totalCountEl.textContent = totalTiles;
+                played.clear();
+                updateProgress();
 
-            function getSavedState() {
-                try {
-                    const raw = localStorage.getItem(STORAGE_KEY);
-                    return raw ? JSON.parse(raw) : null;
-                } catch { return null; }
-            }
-
-            function saveState() {
-                const state = {};
-                document.querySelectorAll('.cell-input').forEach(inp => {
-                    const val = inp.value;
-                    if (val) {
-                        const key = `${inp.dataset.row},${inp.dataset.col}`;
-                        state[key] = val;
-                    }
-                });
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            }
-
-            function clearSavedState() {
-                localStorage.removeItem(STORAGE_KEY);
-            }
-
-            // ─── RENDER CLUES ───
-            function renderClues() {
-                clueContainer.innerHTML = '';
-                const sorted = [...WORDS].sort((a, b) => a.number - b.number);
-                sorted.forEach((w, idx) => {
-                    const row = document.createElement('div');
-                    row.className = 'clue-row';
-                    row.dataset.wordIndex = WORDS.indexOf(w);
+                grid.innerHTML = '';
+                segments.forEach((seg, idx) => {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    tile.dataset.index = idx;
+                    tile.dataset.start = seg.start;
+                    tile.dataset.end = seg.end;
 
                     const num = document.createElement('span');
-                    num.className = 'clue-num';
-                    num.textContent = w.number + '.';
-                    row.appendChild(num);
+                    num.className = 'tile-num';
+                    num.textContent = String(idx + 1).padStart(2, '0');
 
-                    const text = document.createElement('span');
-                    text.className = 'clue-text';
-                    text.textContent = w.clue;
-                    row.appendChild(text);
+                    const lyric = document.createElement('span');
+                    lyric.className = 'tile-lyric';
+                    lyric.textContent = seg.text.length > 28 ? seg.text.slice(0, 26) + '…' : seg.text;
 
-                    const answer = document.createElement('span');
-                    answer.className = 'clue-answer';
-                    answer.id = `clue-answer-${WORDS.indexOf(w)}`;
-                    let dots = '';
-                    for (let i = 0; i < w.word.length; i++) dots += '·';
-                    answer.textContent = dots;
-                    row.appendChild(answer);
+                    tile.appendChild(num);
+                    tile.appendChild(lyric);
 
-                    clueContainer.appendChild(row);
+                    tile.addEventListener('click', () => handleTileClick(idx));
+                    grid.appendChild(tile);
                 });
+
+                // set initial now playing
+                npText.textContent = 'tap a tile to begin';
+                npEmoji.textContent = '🎵';
             }
 
-            // ─── CHECK PROGRESS ───
-            function checkProgress() {
-                let solved = 0;
-                const total = WORDS.length;
+            // ─── HANDLE TILE CLICK ───
+            function handleTileClick(idx) {
+                if (played.has(idx)) return;
+                if (isPlaying) return;
 
-                WORDS.forEach((w, idx) => {
-                    const word = w.word;
-                    const len = word.length;
-                    let allCorrect = true;
-                    let allFilled = true;
-                    for (let i = 0; i < len; i++) {
-                        const r = w.direction === 'down' ? w.startRow + i : w.startRow;
-                        const c = w.direction === 'across' ? w.startCol + i : w.startCol;
-                        const key = `${r},${c}`;
-                        const input = cellInputs[key];
-                        if (!input) { allCorrect = false; break; }
-                        const val = input.value.toUpperCase();
-                        if (val === '') { allFilled = false;
-                            allCorrect = false; break; }
-                        if (val !== word[i]) { allCorrect = false; break; }
-                    }
-                    const answerEl = document.getElementById(`clue-answer-${idx}`);
-                    if (answerEl) {
-                        if (allCorrect && allFilled) {
-                            answerEl.textContent = word;
-                            answerEl.className = 'clue-answer solved';
-                            solved++;
-                        } else {
-                            let filled = '';
-                            let hasFilled = false;
-                            for (let i = 0; i < len; i++) {
-                                const r = w.direction === 'down' ? w.startRow + i : w.startRow;
-                                const c = w.direction === 'across' ? w.startCol + i : w.startCol;
-                                const key = `${r},${c}`;
-                                const input = cellInputs[key];
-                                if (input) {
-                                    const val = input.value.toUpperCase();
-                                    if (val) { filled += val;
-                                        hasFilled = true; } else filled += '·';
-                                } else { filled += '·'; }
-                            }
-                            if (hasFilled) {
-                                answerEl.textContent = filled;
-                                answerEl.className = 'clue-answer';
-                            } else {
-                                let dots = '';
-                                for (let i = 0; i < len; i++) dots += '·';
-                                answerEl.textContent = dots;
-                                answerEl.className = 'clue-answer';
-                            }
+                const seg = segments[idx];
+                if (!seg) return;
+
+                const tile = grid.children[idx];
+                if (!tile) return;
+
+                // play
+                playSegment(seg, idx, tile);
+            }
+
+            function playSegment(seg, idx, tile) {
+                isPlaying = true;
+
+                // highlight
+                tile.classList.add('active');
+
+                // update now playing
+                npText.innerHTML = `<span class="highlight">${seg.text}</span>`;
+                npEmoji.textContent = '🎶';
+
+                // seek and play
+                if (audio && audio.src && audio.duration) {
+                    audio.currentTime = seg.start;
+                    audio.play().catch(() => {});
+                    // stop at end
+                    const checkEnd = setInterval(() => {
+                        if (audio.currentTime >= seg.end || audio.ended) {
+                            audio.pause();
+                            clearInterval(checkEnd);
+                            finishTile(idx, tile, seg);
                         }
-                    }
-
-                    // Update cell colors
-                    for (let i = 0; i < len; i++) {
-                        const r = w.direction === 'down' ? w.startRow + i : w.startRow;
-                        const c = w.direction === 'across' ? w.startCol + i : w.startCol;
-                        const key = `${r},${c}`;
-                        const input = cellInputs[key];
-                        if (input) {
-                            const val = input.value.toUpperCase();
-                            if (val === '') {
-                                input.classList.remove('correct', 'wrong');
-                            } else if (val === word[i]) {
-                                input.classList.add('correct');
-                                input.classList.remove('wrong');
-                            } else {
-                                input.classList.add('wrong');
-                                input.classList.remove('correct');
-                            }
+                    }, 80);
+                    // safety timeout
+                    setTimeout(() => {
+                        clearInterval(checkEnd);
+                        if (isPlaying) {
+                            audio.pause();
+                            finishTile(idx, tile, seg);
                         }
-                    }
-                });
-
-                const fill = document.getElementById('progressFill');
-                const text = document.getElementById('progressText');
-                const pct = Math.round((solved / total) * 100);
-                fill.style.width = pct + '%';
-                text.textContent = `${solved} / ${total} solved`;
-
-                // If fully solved, show message and clear saved state
-                if (solved === total) {
-                    showRomanticMessage();
-                    // Clear saved state so next visit is fresh
-                    clearSavedState();
+                    }, (seg.end - seg.start) * 1000 + 300);
                 } else {
-                    hideRomanticMessage();
+                    // fallback: just simulate playback with a timer
+                    const duration = (seg.end - seg.start) * 1000;
+                    setTimeout(() => {
+                        finishTile(idx, tile, seg);
+                    }, Math.min(duration, 2500));
                 }
-
-                return solved;
             }
 
-            // ─── ROMANTIC MESSAGE ───
-            let messageShown = false;
+            function finishTile(idx, tile, seg) {
+                if (played.has(idx)) return;
+                played.add(idx);
+                tile.classList.remove('active');
+                tile.classList.add('played');
+                isPlaying = false;
+                updateProgress();
 
-            function showRomanticMessage() {
-                if (messageShown) return;
-                messageShown = true;
-                const el = document.getElementById('romanticMessage');
-                el.classList.add('show');
-                // Confetti burst
+                // update now playing with done status
+                npText.textContent = '✓ ' + seg.text;
+                npEmoji.textContent = '💕';
+
+                // check if all done
+                if (played.size === totalTiles) {
+                    setTimeout(() => {
+                        showReveal();
+                    }, 600);
+                } else {
+                    // auto-advance: after a moment, reset now playing
+                    setTimeout(() => {
+                        if (!isPlaying && played.size < totalTiles) {
+                            npText.textContent = 'tap another tile ♪';
+                            npEmoji.textContent = '🎵';
+                        }
+                    }, 1200);
+                }
+            }
+
+            // ─── UPDATE PROGRESS ───
+            function updateProgress() {
+                const done = played.size;
+                const total = totalTiles || 1;
+                const pct = (done / total) * 100;
+                progressFill.style.width = Math.min(pct, 100) + '%';
+                playedCountEl.textContent = done;
+                totalCountEl.textContent = total;
+            }
+
+            // ─── REVEAL ───
+            function showReveal() {
+                revealOverlay.classList.add('open');
+                // sparkle burst!
                 for (let i = 0; i < 5; i++) {
                     setTimeout(() => {
-                        confettiBurst(
-                            window.innerWidth * (0.2 + Math.random() * 0.6),
-                            window.innerHeight * (0.2 + Math.random() * 0.4)
+                        sparkleBurst(
+                            Math.random() * window.innerWidth,
+                            Math.random() * window.innerHeight,
+                            20 + Math.floor(Math.random() * 20)
                         );
-                    }, i * 300);
+                    }, i * 200);
                 }
-                setTimeout(() => {
-                    sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 40);
-                }, 200);
-            }
-
-            function hideRomanticMessage() {
-                const el = document.getElementById('romanticMessage');
-                const solved = WORDS.filter((w, idx) => {
-                    const answerEl = document.getElementById(`clue-answer-${idx}`);
-                    return answerEl && answerEl.classList.contains('solved');
-                }).length;
-                if (solved < WORDS.length) {
-                    el.classList.remove('show');
-                    messageShown = false;
+                confettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+                // play a little sound if audio is available
+                if (audio && audio.src) {
+                    try {
+                        audio.currentTime = 0;
+                        audio.volume = 0.3;
+                        audio.play().catch(() => {});
+                        setTimeout(() => audio.pause(), 2000);
+                    } catch (_) {}
                 }
             }
 
-            // ─── CONFETTI & SPARKLE ───
+            function hideReveal() {
+                revealOverlay.classList.remove('open');
+                // reset now playing
+                npText.textContent = '✨ all tiles complete! ✨';
+                npEmoji.textContent = '🌟';
+            }
+
+            closeReveal.addEventListener('click', hideReveal);
+            revealOverlay.addEventListener('click', (e) => {
+                if (e.target === revealOverlay) hideReveal();
+            });
+
+            // ─── RESET ───
+            function resetTiles() {
+                if (played.size === 0) return;
+                played.clear();
+                updateProgress();
+                Array.from(grid.children).forEach(tile => {
+                    tile.classList.remove('played', 'active');
+                });
+                npText.textContent = 'tap a tile to begin';
+                npEmoji.textContent = '🎵';
+                if (audio) {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }
+                isPlaying = false;
+                // hide reveal if open
+                hideReveal();
+            }
+
+            resetBtn.addEventListener('click', resetTiles);
+
+            // ─── SPARKLE / CONFETTI ───
+            function sparkleBurst(cx, cy, count) {
+                const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
+                const total = count || 24 + Math.floor(Math.random() * 16);
+                for (let i = 0; i < total; i++) {
+                    const spark = document.createElement('div');
+                    spark.className = 'sparkle-burst';
+                    spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    const angle = Math.random() * 2 * Math.PI;
+                    const dist = 60 + Math.random() * 180;
+                    const tx = Math.cos(angle) * dist;
+                    const ty = Math.sin(angle) * dist - 50;
+                    spark.style.setProperty('--tx', tx + 'px');
+                    spark.style.setProperty('--ty', ty + 'px');
+                    spark.style.left = (cx || window.innerWidth / 2) + 'px';
+                    spark.style.top = (cy || window.innerHeight / 2) + 'px';
+                    spark.style.fontSize = 1 + Math.random() * 1.8 + 'rem';
+                    spark.style.animationDuration = 0.4 + Math.random() * 0.6 + 's';
+                    document.body.appendChild(spark);
+                    setTimeout(() => spark.remove(), 1200);
+                }
+            }
+
             function confettiBurst(cx, cy) {
                 const colors = ['#f8a4b8', '#c78bdb', '#f5c6a0', '#ffd6d6', '#d4b8e0', '#fce7f3', '#ffb3c6', '#b8d4e3'];
                 const count = 40 + Math.floor(Math.random() * 30);
@@ -1130,182 +1166,74 @@
                 }
             }
 
-            function sparkleBurst(cx, cy, count) {
-                const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
-                const total = count || 24 + Math.floor(Math.random() * 16);
-                for (let i = 0; i < total; i++) {
-                    const spark = document.createElement('div');
-                    spark.className = 'sparkle-burst';
-                    spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-                    const angle = Math.random() * 2 * Math.PI;
-                    const dist = 60 + Math.random() * 180;
-                    const tx = Math.cos(angle) * dist;
-                    const ty = Math.sin(angle) * dist - 50;
-                    spark.style.setProperty('--tx', tx + 'px');
-                    spark.style.setProperty('--ty', ty + 'px');
-                    spark.style.left = (cx || window.innerWidth / 2) + 'px';
-                    spark.style.top = (cy || window.innerHeight / 2) + 'px';
-                    spark.style.fontSize = 1 + Math.random() * 1.8 + 'rem';
-                    spark.style.animationDuration = 0.4 + Math.random() * 0.6 + 's';
-                    document.body.appendChild(spark);
-                    setTimeout(() => spark.remove(), 1200);
+            // ─── WISH MINI ───
+            wishMiniBtn.addEventListener('click', function(e) {
+                const cx = e.clientX || window.innerWidth / 2;
+                const cy = e.clientY || window.innerHeight / 2;
+                sparkleBurst(cx, cy, 30);
+                confettiBurst(cx, cy);
+
+                const msg = WISHES[Math.floor(Math.random() * WISHES.length)];
+                wishResponse.textContent = msg;
+                wishResponse.className = 'wish-response show';
+
+                const badge = document.querySelector('.day-badge');
+                if (badge) {
+                    const orig = badge.innerHTML;
+                    badge.innerHTML = '💫 ' + msg;
+                    badge.style.background = 'rgba(252, 231, 243, 0.8)';
+                    setTimeout(() => {
+                        badge.innerHTML = orig;
+                        badge.style.background = '';
+                    }, 3000);
                 }
-            }
 
-            // ─── ACTIONS ───
-            function checkAll() {
-                checkProgress();
-                const solved = WORDS.filter((w, idx) => {
-                    const answerEl = document.getElementById(`clue-answer-${idx}`);
-                    return answerEl && answerEl.classList.contains('solved');
-                }).length;
-                if (solved === WORDS.length) {
-                    showRomanticMessage();
-                } else {
-                    document.querySelectorAll('.cell-input.wrong').forEach(el => {
-                        el.style.animation = 'none';
-                        void el.offsetWidth;
-                        el.style.animation = 'shake 0.3s ease';
-                        setTimeout(() => { el.style.animation = ''; }, 400);
-                    });
-                    document.querySelectorAll('.cell-input').forEach(el => {
-                        if (el.value === '') {
-                            el.style.background = 'rgba(231, 76, 60, 0.05)';
-                            setTimeout(() => { el.style.background = ''; }, 600);
-                        }
-                    });
-                }
-            }
+                setTimeout(() => {
+                    wishResponse.className = 'wish-response';
+                }, 4200);
+            });
 
-            function clearAll() {
-                document.querySelectorAll('.cell-input').forEach(el => {
-                    el.value = '';
-                    el.classList.remove('correct', 'wrong', 'highlighted');
-                });
-                messageShown = false;
-                document.getElementById('romanticMessage').classList.remove('show');
-                WORDS.forEach((w, idx) => {
-                    const answerEl = document.getElementById(`clue-answer-${idx}`);
-                    if (answerEl) {
-                        let dots = '';
-                        for (let i = 0; i < w.word.length; i++) dots += '·';
-                        answerEl.textContent = dots;
-                        answerEl.className = 'clue-answer';
-                    }
-                });
-                clearSavedState();
-                checkProgress();
-                const first = document.querySelector('.cell-input');
-                if (first) first.focus();
-            }
+            // ─── CLICK SPARKLES ───
+            document.addEventListener('click', function(e) {
+                const tag = e.target.tagName.toLowerCase();
+                if (tag === 'a' || tag === 'button' || e.target.closest('.sparkle-burst') || e.target.closest(
+                        '.tile')) return;
+                if (Math.random() > 0.3) return;
+                sparkleBurst(e.clientX, e.clientY, 6);
+            });
 
-            function giveHint() {
-                for (let idx = 0; idx < WORDS.length; idx++) {
-                    const w = WORDS[idx];
-                    const answerEl = document.getElementById(`clue-answer-${idx}`);
-                    if (answerEl && !answerEl.classList.contains('solved')) {
-                        const firstR = w.direction === 'down' ? w.startRow : w.startRow;
-                        const firstC = w.direction === 'across' ? w.startCol : w.startCol;
-                        const key = `${firstR},${firstC}`;
-                        const input = cellInputs[key];
-                        if (input && input.value === '') {
-                            input.value = w.word[0];
-                            input.classList.add('correct');
-                            input.classList.remove('wrong');
-                            const ev = new Event('input', { bubbles: true });
-                            input.dispatchEvent(ev);
-                            input.style.background = 'rgba(199, 139, 219, 0.2)';
-                            setTimeout(() => { input.style.background = ''; }, 800);
-                            input.focus();
-                            input.select();
-                            break;
-                        }
-                    }
-                }
-            }
-
-            function resetAll() {
-                clearAll();
-                // Also clear saved state
-                clearSavedState();
-                messageShown = false;
-                document.getElementById('romanticMessage').classList.remove('show');
-                checkProgress();
-            }
-
-            // ─── KEYBOARD SHORTCUTS ───
+            // ─── KEYBOARD ───
             document.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    const active = document.activeElement;
-                    if (active && active.classList.contains('cell-input')) {
-                        e.preventDefault();
-                        checkAll();
-                    }
-                }
                 if (e.key === 'Escape') {
-                    document.activeElement && document.activeElement.blur();
+                    if (revealOverlay.classList.contains('open')) {
+                        hideReveal();
+                        return;
+                    }
+                    const el = document.activeElement;
+                    if (el) el.blur();
+                }
+                if (e.key === 'r' || e.key === 'R') {
+                    resetTiles();
                 }
                 if (e.key === 'h' || e.key === 'H') {
-                    if (!e.ctrlKey && !e.metaKey) giveHint();
-                }
-                if (e.key === 'c' || e.key === 'C') {
-                    if (!e.ctrlKey && !e.metaKey) checkAll();
+                    window.location.href = 'index.html';
                 }
             });
 
             // ─── INIT ───
-            renderGrid();
-            renderClues();
-            // Restore saved state after grid is rendered
-            const saved = getSavedState();
-            if (saved) {
-                Object.keys(saved).forEach(key => {
-                    const input = cellInputs[key];
-                    if (input) {
-                        input.value = saved[key];
-                        // Trigger events to update colors
-                        const ev = new Event('input', { bubbles: true });
-                        input.dispatchEvent(ev);
-                    }
-                });
+            async function init() {
+                // load SRT
+                const srtData = await loadSRT();
+                // load audio
+                await loadAudio();
+                // build tiles
+                buildTiles(srtData);
+
+                console.log(`🌸 Day 08 · Music Tiles · ${totalTiles} tiles loaded`);
             }
-            // Now check progress to update UI
-            checkProgress();
 
-            // Click on grid to focus first empty cell
-            gridContainer.addEventListener('click', function(e) {
-                const target = e.target.closest('.cell-input');
-                if (!target) {
-                    const first = document.querySelector('.cell-input');
-                    if (first) first.focus();
-                }
-            });
+            init();
 
-            // Button events
-            document.getElementById('checkBtn').addEventListener('click', checkAll);
-            document.getElementById('clearBtn').addEventListener('click', clearAll);
-            document.getElementById('hintBtn').addEventListener('click', giveHint);
-            document.getElementById('resetBtn').addEventListener('click', resetAll);
-
-            // Window resize - re-render grid sizes
-            let resizeTimer;
-            window.addEventListener('resize', function() {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(() => {
-                    const isMobile = window.innerWidth < 600;
-                    const isTiny = window.innerWidth < 400;
-                    const size = isTiny ? 22 : isMobile ? 28 : 34;
-                    gridContainer.style.gridTemplateColumns = `repeat(${cols}, ${size}px)`;
-                    document.querySelectorAll('.cell').forEach(el => {
-                        el.style.width = size + 'px';
-                        el.style.height = size + 'px';
-                        const inp = el.querySelector('.cell-input');
-                        if (inp) inp.style.fontSize = (isTiny ? 0.7 : isMobile ? 0.85 : 1.1) + 'rem';
-                    });
-                }, 200);
-            });
-
-            console.log('💕 Crossword for Ruth · solve to reveal the message!');
         })();
     </script>
 
