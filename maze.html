@@ -622,15 +622,17 @@
 
             <div class="card-body">
                 <p>
-                    Baby Girl 💕 before we celebrate your 21st, I wanted to give you a little journey. A maze
+                    Baby Girl 💕 before we celebrate your 21st, I wanted to give you a little journey. A maze,
+                    a few wrong turns, and me waiting at the end of it.
                 </p>
 
                 <div class="rule-box">
                     <p><span class="highlight">🧭 How it works:</span></p>
-                    <p>· Study the map below, it shows you the way through.</p>
+                    <p>· The map below shows the <span class="highlight">whole way through</span> — start, finish, and every turn between.</p>
+                    <p>· <span class="highlight">Dead ends and loops are everywhere</span>, so glance at the map when you get turned around.</p>
                     <p>· Use the <span class="highlight">d-pad</span> to move and <span class="highlight">swipe the screen</span> (or use the look pad) to turn.</p>
                     <p>· Find your way to the <span class="highlight">glowing heart</span> at the other end.</p>
-                    <p>· Take your time for there's no wrong turn that can't be undone.</p>
+                    <p>· Take your time — there's no wrong turn that can't be undone.</p>
                 </div>
 
                 <p style="font-family:'Patrick Hand',cursive; font-size:0.85rem; color:#a392b0; text-align:center; margin-top:8px;">
@@ -640,7 +642,7 @@
 
             <div class="map-container">
                 <canvas id="mapCanvas" width="500" height="500"></canvas>
-                <div class="map-tag">📌 your map · study it well</div>
+                <div class="map-tag">📌 your map · follow the dotted line</div>
             </div>
 
             <button class="btn-primary" id="startGameBtn">enter the maze 💖</button>
@@ -690,55 +692,96 @@
             // Force odd dimensions for proper maze generation
             if (width % 2 === 0) width++;
             if (height % 2 === 0) height++;
-            
+
             const rng = mulberry32(seed);
             const maze = Array(height).fill().map(() => Array(width).fill(1));
-            
-            const stack = [];
-            let current = { x: 1, y: 1 };
-            maze[1][1] = 0;
-            
+
             const dirs = [
                 { dx: 0, dy: -2 }, // up
                 { dx: 2, dy: 0 },  // right
                 { dx: 0, dy: 2 },  // down
                 { dx: -2, dy: 0 }  // left
             ];
-            
-            while (true) {
+
+            // ── 1. Growing-tree carve ──────────────────────────────
+            // Mixing "always take the newest cell" (long winding halls)
+            // with "take a random cell from the frontier" (bushy, lots
+            // of short branches) gives a far more interesting maze than
+            // a plain depth-first backtracker.
+            const stack = [{ x: 1, y: 1 }];
+            maze[1][1] = 0;
+
+            while (stack.length) {
+                const pick = rng() < 0.62
+                    ? stack.length - 1
+                    : Math.floor(rng() * stack.length);
+                const cur = stack[pick];
+
                 const neighbors = [];
                 for (const d of dirs) {
-                    const nx = current.x + d.dx;
-                    const ny = current.y + d.dy;
+                    const nx = cur.x + d.dx;
+                    const ny = cur.y + d.dy;
                     if (nx > 0 && nx < width - 1 && ny > 0 && ny < height - 1 && maze[ny][nx] === 1) {
                         neighbors.push({ x: nx, y: ny, dx: d.dx, dy: d.dy });
                     }
                 }
-                
-                if (neighbors.length > 0) {
-                    const next = neighbors[Math.floor(rng() * neighbors.length)];
-                    maze[current.y + next.dy / 2][current.x + next.dx / 2] = 0;
-                    maze[next.y][next.x] = 0;
-                    stack.push(current);
-                    current = { x: next.x, y: next.y };
-                } else {
-                    if (stack.length === 0) break;
-                    current = stack.pop();
+
+                if (neighbors.length === 0) {
+                    stack.splice(pick, 1);
+                    continue;
+                }
+
+                const next = neighbors[Math.floor(rng() * neighbors.length)];
+                maze[cur.y + next.dy / 2][cur.x + next.dx / 2] = 0;
+                maze[next.y][next.x] = 0;
+                stack.push({ x: next.x, y: next.y });
+            }
+
+            // ── 2. Braid: open some walls between two corridors ────
+            // Creates loops, so the maze stops being a single corridor
+            // tree — you can double back and take a different route.
+            for (let r = 1; r < height - 1; r++) {
+                for (let c = 1; c < width - 1; c++) {
+                    if (maze[r][c] !== 1) continue;
+                    const vert = maze[r - 1][c] !== 1 && maze[r + 1][c] !== 1;
+                    const horz = maze[r][c - 1] !== 1 && maze[r][c + 1] !== 1;
+                    if (vert && horz) {
+                        if (rng() < 0.18) maze[r][c] = 0;
+                    } else if (vert) {
+                        if (rng() < 0.12) maze[r][c] = 0;
+                    } else if (horz) {
+                        if (rng() < 0.12) maze[r][c] = 0;
+                    }
                 }
             }
-            
+
+            // ── 3. Little alcoves ─────────────────────────────────
+            // Carve a few dead-end nooks in the pillars so there are
+            // even more tempting places to poke your nose into.
+            for (let r = 2; r < height - 2; r += 2) {
+                for (let c = 2; c < width - 2; c += 2) {
+                    if (maze[r][c] !== 1) continue;
+                    let open = 0;
+                    if (maze[r - 1][c] !== 1) open++;
+                    if (maze[r + 1][c] !== 1) open++;
+                    if (maze[r][c - 1] !== 1) open++;
+                    if (maze[r][c + 1] !== 1) open++;
+                    if (open === 1 && rng() < 0.55) maze[r][c] = 0;
+                }
+            }
+
             // Set start and end
             maze[1][1] = 2;
             maze[height - 2][width - 2] = 3;
-            
+
             return maze;
         }
 
         // ═══════════════════════════════════════════════════
-        //  MAZE CONFIG  (25x25, fixed seed)
+        //  MAZE CONFIG  (27x27, fixed seed)
         // ═══════════════════════════════════════════════════
-        const MAZE_W = 25;
-        const MAZE_H = 25;
+        const MAZE_W = 27;
+        const MAZE_H = 27;
         const SEED   = 20240607; // fixed seed → same maze every time
         const MAZE   = generateMaze(MAZE_W, MAZE_H, SEED);
 
@@ -754,16 +797,16 @@
         }
 
         // ── world constants ──
-        const CELL       = 4;
-        const WALL_H     = 3.2;
+        const CELL       = 3.6;
+        const WALL_H     = 3.3;
         const EYE_H      = WALL_H / 2;
-        const MOVE_SPEED = 4.2;            // faster for larger maze
+        const MOVE_SPEED = 4.4;
         const TURN_SPEED = 2.8;
         const PLAYER_R   = 0.62;
         const FOV        = Math.PI / 3;
         const HALF_FOV   = FOV / 2;
         const TAN_HALF   = Math.tan(HALF_FOV);
-        const MAX_DIST   = 40;
+        const MAX_DIST   = 32;
 
         const START_X = startCol * CELL + CELL / 2;
         const START_Z = startRow * CELL + CELL / 2;
@@ -867,8 +910,11 @@
             return path.reverse();
         }
 
+        // computed once and reused for the map preview + spawn facing
+        const SOLUTION_PATH = solveMaze();
+
         // ═══════════════════════════════════════════════════
-        //  MAP PREVIEW
+        //  MAP PREVIEW — draws the FULL route from S to ♥
         // ═══════════════════════════════════════════════════
         function drawMapPreview() {
             const W = mapCanvas.width;
@@ -884,6 +930,7 @@
             mapCtx.fillStyle = bg;
             mapCtx.fillRect(0, 0, W, H);
 
+            // walls + floor
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
                     const x = ox + c * cw;
@@ -900,6 +947,7 @@
                 }
             }
 
+            // faint floor dots
             mapCtx.fillStyle = 'rgba(199,139,219,0.13)';
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
@@ -910,14 +958,31 @@
                 }
             }
 
-            const path = solveMaze();
+            // ── FULL solution path, start → finish ──
+            const path = SOLUTION_PATH;
             if (path.length > 1) {
                 mapCtx.save();
-                mapCtx.strokeStyle = 'rgba(248,164,184,0.42)';
-                mapCtx.lineWidth = Math.max(2, cw * 0.20);
+                mapCtx.strokeStyle = 'rgba(248,164,184,0.72)';
+                mapCtx.lineWidth = Math.max(2, cw * 0.22);
                 mapCtx.lineCap = 'round';
                 mapCtx.lineJoin = 'round';
-                mapCtx.setLineDash([cw * 0.34, cw * 0.42]);
+                mapCtx.setLineDash([cw * 0.34, cw * 0.40]);
+                mapCtx.beginPath();
+                for (let i = 0; i < path.length; i++) {
+                    const x = ox + path[i][1] * cw + cw / 2;
+                    const y = oy + path[i][0] * ch + ch / 2;
+                    if (i === 0) mapCtx.moveTo(x, y);
+                    else mapCtx.lineTo(x, y);
+                }
+                mapCtx.stroke();
+                mapCtx.restore();
+
+                // soft glow under the line for readability
+                mapCtx.save();
+                mapCtx.strokeStyle = 'rgba(199,139,219,0.18)';
+                mapCtx.lineWidth = Math.max(4, cw * 0.55);
+                mapCtx.lineCap = 'round';
+                mapCtx.lineJoin = 'round';
                 mapCtx.beginPath();
                 for (let i = 0; i < path.length; i++) {
                     const x = ox + path[i][1] * cw + cw / 2;
@@ -929,6 +994,7 @@
                 mapCtx.restore();
             }
 
+            // start marker
             const sx = ox + startCol * cw + cw / 2;
             const sy = oy + startRow * ch + ch / 2;
             mapCtx.beginPath();
@@ -941,6 +1007,7 @@
             mapCtx.textBaseline = 'middle';
             mapCtx.fillText('S', sx, sy + cw * 0.03);
 
+            // finish marker
             const ex = ox + endCol * cw + cw / 2;
             const ey = oy + endRow * ch + ch / 2;
             const glow = mapCtx.createRadialGradient(ex, ey, 0, ex, ey, cw * 1.5);
@@ -1261,9 +1328,18 @@
         function resetPlayer() {
             px = START_X;
             pz = START_Z;
-            angle = 0;
             bobPhase = 0;
             bobY = 0;
+
+            // face the first step of the real route so you never spawn
+            // nose-first into a wall
+            if (SOLUTION_PATH.length > 1) {
+                const a = SOLUTION_PATH[0];
+                const b = SOLUTION_PATH[1];
+                angle = Math.atan2((b[0] - a[0]) * CELL, (b[1] - a[1]) * CELL);
+            } else {
+                angle = 0;
+            }
         }
 
         function startGame() {
@@ -1491,6 +1567,7 @@
         playAgainBtn.addEventListener('click', resetGame);
 
         console.log('🌸 Day 7 · The Path to You 💖');
+        console.log('   solution length: ' + SOLUTION_PATH.length + ' steps');
     })();
     </script>
 </body>
