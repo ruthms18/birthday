@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Day XX · Ruth's 21st</title>
+    <title>Day 08 · How well do you know me?</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
     <style>
         /* ─── RESET ─── */
@@ -21,6 +21,8 @@
             --text: #2d2a3a;
             --shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
             --radius: 16px;
+            --quiz-bg: rgba(255, 255, 255, 0.7);
+            --green: #7ec8a0;
         }
 
         body {
@@ -49,7 +51,7 @@
         .placeholder {
             position: relative;
             z-index: 1;
-            max-width: 720px;
+            max-width: 780px;
             width: 100%;
             margin: 0 auto;
             padding: 30px 20px 40px;
@@ -59,11 +61,12 @@
             border: 1px solid rgba(255, 255, 255, 0.6);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
             text-align: center;
+            transition: 0.3s ease;
         }
 
         .header .name {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(2.4rem, 8vw, 4rem);
+            font-size: clamp(2.4rem, 8vw, 3.6rem);
             font-weight: 700;
             line-height: 1.1;
             background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
@@ -81,7 +84,7 @@
             letter-spacing: 0.08em;
         }
 
-        .header .day-badge {
+        .day-badge {
             display: inline-block;
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(8px);
@@ -96,136 +99,464 @@
             transition: 0.3s ease;
         }
 
-        .header .day-badge strong {
+        .day-badge strong {
             font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
+            font-size: 1.4rem;
             background: linear-gradient(135deg, #f5b8b8, #c78bdb);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .day-display {
-            margin: 24px 0 12px;
+        /* ─── INTRO OVERLAY ─── */
+        .intro-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(252, 246, 240, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
         }
 
-        .day-display .big-day {
+        .intro-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .intro-card {
+            max-width: 620px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 30px 80px rgba(199, 139, 219, 0.15);
+            padding: 40px 32px 36px;
+            text-align: center;
+            animation: fadeSlideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes fadeSlideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(40px) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .intro-card .intro-emoji {
+            font-size: 4rem;
+            line-height: 1;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .intro-card .intro-title {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(5rem, 18vw, 9rem);
+            font-size: 2.2rem;
             font-weight: 700;
             background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            line-height: 1;
-            letter-spacing: 2px;
-            text-shadow: 0 4px 40px rgba(199, 139, 219, 0.15);
-        }
-
-        .day-display .day-label {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.2rem;
-            color: #b8a6c9;
-            letter-spacing: 0.12em;
-            margin-top: -4px;
-        }
-
-        .coming-soon {
-            margin: 18px 0 24px;
-            padding: 14px 20px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 60px;
-            display: inline-block;
-            border: 1px solid rgba(199, 139, 219, 0.15);
-            backdrop-filter: blur(4px);
-        }
-
-        .coming-soon .badge {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.4rem;
-            color: #c27b9e;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .coming-soon .badge .day-emoji {
-            font-size: 1.8rem;
-            line-height: 1;
-        }
-
-        .day-countdown {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin: 18px 0 28px;
-        }
-
-        .day-countdown .item {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(8px);
-            padding: 8px 14px 6px;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            text-align: center;
-            min-width: 56px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-        }
-
-        .day-countdown .item .num {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1;
-            display: block;
-        }
-
-        .day-countdown .item .label {
-            font-size: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #a392b0;
-            font-weight: 600;
-            margin-top: 2px;
-        }
-
-        .message-box {
-            margin: 12px 0 28px;
-            padding: 20px 24px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: var(--radius);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 4px 16px rgba(199, 139, 219, 0.04);
-            transition: 0.3s ease;
-        }
-
-        .message-box .message-content {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.1rem;
-            color: #3d344a;
-            line-height: 1.7;
-        }
-
-        .message-box .message-content .highlight-emoji {
-            font-size: 2rem;
-            display: block;
+            line-height: 1.2;
             margin-bottom: 6px;
         }
 
-        .message-box .message-content .day-date {
+        .intro-card .intro-sub {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            color: #b8a6c9;
+            letter-spacing: 0.06em;
+            margin-bottom: 20px;
+        }
+
+        .intro-card .intro-body {
             font-family: 'Inter', sans-serif;
+            font-size: 0.98rem;
+            color: #3d344a;
+            line-height: 1.8;
+            text-align: left;
+            padding: 0 4px;
+            margin-bottom: 16px;
+        }
+
+        .intro-card .intro-body p {
+            margin-bottom: 12px;
+        }
+
+        .intro-card .intro-body .highlight {
+            color: #c27b9e;
+            font-weight: 600;
+        }
+
+        .intro-card .intro-body .rule-box {
+            background: rgba(199, 139, 219, 0.07);
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin: 14px 0 6px;
+            border-left: 4px solid #c78bdb;
+        }
+
+        .intro-card .intro-body .rule-box p {
+            margin-bottom: 6px;
+            font-size: 0.92rem;
+        }
+
+        .intro-card .intro-body .rule-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .intro-card .intro-body .rule-box .rule-label {
+            font-weight: 700;
+            color: #c27b9e;
+        }
+
+        .intro-card .intro-body .small-note {
+            font-size: 0.85rem;
+            color: #b8a6c9;
+            font-style: italic;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .intro-card .intro-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .btn-start {
+            padding: 16px 52px;
+            border-radius: 60px;
+            border: none;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 12px 40px rgba(199, 139, 219, 0.3);
+            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            letter-spacing: 0.03em;
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 18px 56px rgba(199, 139, 219, 0.4);
+        }
+
+        .btn-start:active {
+            transform: scale(0.96);
+        }
+
+        .intro-card .intro-footer {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.9rem;
+            color: #b8a6c9;
+            margin-top: 12px;
+        }
+
+        /* ─── QUIZ AREA ─── */
+        .quiz-intro {
+            margin: 20px 0 12px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            color: #5a4a6a;
+            line-height: 1.6;
+        }
+
+        .quiz-intro .highlight {
+            color: #c27b9e;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 16px 0 20px;
+            padding: 0 8px;
+        }
+
+        .progress-track {
+            flex: 1;
+            height: 8px;
+            background: rgba(199, 139, 219, 0.15);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f8a4b8, #c78bdb);
+            border-radius: 20px;
+            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .progress-text {
             font-size: 0.75rem;
             font-weight: 600;
             color: #b8a6c9;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .question-card {
+            background: var(--quiz-bg);
+            backdrop-filter: blur(8px);
+            border-radius: 20px;
+            padding: 28px 24px 24px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.08);
+            margin: 8px 0 18px;
+            transition: 0.3s ease;
+            text-align: left;
+        }
+
+        .question-number {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1rem;
+            color: #c27b9e;
             letter-spacing: 0.06em;
-            text-transform: uppercase;
-            margin-top: 10px;
+            margin-bottom: 6px;
+        }
+
+        .question-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #3d344a;
+            line-height: 1.4;
+            margin-bottom: 18px;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            border: 2px solid rgba(199, 139, 219, 0.15);
+            background: rgba(255, 255, 255, 0.6);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: #3d344a;
+            cursor: pointer;
+            transition: 0.25s ease;
+            text-align: left;
+            width: 100%;
+        }
+
+        .option-btn:hover {
+            border-color: rgba(199, 139, 219, 0.4);
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateX(4px);
+        }
+
+        .option-btn.selected {
+            border-color: #c78bdb;
+            background: rgba(199, 139, 219, 0.12);
+            box-shadow: 0 4px 16px rgba(199, 139, 219, 0.12);
+        }
+
+        .option-btn .opt-letter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(199, 139, 219, 0.12);
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #9b7bb0;
+            flex-shrink: 0;
+            transition: 0.25s ease;
+        }
+
+        .option-btn.selected .opt-letter {
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            color: #fff;
+        }
+
+        .option-btn .opt-text {
+            flex: 1;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-buttons .spacer {
+            flex: 1;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border-radius: 60px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            letter-spacing: 0.02em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            color: #fff;
+            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.18);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.28);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.7);
+            color: #9b7bb0;
+            border: 2px solid rgba(199, 139, 219, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(199, 139, 219, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #c78bdb, #f5c6a0);
+            color: #fff;
+            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.2);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .result-screen {
+            display: none;
+            padding: 12px 0 8px;
+        }
+
+        .result-screen.active {
             display: block;
+        }
+
+        .result-card {
+            background: var(--quiz-bg);
+            backdrop-filter: blur(8px);
+            border-radius: 24px;
+            padding: 32px 24px 28px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.08);
+            margin: 8px 0 18px;
+        }
+
+        .result-emoji {
+            font-size: 4rem;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .result-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+
+        .result-score {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.6rem;
+            color: #5a4a6a;
+            margin: 8px 0 4px;
+        }
+
+        .result-score strong {
+            color: #c27b9e;
+            font-size: 2.2rem;
+        }
+
+        .result-percentage {
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #b8a6c9;
+            margin-bottom: 16px;
+        }
+
+        .result-message {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            color: #3d344a;
+            line-height: 1.7;
+            padding: 16px 12px 8px;
+            border-top: 1px solid rgba(199, 139, 219, 0.12);
+            margin-top: 8px;
+        }
+
+        .result-message .win {
+            color: #c27b9e;
+            font-weight: 700;
+        }
+
+        .result-message .lose {
+            color: #9b8aa8;
+        }
+
+        .result-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 18px;
         }
 
         .back-btn {
@@ -243,6 +574,7 @@
             transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             text-decoration: none;
             letter-spacing: 0.02em;
+            margin-top: 6px;
         }
 
         .back-btn:hover {
@@ -254,47 +586,15 @@
             transform: scale(0.95);
         }
 
-        .back-btn span {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .hidden {
+            display: none !important;
         }
 
-        .wish-mini {
-            margin-top: 16px;
-        }
-
-        .wish-mini button {
-            background: none;
-            border: none;
+        .footer-note {
             font-family: 'Patrick Hand', cursive;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: #b8a6c9;
-            cursor: pointer;
-            transition: 0.3s ease;
-            padding: 4px 12px;
-            border-radius: 20px;
-        }
-
-        .wish-mini button:hover {
-            color: #c27b9e;
-            background: rgba(199, 139, 219, 0.06);
-        }
-
-        .wish-mini .wish-response {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1rem;
-            color: #c27b9e;
-            min-height: 1.8rem;
-            opacity: 0;
-            transition: 0.5s ease;
-            transform: translateY(6px);
-            margin-top: 4px;
-        }
-
-        .wish-mini .wish-response.show {
-            opacity: 1;
-            transform: translateY(0);
+            margin-top: 18px;
         }
 
         .sparkle-burst {
@@ -337,39 +637,367 @@
             }
         }
 
+        /* ─── REVIEW OVERLAY ─── */
+        .review-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(252, 246, 240, 0.82);
+            backdrop-filter: blur(14px);
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.35s ease, visibility 0.35s ease;
+        }
+
+        .review-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .review-panel {
+            width: 100%;
+            max-width: 720px;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.86);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 30px 80px rgba(199, 139, 219, 0.2);
+            overflow: hidden;
+            transform: translateY(24px) scale(0.97);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .review-overlay.active .review-panel {
+            transform: translateY(0) scale(1);
+        }
+
+        .review-header {
+            position: relative;
+            flex-shrink: 0;
+            padding: 24px 60px 16px;
+            text-align: center;
+            border-bottom: 1px solid rgba(199, 139, 219, 0.12);
+        }
+
+        .review-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .review-sub {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1rem;
+            color: #b8a6c9;
+            letter-spacing: 0.04em;
+            margin-top: 4px;
+        }
+
+        .review-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid rgba(199, 139, 219, 0.2);
+            background: rgba(255, 255, 255, 0.8);
+            color: #9b7bb0;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .review-close:hover {
+            background: #fff;
+            border-color: rgba(199, 139, 219, 0.45);
+            transform: scale(1.08);
+        }
+
+        .review-list {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 16px 18px 6px;
+        }
+
+        .review-item {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(199, 139, 219, 0.14);
+            border-radius: 18px;
+            padding: 16px 16px 14px;
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        .review-item.is-correct {
+            border-color: rgba(126, 200, 160, 0.45);
+        }
+
+        .review-item.is-wrong {
+            border-color: rgba(245, 160, 184, 0.5);
+        }
+
+        .review-q {
+            display: flex;
+            gap: 10px;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #3d344a;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+
+        .review-num {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: #c27b9e;
+            flex-shrink: 0;
+            padding-top: 3px;
+            letter-spacing: 0.04em;
+        }
+
+        .review-opts {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .review-opt {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.55);
+            border: 1.5px solid transparent;
+            color: #7a6c88;
+        }
+
+        .review-opt .ro-letter {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: rgba(199, 139, 219, 0.12);
+            color: #9b7bb0;
+            flex-shrink: 0;
+        }
+
+        .review-opt .ro-text {
+            flex: 1;
+        }
+
+        .review-opt .ro-tag {
+            font-size: 0.62rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 3px 8px;
+            border-radius: 20px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .review-opt.correct {
+            background: rgba(126, 200, 160, 0.14);
+            border-color: rgba(126, 200, 160, 0.45);
+            color: #2f6b4a;
+        }
+
+        .review-opt.correct .ro-letter {
+            background: #7ec8a0;
+            color: #fff;
+        }
+
+        .review-opt.correct .ro-tag {
+            background: rgba(126, 200, 160, 0.25);
+            color: #35795a;
+        }
+
+        .review-opt.chosen-wrong {
+            background: rgba(245, 160, 184, 0.16);
+            border-color: rgba(245, 160, 184, 0.55);
+            color: #a34c68;
+        }
+
+        .review-opt.chosen-wrong .ro-letter {
+            background: #f5a0b8;
+            color: #fff;
+        }
+
+        .review-opt.chosen-wrong .ro-tag {
+            background: rgba(245, 160, 184, 0.3);
+            color: #a34c68;
+        }
+
+        .review-note {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed rgba(199, 139, 219, 0.18);
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.95rem;
+            color: #6b5c7a;
+            line-height: 1.5;
+        }
+
+        .review-note strong {
+            color: #c27b9e;
+        }
+
+        .review-footer {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 20px 18px;
+            border-top: 1px solid rgba(199, 139, 219, 0.12);
+            flex-wrap: wrap;
+        }
+
+        .review-legend {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #b8a6c9;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .legend-dot.correct {
+            background: #7ec8a0;
+        }
+
+        .legend-dot.wrong {
+            background: #f5a0b8;
+        }
+
         @media (max-width: 600px) {
             .placeholder {
-                padding: 20px 16px 30px;
+                padding: 20px 14px 30px;
                 border-radius: 24px;
             }
             .header .name {
-                font-size: 2.8rem;
+                font-size: 2.6rem;
             }
             .header .sub {
                 font-size: 0.9rem;
             }
-            .day-display .big-day {
-                font-size: 5rem;
+            .question-card {
+                padding: 20px 16px 18px;
             }
-            .day-countdown .item {
-                min-width: 44px;
-                padding: 6px 10px 4px;
+            .question-text {
+                font-size: 1.15rem;
             }
-            .day-countdown .item .num {
-                font-size: 1.4rem;
+            .option-btn {
+                padding: 12px 14px;
+                font-size: 0.88rem;
             }
-            .coming-soon .badge {
-                font-size: 1.1rem;
+            .btn {
+                padding: 10px 22px;
+                font-size: 0.82rem;
+            }
+            .result-title {
+                font-size: 1.6rem;
+            }
+            .result-score strong {
+                font-size: 1.8rem;
+            }
+            .result-message {
+                font-size: 1rem;
             }
             .back-btn {
                 padding: 10px 28px;
                 font-size: 0.85rem;
             }
-            .message-box .message-content {
-                font-size: 0.95rem;
+            .intro-card {
+                padding: 28px 18px 24px;
             }
-            .message-box {
-                padding: 16px 16px;
+            .intro-card .intro-title {
+                font-size: 1.6rem;
+            }
+            .intro-card .intro-body {
+                font-size: 0.9rem;
+            }
+            .btn-start {
+                padding: 14px 36px;
+                font-size: 1rem;
+            }
+            .review-panel {
+                max-height: 92vh;
+                border-radius: 22px;
+            }
+            .review-header {
+                padding: 20px 52px 14px;
+            }
+            .review-title {
+                font-size: 1.3rem;
+            }
+            .review-sub {
+                font-size: 0.88rem;
+            }
+            .review-list {
+                padding: 12px 12px 4px;
+            }
+            .review-item {
+                padding: 14px 13px 12px;
+                border-radius: 16px;
+            }
+            .review-q {
+                font-size: 0.92rem;
+            }
+            .review-opt {
+                font-size: 0.79rem;
+                padding: 8px 10px;
+                gap: 8px;
+            }
+            .review-opt .ro-tag {
+                font-size: 0.56rem;
+                padding: 2px 6px;
+            }
+            .review-note {
+                font-size: 0.86rem;
+            }
+            .review-footer {
+                padding: 12px 14px 16px;
             }
         }
 
@@ -377,18 +1005,39 @@
             .header .name {
                 font-size: 2.2rem;
             }
-            .day-display .big-day {
-                font-size: 3.8rem;
+            .question-text {
+                font-size: 1rem;
             }
-            .day-countdown {
-                gap: 6px;
+            .option-btn {
+                padding: 10px 12px;
+                font-size: 0.8rem;
+                gap: 10px;
             }
-            .day-countdown .item {
-                min-width: 36px;
-                padding: 4px 6px 3px;
+            .option-btn .opt-letter {
+                width: 26px;
+                height: 26px;
+                font-size: 0.75rem;
             }
-            .day-countdown .item .num {
-                font-size: 1.1rem;
+            .btn {
+                padding: 8px 18px;
+                font-size: 0.78rem;
+            }
+            .intro-card {
+                padding: 22px 14px 20px;
+                border-radius: 24px;
+            }
+            .intro-card .intro-title {
+                font-size: 1.3rem;
+            }
+            .intro-card .intro-body {
+                font-size: 0.82rem;
+            }
+            .btn-start {
+                padding: 12px 28px;
+                font-size: 0.9rem;
+            }
+            .review-opt .ro-tag {
+                display: none;
             }
         }
 
@@ -408,237 +1057,573 @@
 
     <div class="bg" aria-hidden="true"></div>
 
+    <!-- ─── INTRO OVERLAY ─── -->
+    <div class="intro-overlay" id="introOverlay">
+        <div class="intro-card">
+            <span class="intro-emoji">🎀</span>
+            <div class="intro-title">How well do you know me?</div>
+            <div class="intro-sub">a little game for your 21st · day 08</div>
+
+            <div class="intro-body">
+                <p>
+                    Hey Mama 💕 someone said they wanted a  <span class="highlight">mark X</span> for their birthday this year. But before you can have it, there's a little challenge...
+                </p>
+
+                <div class="rule-box">
+                    <p><span class="rule-label">📝 The rules:</span></p>
+                    <p>· There are <span class="highlight">21 questions</span> about me, mostly.</p>
+                    <p>· Each question has <span class="highlight">4 choices</span>, only one is correct.</p>
+                    <p>· You need to score <span class="highlight">95% or higher</span> (that's at least 20 out of 21) to win the mark X.</p>
+                    <p>· You can go <span class="highlight">back and forward</span> between questions</p>
+                    <p>· Once you submit, that's it — <span class="highlight">no extra chances</span>. So take your time.</p>
+                </div>
+
+                <p class="small-note">
+                    if you win, your mark X is coming in 08 days 🎁 · if not, we try again next year 💫
+                </p>
+            </div>
+
+            <div class="intro-actions">
+                <button class="btn-start" id="startQuizBtn">let's go 💖</button>
+            </div>
+            <div class="intro-footer">good luck, beautiful 🌸</div>
+        </div>
+    </div>
+
+    <!-- ─── MAIN APP ─── -->
     <div class="placeholder" id="app">
 
         <header class="header">
             <div class="name">Ruth</div>
-            <div class="sub">twenty‑one · a celebration</div>
+            <div class="sub">twenty‑one · a gal worthy celebration</div>
             <div class="day-badge" id="dayBadge">
-                day <strong id="dayNumber">—</strong> · countdown
+                💕 day <strong>08</strong> · do you even know me?
             </div>
         </header>
 
-        <div class="day-display">
-            <div class="big-day" id="bigDay">—</div>
-            <div class="day-label" id="dayLabel">days to go ✦</div>
+        <div class="quiz-intro" id="quizIntro">
+            <span class="highlight">21 questions</span> · answer 95% correctly to unlock a <span class="highlight">mark X</span> for your birthday 🎁
         </div>
 
-        <div class="coming-soon">
-            <div class="badge">
-                <span class="day-emoji" id="dayEmoji">🌸</span>
-                coming soon · check back
-                <span class="day-emoji" id="dayEmoji2">🌸</span>
+        <!-- Progress bar -->
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
             </div>
+            <div class="progress-text" id="progressText">0 / 21</div>
         </div>
 
-        <div class="day-countdown" id="dayCountdown" role="timer" aria-label="Countdown to this day">
-            <div class="item">
-                <span class="num" id="cdDays">00</span>
-                <span class="label">days</span>
+        <!-- Quiz area -->
+        <div id="quizArea">
+            <div class="question-card" id="questionCard">
+                <div class="question-number" id="questionNumber">Question 1 of 21</div>
+                <div class="question-text" id="questionText">Loading question...</div>
+                <div class="options-list" id="optionsList"></div>
             </div>
-            <div class="item">
-                <span class="num" id="cdHours">00</span>
-                <span class="label">hours</span>
-            </div>
-            <div class="item">
-                <span class="num" id="cdMinutes">00</span>
-                <span class="label">mins</span>
-            </div>
-            <div class="item">
-                <span class="num" id="cdSeconds">00</span>
-                <span class="label">secs</span>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" id="prevBtn" disabled>← back</button>
+                <div class="spacer"></div>
+                <button class="btn btn-primary" id="nextBtn">next →</button>
+                <button class="btn btn-submit hidden" id="submitBtn">✨ submit answers</button>
             </div>
         </div>
 
-        <div class="message-box" id="messageBox">
-            <div class="message-content" id="messageContent">
-                <span class="highlight-emoji" id="msgEmoji">✨</span>
-                <span id="msgText">This day of the countdown hasn't arrived yet.</span>
-                <span class="day-date" id="msgDate"></span>
+        <!-- Result screen -->
+        <div class="result-screen" id="resultScreen">
+            <div class="result-card">
+                <div class="result-emoji" id="resultEmoji">🌸</div>
+                <div class="result-title" id="resultTitle">Your results</div>
+                <div class="result-score" id="resultScore">— / 21</div>
+                <div class="result-percentage" id="resultPercentage">—%</div>
+                <div class="result-message" id="resultMessage"></div>
+                <div class="result-actions">
+                    <button class="btn btn-secondary" id="reviewBtn">📖 review answers</button>
+                    <a href="index.html" class="back-btn">← back to home</a>
+                </div>
             </div>
         </div>
 
-        <a href="index.html" class="back-btn" id="backBtn">
-            <span>← back to celebration</span>
-        </a>
+        <div class="footer-note" id="footerNote">day 08 · 21 questions · good luck 💕</div>
 
-        <div class="wish-mini">
-            <button id="wishMiniBtn">💫 send a little love</button>
-            <div class="wish-response" id="wishResponse"></div>
+    </div>
+
+    <!-- ─── REVIEW OVERLAY ─── -->
+    <div class="review-overlay" id="reviewOverlay" role="dialog" aria-modal="true" aria-label="Answer review">
+        <div class="review-panel">
+            <div class="review-header">
+                <div class="review-title">your answers, unlocked 🔎</div>
+                <div class="review-sub" id="reviewSub">here's the full breakdown</div>
+                <button class="review-close" id="reviewCloseBtn" aria-label="Close review">✕</button>
+            </div>
+
+            <div class="review-list" id="reviewList"></div>
+
+            <div class="review-footer">
+                <div class="review-legend">
+                    <span class="legend-item"><span class="legend-dot correct"></span> correct answer</span>
+                    <span class="legend-item"><span class="legend-dot wrong"></span> your pick</span>
+                </div>
+                <button class="btn btn-primary" id="reviewDoneBtn">done 💕</button>
+            </div>
         </div>
-
     </div>
 
     <script>
         (function() {
             'use strict';
 
-            const BIRTHDAY = new Date(2026, 8, 18, 0, 0, 0).getTime();
+            // ─── CONFIG ───
+            const TOTAL_QUESTIONS = 21;
+            const PASS_PERCENTAGE = 95;
+            const STORAGE_KEY = 'ruth_day8_quiz_progress';
+            const RESULT_KEY = 'ruth_day8_quiz_result';
+            const INTRO_SEEN_KEY = 'ruth_day8_intro_seen';
 
-            // ─── ROMANTIC MESSAGES WITH SIMPLE, PUNCHY LABELS ───
-            const DAY_DETAILS = {
-                1: {
-                    emoji: '🌅',
-                    label: 'Tomorrow is the day!',
-                    message: 'My heart is already bursting with love for you. Tomorrow, the world gets to celebrate the most beautiful soul I know. You are my dawn, my light, my everything. See you at 21, my love.'
+            // ─── QUESTIONS ───
+            const QUESTIONS = [
+                {
+                    question: "Where was i born?",
+                    options: ["Kamwala Clinic", "UTH", "Chilenje Hospital", "Coptic"],
+                    correct: 1
                 },
-                2: {
-                    emoji: '💫',
-                    label: 'Two days left!',
-                    message: 'Every moment without you feels like a lifetime, but knowing you\'re about to step into the most magnificent year yet fills me with such joy. You are the star that guides me home, Ruth.'
+                {
+                    question: "Where did i do my education from grade 1 to 7?",
+                    options: ["Bobs School", "Overhill School", "Libala Primary", "B-Wise Sch"],
+                    correct: 1
                 },
-                3: {
-                    emoji: '🌙',
-                    label: 'Three days to go!',
-                    message: 'I close my eyes and I see your smile—it\'s the only thing I need. These last few days are a gentle reminder of how deeply I cherish you. You are my moon, my tide, my constant.'
+                {
+                    question: "How many Provinces have i stepped foot in?",
+                    options: ["2", "3", "4", "5"],
+                    correct: 2
                 },
-                4: {
-                    emoji: '🕊️',
-                    label: 'Four days!',
-                    message: 'My soul is already dancing at the thought of celebrating you. You\'ve filled my life with so much tenderness and grace. I can\'t wait to hold you and whisper how much you mean to me.'
+                {
+                    question: "How many Provinces have i Lived in for more than a day??",
+                    options: ["3", "1", "4", "2"],
+                    correct: 0
                 },
-                5: {
-                    emoji: '🌺',
-                    label: 'Five days!',
-                    message: 'You are the most exquisite flower in my garden. With every passing day, I fall more in love with the person you are. Your 21st will be as radiant as your heart.'
+                {
+                    question: "How many biological siblings do i have??",
+                    options: ["1", "3", "4", "2"],
+                    correct: 1
                 },
-                6: {
-                    emoji: '✨',
-                    label: 'Six days!',
-                    message: 'My greatest blessing is you, Ruth. Every heartbeat brings me closer to the day I get to see you shine even brighter. You are my miracle, my forever, my home.'
+                {
+                    question: "My Favourite Sibling of yours?",
+                    options: ["Jimmy", "Ivana", "Nelia", "Rose"],
+                    correct: 3
                 },
-                7: {
-                    emoji: '🌈',
-                    label: 'One week to go!',
-                    message: 'A week from today, I\'ll be looking into your eyes, celebrating the most incredible person I\'ve ever known. You are my rainbow after every storm, my hope, my love.'
+                {
+                    question: "Which Person in your family did you first tell me about?",
+                    options: ["Dad", "Aunty", "Ruth", "Rose"],
+                    correct: 2
                 },
-                8: {
-                    emoji: '🌅',
-                    label: 'Eight days!',
-                    message: 'The anticipation is like golden honey, sweet and slow. You are the warmth I wake up for, the tenderness I hold onto. I\'m counting every second until I can hold you close.'
+                {
+                    question: "What instrument do i play?",
+                    options: ["Piano", "Guitar", "Flute", "Violin"],
+                    correct: 0
                 },
-                9: {
-                    emoji: '🎈',
-                    label: 'Nine days!',
-                    message: 'If I could write you a thousand love letters, they still wouldn\'t capture how much you mean to me. You are poetry in motion, and I\'m so ready to celebrate every beautiful part of you.'
+                {
+                    question: "What do i go steal in the girls bedroom?",
+                    options: ["Vaseline", "A Chitenge", "Perfume", "Joy's nice Iphone"],
+                    correct: 2
                 },
-                10: {
-                    emoji: '🥂',
-                    label: 'Ten days!',
-                    message: 'Here we are, my love—the final stretch. Ten days until I get to toast to you, to us, to everything you are and everything you\'ll become. You are my greatest adventure, and I\'m so grateful to walk this path with you.'
+                {
+                    question: "What vegetabe do i hate?",
+                    options: ["Impwa", "Spinach", "Cabbage", "Chinese"],
+                    correct: 1
+                },
+                {
+                    question: "If i didnt study my program, what would i have pursued?",
+                    options: ["Entrepreneurship", "Aviation", "Astrology", "Software Development"],
+                    correct: 1
+                },
+                {
+                    question: "What type of a person am i?",
+                    options: ["Morning", "Afternoon", "Night", "Difficult"],
+                    correct: 2
+                },
+                {
+                    question: "If I went back in time to secondary school, what would i have done differently?",
+                    options: ["Study hard and get 6 points", "been more serious about God", "written SATs and went to USA", "Started a business"],
+                    correct: 2
+                },
+                {
+                    question: "How much do i love you?",
+                    options: ["Infinitely more", "horizontal 8", "a billion times more than what you say", "more than you"],
+                    correct: 1
+                },
+                {
+                    question: "Fvourite activity?",
+                    options: ["Sleeping", "Driving", "Worrying too much", "talking to you"],
+                    correct: 3
+                },
+                {
+                    question: "What did i hate most about my first job?",
+                    options: ["Studying Accounts", "Marking", "Responding to texts", "Using Public Transport"],
+                    correct: 0
+                },
+                {
+                    question: "Who texted first, cause women are always right?",
+                    options: ["Ru", "was not me", "i was just asking a question", "You"],
+                    correct: 3
+                },
+                {
+                    question: "What did i hate most about boarding school?",
+                    options: ["Working", "Academics", "The Food", "Attending Assembly"],
+                    correct: 0
+                },
+                {
+                    question: "What do i do too much of?",
+                    options: ["Working", "Eating", "Interacting", "Sleeping"],
+                    correct: 3
+                },
+                {
+                    question: "Have i ever had an android phone?",
+                    options: ["Yes", "No", "Androids are for poor people", "c'mon, i'm a bougie guy"],
+                    correct: 0
+                },
+                {
+                    question: "Where did i first see you?",
+                    options: ["The Courtyard", "TG", "Matero", "Sliding in my DM"],
+                    correct: 2
                 }
-            };
-
-            function getDayFromURL() {
-                const path = window.location.pathname;
-                const match = path.match(/day_(\d{2})\.html/i);
-                if (match) return parseInt(match[1], 10);
-                const params = new URLSearchParams(window.location.search);
-                const q = params.get('day');
-                if (q) return parseInt(q, 10);
-                return null;
-            }
-
-            const day = getDayFromURL();
-
-            const dayNumberEl = document.getElementById('dayNumber');
-            const bigDayEl = document.getElementById('bigDay');
-            const dayLabelEl = document.getElementById('dayLabel');
-            const dayEmoji = document.getElementById('dayEmoji');
-            const dayEmoji2 = document.getElementById('dayEmoji2');
-            const cdDays = document.getElementById('cdDays');
-            const cdHours = document.getElementById('cdHours');
-            const cdMinutes = document.getElementById('cdMinutes');
-            const cdSeconds = document.getElementById('cdSeconds');
-            const msgEmoji = document.getElementById('msgEmoji');
-            const msgText = document.getElementById('msgText');
-            const msgDate = document.getElementById('msgDate');
-            const wishMiniBtn = document.getElementById('wishMiniBtn');
-            const wishResponse = document.getElementById('wishResponse');
-            const backBtn = document.getElementById('backBtn');
-            const dayBadge = document.getElementById('dayBadge');
-
-            const WISHES = [
-                'Ruth, you are pure magic ✨', '21 looks stunning on you 💖',
-                'Every moment with you is a gift 🌟', 'Can’t wait to celebrate you! 🥳',
-                'You make the world brighter ❤️', 'Forever and always, Ruth 💫',
-                'So grateful for you 🌸', 'You deserve all the joy in the world 🦋',
-                'Happy 21st, beautiful soul 💗', 'Here’s to you and all your dreams 🌙',
-                'Sending you the biggest hug 🤗', 'You are so loved 💕',
-                'Your light shines so bright ⭐', 'Cheers to 21 years of you 🥂',
-                'Ruth, you are one of a kind 🌺', 'My heart beats for you ❤️‍🔥',
-                'You are my everything 💖', 'Forever yours, always and truly 💞'
             ];
 
-            if (day !== null && day >= 1 && day <= 10) {
-                const details = DAY_DETAILS[day] || DAY_DETAILS[10];
+            // ─── STATE ───
+            let currentIndex = 0;
+            let answers = new Array(TOTAL_QUESTIONS).fill(null);
+            let quizCompleted = false;
 
-                dayNumberEl.textContent = String(day).padStart(2, '0');
-                bigDayEl.textContent = String(day).padStart(2, '0');
-                dayEmoji.textContent = details.emoji;
-                dayEmoji2.textContent = details.emoji;
+            // ─── DOM REFS ───
+            const introOverlay = document.getElementById('introOverlay');
+            const startQuizBtn = document.getElementById('startQuizBtn');
+            const questionNumber = document.getElementById('questionNumber');
+            const questionText = document.getElementById('questionText');
+            const optionsList = document.getElementById('optionsList');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            const quizArea = document.getElementById('quizArea');
+            const resultScreen = document.getElementById('resultScreen');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const resultEmoji = document.getElementById('resultEmoji');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultScore = document.getElementById('resultScore');
+            const resultPercentage = document.getElementById('resultPercentage');
+            const resultMessage = document.getElementById('resultMessage');
+            const reviewBtn = document.getElementById('reviewBtn');
+            const footerNote = document.getElementById('footerNote');
+            const quizIntro = document.getElementById('quizIntro');
+            const progressBar = document.getElementById('progressBar');
 
-                const dayDate = new Date(BIRTHDAY);
-                dayDate.setDate(dayDate.getDate() - day);
-                const dateStr = dayDate.toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric'
-                });
+            const reviewOverlay = document.getElementById('reviewOverlay');
+            const reviewList = document.getElementById('reviewList');
+            const reviewSub = document.getElementById('reviewSub');
+            const reviewCloseBtn = document.getElementById('reviewCloseBtn');
+            const reviewDoneBtn = document.getElementById('reviewDoneBtn');
 
-                // Keep the romantic full message, but use the simple label in the badge
-                msgEmoji.textContent = details.emoji;
-                msgText.innerHTML = `<strong>${details.label}</strong><br />${details.message}`;
-                msgDate.textContent = `📅 ${dateStr} · ${day} days to go`;
-
-                // Simple badge
-                dayBadge.innerHTML =
-                    `💕 day <strong>${String(day).padStart(2, '0')}</strong> · ${details.label}`;
-
-                window._targetTime = dayDate.getTime();
-                backBtn.href = 'index.html';
-                document.title = `Day ${String(day).padStart(2, '0')} · ${details.label}`;
-
-            } else {
-                dayNumberEl.textContent = '—';
-                bigDayEl.textContent = '?';
-                dayEmoji.textContent = '💕';
-                dayEmoji2.textContent = '💕';
-                msgEmoji.textContent = '✨';
-                msgText.innerHTML =
-                    'This page is part of Ruth\'s 21st countdown. Please visit the <a href="index.html" style="color:#c78bdb;text-decoration:none;font-weight:600;">main celebration</a> to follow along.';
-                msgDate.textContent = '';
-                window._targetTime = BIRTHDAY;
-                document.title = 'Countdown · Ruth\'s 21st';
+            // ─── STORAGE HELPERS ───
+            function saveProgress() {
+                try {
+                    const data = {
+                        answers: answers,
+                        currentIndex: currentIndex,
+                        completed: quizCompleted,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                } catch (e) {
+                    // silent
+                }
             }
 
-            function updateCountdown() {
-                const now = Date.now();
-                const target = window._targetTime || BIRTHDAY;
-                let diff = Math.max(0, target - now);
+            function loadProgress() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (!raw) return false;
+                    const data = JSON.parse(raw);
+                    if (data.answers && Array.isArray(data.answers)) {
+                        answers = data.answers;
+                    }
+                    if (typeof data.currentIndex === 'number') {
+                        currentIndex = Math.min(data.currentIndex, TOTAL_QUESTIONS - 1);
+                    }
+                    if (data.completed) {
+                        quizCompleted = true;
+                    }
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
 
-                if (diff === 0) {
-                    cdDays.textContent = '00';
-                    cdHours.textContent = '00';
-                    cdMinutes.textContent = '00';
-                    cdSeconds.textContent = '00';
+            function saveResult(result) {
+                try {
+                    localStorage.setItem(RESULT_KEY, JSON.stringify(result));
+                } catch (e) {
+                    // silent
+                }
+            }
+
+            function loadResult() {
+                try {
+                    const raw = localStorage.getItem(RESULT_KEY);
+                    if (!raw) return null;
+                    return JSON.parse(raw);
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function hasSeenIntro() {
+                try {
+                    return localStorage.getItem(INTRO_SEEN_KEY) === 'true';
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            function markIntroSeen() {
+                try {
+                    localStorage.setItem(INTRO_SEEN_KEY, 'true');
+                } catch (e) {
+                    // silent
+                }
+            }
+
+            // ─── INTRO LOGIC ───
+            function showIntro() {
+                introOverlay.classList.remove('hidden');
+            }
+
+            function hideIntro() {
+                introOverlay.classList.add('hidden');
+                markIntroSeen();
+            }
+
+            // ─── RENDER ───
+            function renderQuestion() {
+                const q = QUESTIONS[currentIndex];
+                if (!q) return;
+
+                questionNumber.textContent = `Question ${currentIndex + 1} of ${TOTAL_QUESTIONS}`;
+                questionText.textContent = q.question;
+
+                optionsList.innerHTML = '';
+                const letters = ['A', 'B', 'C', 'D'];
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn' + (answers[currentIndex] === idx ? ' selected' : '');
+                    btn.innerHTML = `
+                        <span class="opt-letter">${letters[idx]}</span>
+                        <span class="opt-text">${opt}</span>
+                    `;
+                    btn.addEventListener('click', () => {
+                        if (quizCompleted) return;
+                        answers[currentIndex] = idx;
+                        saveProgress();
+                        renderQuestion();
+                        updateNavButtons();
+                    });
+                    optionsList.appendChild(btn);
+                });
+
+                updateProgress();
+                updateNavButtons();
+            }
+
+            function updateProgress() {
+                const answered = answers.filter(a => a !== null).length;
+                const pct = (answered / TOTAL_QUESTIONS) * 100;
+                progressFill.style.width = pct + '%';
+                progressText.textContent = `${answered} / ${TOTAL_QUESTIONS}`;
+            }
+
+            function updateNavButtons() {
+                prevBtn.disabled = currentIndex === 0 || quizCompleted;
+
+                if (currentIndex === TOTAL_QUESTIONS - 1) {
+                    nextBtn.classList.add('hidden');
+                    submitBtn.classList.remove('hidden');
+                } else {
+                    nextBtn.classList.remove('hidden');
+                    submitBtn.classList.add('hidden');
+                }
+
+                if (quizCompleted) {
+                    nextBtn.classList.add('hidden');
+                    submitBtn.classList.add('hidden');
+                    prevBtn.disabled = true;
+                }
+            }
+
+            function showResult() {
+                const result = loadResult();
+                if (!result) return;
+
+                quizArea.classList.add('hidden');
+                quizIntro.classList.add('hidden');
+                progressBar.classList.add('hidden');
+                resultScreen.classList.add('active');
+
+                resultEmoji.textContent = result.emoji || '🌸';
+                resultTitle.textContent = result.title || 'Your results';
+                resultScore.textContent = `${result.correct} / ${TOTAL_QUESTIONS}`;
+                resultPercentage.textContent = `${result.percentage}%`;
+
+                let msg = '';
+                if (result.passed) {
+                    msg = `<span class="win">🎉 Congratulations!</span> You scored <strong>${result.percentage}%</strong> — that's above 95%! Your <strong>mark X</strong> is coming in <strong>08 days</strong> 💖`;
+                } else {
+                    msg = `<span class="lose">💫 So close!</span> You scored <strong>${result.percentage}%</strong> — you need 95% to unlock the mark X. We'll try again next year, beautiful 🌸`;
+                }
+                resultMessage.innerHTML = msg;
+
+                footerNote.textContent = result.passed ? 'you did it! mark X incoming 💕' : 'keep shining, Ruth 🌟';
+            }
+
+            function submitQuiz() {
+                // Hard lock — no second chances.
+                if (quizCompleted || loadResult()) {
+                    showResult();
                     return;
                 }
 
-                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                const unanswered = answers.filter(a => a === null).length;
+                if (unanswered > 0) {
+                    alert(`Please answer all ${TOTAL_QUESTIONS} questions. You have ${unanswered} unanswered.`);
+                    return;
+                }
 
-                cdDays.textContent = String(d).padStart(2, '0');
-                cdHours.textContent = String(h).padStart(2, '0');
-                cdMinutes.textContent = String(m).padStart(2, '0');
-                cdSeconds.textContent = String(s).padStart(2, '0');
+                let correct = 0;
+                for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+                    if (answers[i] === QUESTIONS[i].correct) {
+                        correct++;
+                    }
+                }
+
+                const percentage = Math.round((correct / TOTAL_QUESTIONS) * 100);
+                const passed = percentage >= PASS_PERCENTAGE;
+
+                const result = {
+                    correct: correct,
+                    percentage: percentage,
+                    passed: passed,
+                    emoji: passed ? '🎉' : '🌸',
+                    title: passed ? 'You did it!' : 'Good try!',
+                    answers: answers.slice(),          // ← saved so review always works
+                    timestamp: Date.now()
+                };
+
+                saveResult(result);
+                quizCompleted = true;
+                saveProgress();
+                showResult();
+
+                if (passed) {
+                    setTimeout(() => {
+                        confettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+                        sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 40);
+                    }, 300);
+                }
             }
 
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
+            // ─── REVIEW OVERLAY ───
+            function renderReview() {
+                const letters = ['A', 'B', 'C', 'D'];
+                reviewList.innerHTML = '';
+                let correctCount = 0;
 
+                QUESTIONS.forEach((q, i) => {
+                    const chosen = (typeof answers[i] === 'number') ? answers[i] : null;
+                    const isCorrect = chosen === q.correct;
+                    if (isCorrect) correctCount++;
+
+                    const item = document.createElement('div');
+                    item.className = 'review-item ' + (isCorrect ? 'is-correct' : 'is-wrong');
+
+                    const qRow = document.createElement('div');
+                    qRow.className = 'review-q';
+                    const num = document.createElement('span');
+                    num.className = 'review-num';
+                    num.textContent = 'Q' + String(i + 1).padStart(2, '0');
+                    const qTxt = document.createElement('span');
+                    qTxt.textContent = q.question;
+                    qRow.appendChild(num);
+                    qRow.appendChild(qTxt);
+                    item.appendChild(qRow);
+
+                    const opts = document.createElement('div');
+                    opts.className = 'review-opts';
+
+                    q.options.forEach((opt, idx) => {
+                        const row = document.createElement('div');
+                        let cls = 'review-opt';
+                        let tag = '';
+
+                        if (idx === q.correct) {
+                            cls += ' correct';
+                            tag = (chosen === idx) ? '✓ your answer' : 'correct answer';
+                        } else if (idx === chosen) {
+                            cls += ' chosen-wrong';
+                            tag = '✗ your answer';
+                        }
+
+                        row.className = cls;
+
+                        const letterEl = document.createElement('span');
+                        letterEl.className = 'ro-letter';
+                        letterEl.textContent = letters[idx];
+
+                        const textEl = document.createElement('span');
+                        textEl.className = 'ro-text';
+                        textEl.textContent = opt;
+
+                        row.appendChild(letterEl);
+                        row.appendChild(textEl);
+
+                        if (tag) {
+                            const tagEl = document.createElement('span');
+                            tagEl.className = 'ro-tag';
+                            tagEl.textContent = tag;
+                            row.appendChild(tagEl);
+                        }
+
+                        opts.appendChild(row);
+                    });
+
+                    item.appendChild(opts);
+
+                    const note = document.createElement('div');
+                    note.className = 'review-note';
+
+                    if (isCorrect) {
+                        note.innerHTML = `✅ you got this one right — <strong>${q.options[q.correct]}</strong>`;
+                    } else if (chosen === null) {
+                        note.innerHTML = `⚠️ you didn't answer this — correct was <strong>${q.options[q.correct]}</strong>`;
+                    } else {
+                        note.innerHTML = `❌ you chose <strong>${q.options[chosen]}</strong> · correct was <strong>${q.options[q.correct]}</strong>`;
+                    }
+
+                    item.appendChild(note);
+                    reviewList.appendChild(item);
+                });
+
+                reviewSub.textContent = `you got ${correctCount} of ${TOTAL_QUESTIONS} right · here's the full breakdown`;
+            }
+
+            function openReview() {
+                renderReview();
+                reviewList.scrollTop = 0;
+                reviewOverlay.classList.add('active');
+            }
+
+            function closeReview() {
+                reviewOverlay.classList.remove('active');
+            }
+
+            // ─── EFFECTS ───
             function sparkleBurst(cx, cy, count) {
                 const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
                 const total = count || 24 + Math.floor(Math.random() * 16);
@@ -684,50 +1669,107 @@
                 }
             }
 
-            wishMiniBtn.addEventListener('click', function(e) {
-                const cx = e.clientX || window.innerWidth / 2;
-                const cy = e.clientY || window.innerHeight / 2;
-                sparkleBurst(cx, cy, 30);
-                confettiBurst(cx, cy);
+            // ─── EVENT LISTENERS ───
+            startQuizBtn.addEventListener('click', () => {
+                hideIntro();
+                sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 20);
+            });
 
-                const msg = WISHES[Math.floor(Math.random() * WISHES.length)];
-                wishResponse.textContent = msg;
-                wishResponse.className = 'wish-response show';
-
-                const badge = document.querySelector('.day-badge');
-                if (badge) {
-                    const orig = badge.innerHTML;
-                    badge.innerHTML = '💫 ' + msg;
-                    badge.style.background = 'rgba(252, 231, 243, 0.8)';
-                    setTimeout(() => {
-                        badge.innerHTML = orig;
-                        badge.style.background = '';
-                    }, 3000);
+            prevBtn.addEventListener('click', () => {
+                if (currentIndex > 0 && !quizCompleted) {
+                    currentIndex--;
+                    saveProgress();
+                    renderQuestion();
                 }
+            });
 
-                setTimeout(() => {
-                    wishResponse.className = 'wish-response';
-                }, 4200);
+            nextBtn.addEventListener('click', () => {
+                if (currentIndex < TOTAL_QUESTIONS - 1 && !quizCompleted) {
+                    currentIndex++;
+                    saveProgress();
+                    renderQuestion();
+                }
+            });
+
+            submitBtn.addEventListener('click', submitQuiz);
+
+            // Review instead of replay — the quiz is locked after submission.
+            reviewBtn.addEventListener('click', openReview);
+            reviewCloseBtn.addEventListener('click', closeReview);
+            reviewDoneBtn.addEventListener('click', closeReview);
+
+            reviewOverlay.addEventListener('click', (e) => {
+                if (e.target === reviewOverlay) closeReview();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && reviewOverlay.classList.contains('active')) {
+                    closeReview();
+                }
             });
 
             document.addEventListener('click', function(e) {
                 const tag = e.target.tagName.toLowerCase();
                 if (tag === 'a' || tag === 'button' || e.target.closest('.sparkle-burst')) return;
+                if (e.target.closest('.review-overlay')) return;
                 if (Math.random() > 0.25) return;
                 sparkleBurst(e.clientX, e.clientY, 6);
             });
 
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    const el = document.activeElement;
-                    if (el) el.blur();
-                }
-                if (e.key === 'h' || e.key === 'H') {
-                    window.location.href = 'index.html';
-                }
-            });
+            // ─── INIT ───
+            function init() {
+                const loaded = loadProgress();
+                const savedResult = loadResult();
 
-            console.log(`🌸 Day ${day || '?'} · Romantic message with simple label 💖`);
+                // Already played → never show the quiz again, only the result + review.
+                if (savedResult) {
+                    if (savedResult.answers && Array.isArray(savedResult.answers)) {
+                        answers = savedResult.answers;
+                    }
+                    quizCompleted = true;
+                    hideIntro();
+                    showResult();
+                    return;
+                }
+
+                if (loaded && quizCompleted) {
+                    let correct = 0;
+                    for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+                        if (answers[i] === QUESTIONS[i].correct) correct++;
+                    }
+                    const percentage = Math.round((correct / TOTAL_QUESTIONS) * 100);
+                    const passed = percentage >= PASS_PERCENTAGE;
+                    const result = {
+                        correct, percentage, passed,
+                        emoji: passed ? '🎉' : '🌸',
+                        title: passed ? 'You did it!' : 'Good try!',
+                        answers: answers.slice(),
+                        timestamp: Date.now()
+                    };
+                    saveResult(result);
+                    hideIntro();
+                    showResult();
+                    return;
+                }
+
+                if (answers.length !== TOTAL_QUESTIONS) {
+                    answers = new Array(TOTAL_QUESTIONS).fill(null);
+                }
+
+                if (!hasSeenIntro()) {
+                    showIntro();
+                } else {
+                    hideIntro();
+                }
+
+                renderQuestion();
+                updateProgress();
+                updateNavButtons();
+            }
+
+            init();
+
+            console.log('🌸 Day 8 · 21 Questions · Birthday Trivia 💖');
         })();
     </script>
 

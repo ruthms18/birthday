@@ -3,135 +3,1139 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Site Error</title>
+    <title>Ruth · 21 · A Celebration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
     <style>
+        /* ─── RESET ─── */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --pink: #f5a0b8;
+            --purple: #c78bdb;
+            --peach: #f5c6a0;
+            --cream: #fcf6f0;
+            --text: #2d2a3a;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
+            --radius: 16px;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f5f5f5;
+            font-family: 'Inter', sans-serif;
+            background: var(--cream);
+            color: var(--text);
             min-height: 100vh;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        /* ─── SOFT BACKGROUND ─── */
+        .bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse at 20% 30%, rgba(248, 164, 184, 0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 70%, rgba(199, 139, 219, 0.20) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 50%, rgba(245, 198, 160, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        /* ─── MAIN WRAP ─── */
+        .scrapbook {
+            position: relative;
+            z-index: 1;
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 20px 16px 50px;
+        }
+
+        /* ─── HEADER ─── */
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header .name {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3.6rem, 12vw, 6.5rem);
+            font-weight: 700;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+
+        .header .sub {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.3rem;
+            color: #b8a6c9;
+            margin-top: -4px;
+            letter-spacing: 0.08em;
+        }
+
+        .header .age-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 8px 28px;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #c27b9e;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 20px rgba(194, 123, 158, 0.08);
+            margin-top: 10px;
+            transition: 0.3s ease;
+        }
+
+        .header .age-badge strong {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #f5b8b8, #c78bdb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ─── TODAY'S DATE ─── */
+        .today-date {
+            margin-top: 14px;
+            font-size: 0.8rem;
+            color: #b8a6c9;
+            font-weight: 300;
+            letter-spacing: 0.06em;
+        }
+
+        /* ─── COUNTDOWN ─── */
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 20px 0 36px;
+        }
+
+        .countdown .item {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 10px 18px 8px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            text-align: center;
+            min-width: 64px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            transition: 0.3s ease;
+        }
+
+        .countdown .item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .countdown .item .num {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            display: block;
+        }
+
+        .countdown .item .label {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #a392b0;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        /* ─── GALLERY ─── */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+            margin-bottom: 44px;
+        }
+
+        .polaroid {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(4px);
+            padding: 6px 6px 20px 6px;
+            border-radius: 8px 8px 18px 18px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: rotate(var(--rot, 0deg));
+        }
+
+        .polaroid:hover {
+            transform: rotate(0deg) scale(1.03) translateY(-6px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.10);
+            border-color: rgba(199, 139, 219, 0.2);
+        }
+
+        .polaroid .img-wrap {
+            border-radius: 4px;
+            overflow: hidden;
+            background: #f0ebe3;
+            position: relative;
+        }
+
+        .polaroid .img-wrap img {
+            width: 100%;
+            height: auto;
+            display: block;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            transition: 0.4s ease;
+        }
+
+        .polaroid:hover .img-wrap img {
+            transform: scale(1.04);
+        }
+
+        .polaroid .caption {
+            text-align: center;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.7rem;
+            color: #b8a6c9;
+            margin-top: 8px;
+            letter-spacing: 0.04em;
+        }
+
+        /* ─── TIMELINE ─── */
+        .timeline-section {
+            max-width: 720px;
+            margin: 0 auto 44px;
+        }
+
+        .timeline-section .section-title {
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 28px;
+            letter-spacing: 0.04em;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 6px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2.5px;
+            background: linear-gradient(to bottom, #f5d6d6, #d4b8e0, #f5c6a0);
+            transform: translateX(-50%);
+            border-radius: 4px;
+        }
+
+        .timeline .step {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            position: relative;
+            width: 100%;
+        }
+
+        .timeline .step:nth-child(odd) {
+            flex-direction: row;
+        }
+        .timeline .step:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline .step .content {
+            width: 40%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 12px 18px;
+            border-radius: var(--radius);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.03);
+            text-align: center;
+            text-decoration: none;
+            color: var(--text);
+            transition: 0.35s ease;
+            cursor: pointer;
+        }
+
+        .timeline .step .content:hover {
+            transform: scale(1.05) translateY(-4px);
+            box-shadow: 0 10px 36px rgba(0, 0, 0, 0.06);
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(199, 139, 219, 0.15);
+        }
+
+        .timeline .step .content .day {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .timeline .step .content .label {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #a392b0;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .timeline .step .content .desc {
+            font-size: 0.65rem;
+            color: #7a6a88;
+            margin-top: 2px;
+        }
+
+        .timeline .step .dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fad6d6;
+            border: 3px solid #fff;
+            box-shadow: 0 0 0 2px #c78bdb, 0 2px 12px rgba(0, 0, 0, 0.04);
+            z-index: 2;
+            flex-shrink: 0;
+            transition: 0.3s ease;
+        }
+
+        .timeline .step:hover .dot {
+            transform: scale(1.2);
+        }
+
+        .timeline .step:last-child .dot {
+            background: #f5c6a0;
+            box-shadow: 0 0 0 2px #f5b8b8;
+        }
+
+        .timeline .step:last-child .content .day {
+            background: linear-gradient(135deg, #f5b8b8, #f5c6a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ─── WISH SECTION ─── */
+        .wish-section {
+            text-align: center;
+            padding: 8px 0 10px;
+        }
+
+        .wish-btn {
+            display: inline-block;
+            padding: 14px 44px;
+            border-radius: 60px;
+            border: none;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.2);
+            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            letter-spacing: 0.02em;
+        }
+
+        .wish-btn:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.3);
+        }
+
+        .wish-btn:active {
+            transform: scale(0.95);
+        }
+
+        .wish-btn span {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wish-message {
+            margin-top: 16px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            color: #c27b9e;
+            min-height: 2.4rem;
+            opacity: 0;
+            transition: 0.5s ease;
+            transform: translateY(10px);
+        }
+
+        .wish-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ─── LIGHTBOX ─── */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(16px);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            padding: 30px;
         }
 
-        .container {
-            max-width: 480px;
-            width: 100%;
-            background: white;
-            padding: 50px 40px;
+        .lightbox.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .lightbox img {
+            max-width: 92vw;
+            max-height: 82vh;
             border-radius: 12px;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
-            text-align: center;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
+            transform: scale(0.92);
+            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+            object-fit: contain;
         }
 
-        .icon {
-            font-size: 4rem;
-            display: block;
-            margin-bottom: 16px;
+        .lightbox.active img {
+            transform: scale(1);
         }
 
-        h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 8px;
-        }
-
-        p {
-            color: #666;
-            font-size: 1rem;
-            line-height: 1.6;
-            margin-bottom: 24px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 32px;
-            border-radius: 8px;
-            border: none;
-            background: #0066ff;
-            color: white;
-            font-size: 0.95rem;
-            font-weight: 500;
-            font-family: inherit;
+        .lightbox .close {
+            position: absolute;
+            top: 24px;
+            right: 32px;
+            color: #fff;
+            font-size: 2rem;
             cursor: pointer;
-            transition: 0.2s ease;
-            text-decoration: none;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s ease;
+            font-family: 'Inter', sans-serif;
         }
 
-        .btn:hover {
-            background: #0052cc;
+        .lightbox .close:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: rotate(90deg);
         }
 
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-            margin-left: 8px;
+        .lightbox .nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #fff;
+            font-size: 2.2rem;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.06);
+            border: none;
+            padding: 16px 20px;
+            border-radius: 50%;
+            transition: 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            opacity: 0.5;
         }
 
-        .btn-secondary:hover {
-            background: #e0e0e0;
+        .lightbox .nav:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.12);
         }
 
-        .timestamp {
-            margin-top: 16px;
-            font-size: 0.75rem;
-            color: #999;
+        .lightbox .nav.prev {
+            left: 16px;
+        }
+        .lightbox .nav.next {
+            right: 16px;
+        }
+
+        .lightbox .counter {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            font-weight: 300;
+        }
+
+        /* ─── SPARKLE BURST ─── */
+        .sparkle-burst {
+            position: fixed;
+            pointer-events: none;
+            font-size: 1.6rem;
+            animation: burst 0.8s ease-out forwards;
+            z-index: 999;
+        }
+
+        @keyframes burst {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(0.2) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg);
+            }
+        }
+
+        /* ─── CONFETTI ─── */
+        .confetti-piece {
+            position: fixed;
+            pointer-events: none;
+            z-index: 998;
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            animation: confettiFall linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(720deg) scale(0.2);
+            }
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 820px) {
+            .gallery {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+            }
+            .polaroid:nth-child(4),
+            .polaroid:nth-child(5) {
+                margin-top: 0;
+            }
+            .polaroid:nth-child(3) {
+                margin-top: 0;
+            }
         }
 
         @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
+            .gallery {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
             }
-            .icon {
+            .polaroid {
+                padding: 4px 4px 14px 4px;
+            }
+            .polaroid .caption {
+                font-size: 0.55rem;
+                margin-top: 4px;
+            }
+            .polaroid:nth-child(1),
+            .polaroid:nth-child(2),
+            .polaroid:nth-child(3),
+            .polaroid:nth-child(4),
+            .polaroid:nth-child(5) {
+                --rot: 0deg;
+                margin-top: 0;
+            }
+
+            .countdown .item {
+                min-width: 48px;
+                padding: 6px 10px 4px;
+            }
+            .countdown .item .num {
+                font-size: 1.6rem;
+            }
+            .countdown .item .label {
+                font-size: 0.45rem;
+            }
+
+            .header .name {
                 font-size: 3rem;
             }
-            h1 {
+            .header .sub {
+                font-size: 1rem;
+            }
+            .header .age-badge {
+                font-size: 0.8rem;
+                padding: 5px 18px;
+            }
+            .header .age-badge strong {
+                font-size: 1.3rem;
+            }
+
+            .timeline .step .content {
+                width: 34%;
+                padding: 8px 12px;
+            }
+            .timeline .step .content .day {
+                font-size: 1.3rem;
+            }
+            .timeline .step .content .label {
+                font-size: 0.45rem;
+            }
+            .timeline .step .content .desc {
+                font-size: 0.5rem;
+            }
+            .timeline .step .dot {
+                width: 14px;
+                height: 14px;
+            }
+            .timeline-section .section-title {
+                font-size: 1.4rem;
+            }
+
+            .wish-btn {
+                padding: 12px 28px;
+                font-size: 0.9rem;
+            }
+
+            .lightbox {
+                padding: 16px;
+            }
+            .lightbox .nav {
+                font-size: 1.6rem;
+                padding: 10px 14px;
+            }
+            .lightbox .nav.prev {
+                left: 6px;
+            }
+            .lightbox .nav.next {
+                right: 6px;
+            }
+            .lightbox .close {
+                top: 14px;
+                right: 16px;
+                font-size: 1.4rem;
+                width: 40px;
+                height: 40px;
+            }
+            .lightbox .counter {
+                font-size: 0.7rem;
+                bottom: 16px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .gallery {
+                gap: 6px;
+            }
+            .countdown {
+                gap: 6px;
+            }
+            .countdown .item {
+                min-width: 40px;
+                padding: 4px 6px 3px;
+            }
+            .countdown .item .num {
                 font-size: 1.2rem;
             }
-            .btn {
-                width: 100%;
-                margin: 4px 0;
+            .header .name {
+                font-size: 2.4rem;
             }
-            .btn-secondary {
-                margin-left: 0;
-            }
+        }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--cream);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            border-radius: 10px;
+        }
+
+        /* ─── AUDIO TOAST (subtle hint) ─── */
+        .audio-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            padding: 10px 24px;
+            border-radius: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            font-size: 0.75rem;
+            color: #7a6a88;
+            font-weight: 400;
+            letter-spacing: 0.04em;
+            opacity: 0;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            transform: translateX(-50%) translateY(12px);
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .audio-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <span class="icon">💥</span>
-        <h1>Site Crash</h1>
-        <p>
-            Oops! Something went wrong and the site crashed.<br />
-            Please try refreshing the page or come back later.
-        </p>
+    <div class="bg" aria-hidden="true"></div>
 
-        <div>
-            <button onclick="location.reload()" class="btn">🔄 Refresh Page</button>
-            <a href="index.html" class="btn btn-secondary">🏠 Home</a>
-        </div>
-
-        <div class="timestamp">
-            Error occurred: <span id="time"></span>
-        </div>
+    <!-- ─── LIGHTBOX ─── -->
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+        <button class="close" id="lightboxClose" aria-label="Close">✕</button>
+        <button class="nav prev" id="lightboxPrev" aria-label="Previous">‹</button>
+        <button class="nav next" id="lightboxNext" aria-label="Next">›</button>
+        <img id="lightboxImg" src="" alt="" />
+        <div class="counter" id="lightboxCounter"></div>
     </div>
 
-    <script>
-        // Show current time
-        document.getElementById('time').textContent = new Date().toLocaleString();
+    <!-- ─── AUDIO (hidden) ─── -->
+    <audio id="bgAudio" preload="auto" loop>
+        <source src="audio_05.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+    </audio>
 
-        // Log error
-        console.error('Site crashed at:', new Date().toISOString());
+    <!-- ─── TOAST (subtle hint) ─── -->
+    <div class="audio-toast" id="audioToast">♫ tap anywhere to start the music</div>
+
+    <!-- ─── MAIN ─── -->
+    <div class="scrapbook">
+
+        <!-- ═══ HEADER ═══ -->
+        <header class="header">
+            <div class="name">Ruth</div>
+            <div class="sub">twenty‑one · a celebration</div>
+            <div class="age-badge">
+                <strong>21</strong> &nbsp;·&nbsp; born 18 · 09 · 2005
+            </div>
+            <div class="today-date" id="todayDate"></div>
+        </header>
+
+        <!-- ═══ COUNTDOWN ═══ -->
+        <div class="countdown" id="countdown" role="timer" aria-label="Countdown to birthday">
+            <div class="item">
+                <span class="num" id="cdDays">00</span>
+                <span class="label">days</span>
+            </div>
+            <div class="item">
+                <span class="num" id="cdHours">00</span>
+                <span class="label">hours</span>
+            </div>
+            <div class="item">
+                <span class="num" id="cdMinutes">00</span>
+                <span class="label">mins</span>
+            </div>
+            <div class="item">
+                <span class="num" id="cdSeconds">00</span>
+                <span class="label">secs</span>
+            </div>
+        </div>
+
+        <!-- ═══ GALLERY ═══ -->
+        <div class="gallery" id="gallery" role="group" aria-label="Photo gallery">
+            <div class="polaroid" data-index="0">
+                <div class="img-wrap">
+                    <img src="ruth1.jpg" alt="Ruth 1" loading="lazy" />
+                </div>
+                <div class="caption">✦ 1/6</div>
+            </div>
+            <div class="polaroid" data-index="1">
+                <div class="img-wrap">
+                    <img src="ruth2.jpg" alt="Ruth 2" loading="lazy" />
+                </div>
+                <div class="caption">✦ 2/6</div>
+            </div>
+            <div class="polaroid" data-index="2">
+                <div class="img-wrap">
+                    <img src="ruth3.jpg" alt="Ruth 3" loading="lazy" />
+                </div>
+                <div class="caption">✦ 3/6</div>
+            </div>
+            <div class="polaroid" data-index="3">
+                <div class="img-wrap">
+                    <img src="ruth4.jpg" alt="Ruth 4" loading="lazy" />
+                </div>
+                <div class="caption">✦ 4/6</div>
+            </div>
+            <div class="polaroid" data-index="4">
+                <div class="img-wrap">
+                    <img src="ruth5.jpg" alt="Ruth 5" loading="lazy" />
+                </div>
+                <div class="caption">✦ 5/6</div>
+            </div>
+            <div class="polaroid" data-index="5">
+                <div class="img-wrap">
+                    <img src="ruth6.jpg" alt="Ruth 6" loading="lazy" />
+                </div>
+                <div class="caption">✦ 6/6</div>
+            </div>
+        </div>
+
+        <!-- ═══ TIMELINE ═══ -->
+        <section class="timeline-section">
+            <h2 class="section-title">Countdown to 21</h2>
+            <div class="timeline" id="timeline" role="list"></div>
+        </section>
+
+        <!-- ═══ WISH ═══ -->
+        <section class="wish-section">
+            <button class="wish-btn" id="wishBtn">
+                <span>✨ Make a wish ✨</span>
+            </button>
+            <div class="wish-message" id="wishMessage"></div>
+        </section>
+
+    </div>
+
+    <!-- ──────────────────────────────────────────────────────────────── -->
+    <!-- ─── SCRIPT ─── -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ─── CONFIG ───
+            const BIRTHDAY = new Date(2026, 8, 18, 0, 0, 0).getTime();
+            const DAYS = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+            const LABELS = ['begin', 'closer', 'near', 'so close', 'anticipation', 'one week', 'almost',
+                'final stretch', 'tomorrow!', '🎂 today!'
+            ];
+            const DESCS = ['the countdown begins', 'every day a step closer', 'almost there', 'so close now',
+                'the anticipation builds', 'one week to go', 'nearly here', 'the final stretch', 'tomorrow!',
+                'HAPPY BIRTHDAY! 🎉'
+            ];
+
+            const WISHES = [
+                'Ruth, you are pure magic ✨',
+                '21 looks stunning on you 💖',
+                'Every moment with you is a gift 🌟',
+                'Can’t wait to celebrate you! 🥳',
+                'You make the world brighter ❤️',
+                'Forever and always, Ruth 💫',
+                'So grateful for you 🌸',
+                'You deserve all the joy in the world 🦋',
+                'Happy 21st, beautiful soul 💗',
+                'Here’s to you and all your dreams 🌙',
+                'Your smile lights up the room ☀️',
+                'Ruth, you are one of a kind 🌈',
+                'The world is better because you’re in it 🌍',
+                'Cheers to 21 years of amazing you 🥂',
+                'You are loved more than you know 💕',
+                'Keep shining, Ruth ⭐',
+                'So proud of the woman you’ve become 🌺',
+                'May your 21st year be your best yet 🎉',
+                'You have a heart of gold 💛',
+                'Ruth, you are absolutely unforgettable ✨',
+                'Wishing you endless happiness 💖'
+            ];
+
+            // ─── DOM ───
+            const daysEl = document.getElementById('cdDays');
+            const hoursEl = document.getElementById('cdHours');
+            const minutesEl = document.getElementById('cdMinutes');
+            const secondsEl = document.getElementById('cdSeconds');
+            const timelineEl = document.getElementById('timeline');
+            const wishBtn = document.getElementById('wishBtn');
+            const wishMsg = document.getElementById('wishMessage');
+            const polaroids = document.querySelectorAll('.polaroid');
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightboxImg');
+            const lightboxClose = document.getElementById('lightboxClose');
+            const lightboxPrev = document.getElementById('lightboxPrev');
+            const lightboxNext = document.getElementById('lightboxNext');
+            const lightboxCounter = document.getElementById('lightboxCounter');
+            const todayDateEl = document.getElementById('todayDate');
+
+            // ─── AUDIO ───
+            const audio = document.getElementById('bgAudio');
+            const toast = document.getElementById('audioToast');
+            let audioStarted = false;
+
+            function startAudio() {
+                if (audioStarted) return;
+                audioStarted = true;
+                audio.play().catch(() => { /* ignore autoplay errors */ });
+                toast.classList.remove('show');
+                // hide toast permanently after first touch
+                setTimeout(() => { toast.style.display = 'none'; }, 800);
+            }
+
+            // ─── SHOW TOAST ───
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 600);
+
+            // ─── LISTEN FOR FIRST TOUCH/CLICK ───
+            const startEvents = ['touchstart', 'click'];
+            const starter = function(e) {
+                startAudio();
+                // remove listeners after first trigger
+                startEvents.forEach(ev => document.removeEventListener(ev, starter));
+            };
+            startEvents.forEach(ev => document.addEventListener(ev, starter, { passive: true }));
+
+            // ─── TODAY'S DATE ───
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+            todayDateEl.textContent = '✨ ' + dateStr;
+
+            // ─── GATHER IMAGES ───
+            const galleryImages = [];
+            polaroids.forEach((p, i) => {
+                const img = p.querySelector('img');
+                if (img && img.src) {
+                    galleryImages.push({ src: img.src, alt: img.alt || `Ruth ${i+1}` });
+                }
+            });
+
+            // ─── RANDOM POLAROID ROTATIONS ───
+            polaroids.forEach(el => {
+                const rot = (Math.random() - 0.5) * 4;
+                el.style.setProperty('--rot', rot + 'deg');
+            });
+
+            // ─── COUNTDOWN ───
+            function updateCountdown() {
+                const now = Date.now();
+                let diff = Math.max(0, BIRTHDAY - now);
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                daysEl.textContent = String(d).padStart(2, '0');
+                hoursEl.textContent = String(h).padStart(2, '0');
+                minutesEl.textContent = String(m).padStart(2, '0');
+                secondsEl.textContent = String(s).padStart(2, '0');
+            }
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+
+            // ─── TIMELINE ───
+            function renderTimeline() {
+                timelineEl.innerHTML = '';
+                DAYS.forEach((day, idx) => {
+                    const step = document.createElement('div');
+                    step.className = 'step';
+                    step.setAttribute('role', 'listitem');
+
+                    const content = document.createElement('a');
+                    content.className = 'content';
+                    content.href = `day_${String(day).padStart(2, '0')}.html`;
+                    content.setAttribute('data-day', day);
+
+                    const daySpan = document.createElement('div');
+                    daySpan.className = 'day';
+                    daySpan.textContent = String(day).padStart(2, '0');
+
+                    const label = document.createElement('div');
+                    label.className = 'label';
+                    label.textContent = LABELS[10 - day] || `day ${day}`;
+
+                    const desc = document.createElement('div');
+                    desc.className = 'desc';
+                    desc.textContent = DESCS[10 - day] || '';
+
+                    content.appendChild(daySpan);
+                    content.appendChild(label);
+                    content.appendChild(desc);
+
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+
+                    step.appendChild(content);
+                    step.appendChild(dot);
+
+                    content.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        sparkleBurst(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight /
+                            2, 30);
+                        setTimeout(() => {
+                            window.location.href = this.href;
+                        }, 380);
+                    });
+
+                    timelineEl.appendChild(step);
+                });
+            }
+            renderTimeline();
+
+            // ─── SPARKLE BURST ───
+            function sparkleBurst(cx, cy, count = 30) {
+                const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊'];
+                const total = count + Math.floor(Math.random() * 16);
+                for (let i = 0; i < total; i++) {
+                    const spark = document.createElement('div');
+                    spark.className = 'sparkle-burst';
+                    spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    const angle = Math.random() * 2 * Math.PI;
+                    const dist = 80 + Math.random() * 200;
+                    const tx = Math.cos(angle) * dist;
+                    const ty = Math.sin(angle) * dist - 60;
+                    spark.style.setProperty('--tx', tx + 'px');
+                    spark.style.setProperty('--ty', ty + 'px');
+                    spark.style.left = (cx || window.innerWidth / 2) + 'px';
+                    spark.style.top = (cy || window.innerHeight / 2) + 'px';
+                    spark.style.fontSize = 1 + Math.random() * 2 + 'rem';
+                    spark.style.animationDuration = 0.5 + Math.random() * 0.7 + 's';
+                    document.body.appendChild(spark);
+                    setTimeout(() => spark.remove(), 1400);
+                }
+            }
+
+            // ─── CONFETTI ───
+            function confettiBurst(cx, cy) {
+                const colors = ['#f8a4b8', '#c78bdb', '#f5c6a0', '#ffd6d6', '#d4b8e0', '#fce7f3', '#ffb3c6', '#b8d4e3'];
+                const count = 60 + Math.floor(Math.random() * 40);
+                for (let i = 0; i < count; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    piece.style.left = (cx || window.innerWidth / 2) + 'px';
+                    piece.style.top = (cy || window.innerHeight / 2) + 'px';
+                    piece.style.width = (5 + Math.random() * 8) + 'px';
+                    piece.style.height = (5 + Math.random() * 8) + 'px';
+                    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    const angle = Math.random() * 2 * Math.PI;
+                    const dist = 80 + Math.random() * 350;
+                    piece.style.animationDuration = (1.2 + Math.random() * 1.8) + 's';
+                    piece.style.animationDelay = (Math.random() * 0.6) + 's';
+                    piece.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                    piece.style.setProperty('--ty', Math.sin(angle) * dist - 180 + 'px');
+                    document.body.appendChild(piece);
+                    setTimeout(() => piece.remove(), 3000);
+                }
+            }
+
+            // ─── LIGHTBOX ───
+            function openLightbox(index) {
+                if (!galleryImages.length) return;
+                lightboxIndex = Math.max(0, Math.min(index, galleryImages.length - 1));
+                const img = galleryImages[lightboxIndex];
+                lightboxImg.src = img.src;
+                lightboxImg.alt = img.alt;
+                lightboxCounter.textContent = `${lightboxIndex + 1} / ${galleryImages.length}`;
+                lightbox.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeLightbox() {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            let lightboxIndex = 0;
+
+            function prevImage() {
+                if (galleryImages.length) {
+                    openLightbox((lightboxIndex - 1 + galleryImages.length) % galleryImages.length);
+                }
+            }
+
+            function nextImage() {
+                if (galleryImages.length) {
+                    openLightbox((lightboxIndex + 1) % galleryImages.length);
+                }
+            }
+
+            polaroids.forEach((p, idx) => {
+                p.addEventListener('click', function(e) {
+                    if (galleryImages.length) {
+                        openLightbox(idx);
+                    }
+                    sparkleBurst(e.clientX, e.clientY, 12);
+                });
+            });
+
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightboxPrev.addEventListener('click', prevImage);
+            lightboxNext.addEventListener('click', nextImage);
+
+            document.addEventListener('keydown', (e) => {
+                if (!lightbox.classList.contains('active')) return;
+                if (e.key === 'Escape') closeLightbox();
+                if (e.key === 'ArrowLeft') prevImage();
+                if (e.key === 'ArrowRight') nextImage();
+            });
+
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+
+            // ─── WISH BUTTON ───
+            wishBtn.addEventListener('click', function(e) {
+                const cx = e.clientX || window.innerWidth / 2;
+                const cy = e.clientY || window.innerHeight / 2;
+                sparkleBurst(cx, cy, 40);
+                confettiBurst(cx, cy);
+
+                const msg = WISHES[Math.floor(Math.random() * WISHES.length)];
+                wishMsg.textContent = msg;
+                wishMsg.className = 'wish-message show';
+
+                const badge = document.querySelector('.age-badge');
+                const orig = badge.innerHTML;
+                badge.innerHTML = '💫 ' + msg;
+                badge.style.background = 'rgba(252, 231, 243, 0.8)';
+                setTimeout(() => {
+                    badge.innerHTML = orig;
+                    badge.style.background = '';
+                }, 3000);
+
+                setTimeout(() => {
+                    wishMsg.className = 'wish-message';
+                }, 6000);
+            });
+
+            // ─── LIGHT SPARKLE ON CLICK ───
+            document.addEventListener('click', function(e) {
+                const tag = e.target.tagName.toLowerCase();
+                if (tag === 'a' || tag === 'button' || e.target.closest('.polaroid') ||
+                    e.target.closest('.content') || e.target.closest('.lightbox')) return;
+                if (Math.random() > 0.2) return;
+                sparkleBurst(e.clientX, e.clientY, 8);
+            });
+
+            console.log('✨ Ruth · 21 · A celebration of you 💖');
+            console.log('🎵 Tap anywhere to start the music.');
+
+        })();
     </script>
 
 </body>
