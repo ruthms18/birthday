@@ -6,12 +6,13 @@
     <title>Day 07 · The Path to You</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
     <style>
-        /* ─── RESET ─── */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         :root {
@@ -20,22 +21,20 @@
             --peach: #f5c6a0;
             --cream: #fcf6f0;
             --text: #2d2a3a;
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
-            --radius: 16px;
         }
 
         html, body {
             height: 100%;
             overflow: hidden;
+            position: fixed;
+            inset: 0;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: var(--cream);
+            background: #0d0a14;
             color: var(--text);
             line-height: 1.5;
-            position: fixed;
-            inset: 0;
         }
 
         #gameCanvas {
@@ -48,81 +47,74 @@
             z-index: 1;
         }
 
-        /* ─── 3D GAME UI ─── */
-        .game-hud {
+        /* ─── HUD ─── */
+        .hud {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 10;
-            padding: 12px 16px;
+            padding: 14px 16px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             pointer-events: none;
         }
 
-        .game-hud > * {
-            pointer-events: auto;
-        }
-
         .hud-badge {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 6px 16px;
             border-radius: 60px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            color: #c27b9e;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 4px 20px rgba(194, 123, 158, 0.08);
+            color: #f0e4f5;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            letter-spacing: 0.03em;
         }
 
         .hud-badge strong {
             font-family: 'Playfair Display', serif;
-            font-size: 1.1rem;
-            background: linear-gradient(135deg, #f5b8b8, #c78bdb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 1rem;
+            color: #f8a4b8;
         }
 
         .compass {
-            position: fixed;
-            top: 16px;
-            right: 16px;
-            z-index: 10;
-            width: 56px;
-            height: 56px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 4px 20px rgba(194, 123, 158, 0.08);
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            pointer-events: none;
-            transition: transform 0.1s ease-out;
+            transition: transform 0.08s linear;
+            pointer-events: auto;
         }
 
-        .compass::after {
-            content: '↑';
-            font-size: 1.6rem;
-            color: #c78bdb;
+        .compass-arrow {
             position: absolute;
-            top: 2px;
+            top: 4px;
             left: 50%;
             transform: translateX(-50%);
-            line-height: 1;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 12px solid #f8a4b8;
+            filter: drop-shadow(0 0 4px rgba(248, 164, 184, 0.5));
         }
 
-        .compass .compass-dot {
-            width: 8px;
-            height: 8px;
+        .compass-dot {
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            box-shadow: 0 0 8px rgba(199, 139, 219, 0.4);
+            background: #c78bdb;
+            box-shadow: 0 0 8px rgba(199, 139, 219, 0.6);
         }
 
         /* ─── CONTROLS ─── */
@@ -132,7 +124,7 @@
             left: 0;
             right: 0;
             z-index: 10;
-            padding: 20px 24px calc(24px + env(safe-area-inset-bottom, 0px));
+            padding: 16px 20px calc(20px + env(safe-area-inset-bottom, 0px));
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
@@ -145,35 +137,53 @@
 
         .dpad {
             display: grid;
-            grid-template-columns: 60px 60px 60px;
-            grid-template-rows: 60px 60px 60px;
-            gap: 6px;
-            opacity: 0.85;
+            grid-template-columns: 56px 56px 56px;
+            grid-template-rows: 56px 56px 56px;
+            gap: 4px;
         }
 
         .dpad-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            background: rgba(255, 255, 255, 0.55);
-            backdrop-filter: blur(8px);
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
-            color: #9b7bb0;
+            font-size: 1.2rem;
+            color: #d4c4e0;
             cursor: pointer;
-            transition: 0.15s ease;
-            user-select: none;
-            box-shadow: 0 4px 16px rgba(194, 123, 158, 0.08);
+            transition: background 0.1s ease, border-color 0.1s ease, transform 0.1s ease, color 0.1s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+            -webkit-touch-callout: none;
         }
 
-        .dpad-btn:active,
+        .dpad-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            background: radial-gradient(circle at center, rgba(199, 139, 219, 0.4), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            pointer-events: none;
+        }
+
+        .dpad-btn.active::before {
+            opacity: 1;
+        }
+
         .dpad-btn.active {
             background: rgba(199, 139, 219, 0.25);
-            transform: scale(0.92);
-            color: #c27b9e;
+            border-color: rgba(199, 139, 219, 0.5);
+            transform: scale(0.94);
+            color: #fff;
         }
 
         .dpad-btn.empty {
@@ -183,29 +193,45 @@
             pointer-events: none;
         }
 
+        .dpad-btn .arrow {
+            font-size: 1.3rem;
+            line-height: 1;
+            pointer-events: none;
+        }
+
         .dpad-center {
-            background: rgba(199, 139, 219, 0.12);
-            border: none;
+            background: rgba(199, 139, 219, 0.08);
+            border: 1px solid rgba(199, 139, 219, 0.15);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.7rem;
-            color: #b8a6c9;
-            font-weight: 600;
-            letter-spacing: 0.05em;
+            font-size: 0.55rem;
+            color: #a392b0;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
 
         .look-pad {
-            width: 130px;
-            height: 130px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             position: relative;
             touch-action: none;
-            box-shadow: 0 4px 20px rgba(194, 123, 158, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .look-pad .look-ring {
+            position: absolute;
+            inset: 12px;
+            border-radius: 50%;
+            border: 1px dashed rgba(199, 139, 219, 0.2);
+            pointer-events: none;
         }
 
         .look-pad .look-knob {
@@ -215,102 +241,78 @@
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background: linear-gradient(135deg, rgba(248, 164, 184, 0.7), rgba(199, 139, 219, 0.7));
+            background: radial-gradient(circle at 35% 35%, rgba(248, 164, 184, 0.9), rgba(199, 139, 219, 0.8));
             transform: translate(-50%, -50%);
-            box-shadow: 0 4px 16px rgba(199, 139, 219, 0.25);
-            transition: 0.05s ease;
+            box-shadow: 0 4px 20px rgba(199, 139, 219, 0.4), inset 0 2px 6px rgba(255, 255, 255, 0.3);
+            pointer-events: none;
         }
 
         .look-pad .look-label {
             position: absolute;
-            bottom: -18px;
+            bottom: -20px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.6rem;
-            font-weight: 600;
-            color: #b8a6c9;
-            letter-spacing: 0.08em;
+            font-size: 0.55rem;
+            font-weight: 700;
+            color: #a392b0;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
             white-space: nowrap;
-        }
-
-        .mobile-hint {
-            position: fixed;
-            bottom: 170px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9;
-            font-family: 'Patrick Hand', cursive;
-            font-size: 0.9rem;
-            color: #b8a6c9;
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(8px);
-            padding: 6px 18px;
-            border-radius: 40px;
             pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            white-space: nowrap;
         }
 
-        .mobile-hint.show {
-            opacity: 1;
-        }
-
-        /* ─── INTRO OVERLAY (MAP) ─── */
-        .intro-overlay {
+        /* ─── OVERLAYS ─── */
+        .overlay {
             position: fixed;
             inset: 0;
             z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(252, 246, 240, 0.92);
-            backdrop-filter: blur(16px);
+            background: rgba(13, 10, 20, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 20px;
             transition: opacity 0.6s ease, visibility 0.6s ease;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
-        .intro-overlay.hidden {
+        .overlay.hidden {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
 
-        .intro-card {
-            max-width: 580px;
+        .overlay-card {
+            max-width: 520px;
             width: 100%;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            border-radius: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 30px 80px rgba(199, 139, 219, 0.15);
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
             padding: 32px 28px 28px;
             text-align: center;
             animation: fadeSlideUp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
             margin: auto;
+            color: #f0e4f5;
         }
 
         @keyframes fadeSlideUp {
-            0% {
-                opacity: 0;
-                transform: translateY(40px) scale(0.96);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            0% { opacity: 0; transform: translateY(30px) scale(0.96); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .intro-card .intro-emoji {
-            font-size: 3.4rem;
+        .overlay-card .card-emoji {
+            font-size: 3.2rem;
             line-height: 1;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             display: block;
         }
 
-        .intro-card .intro-title {
+        .overlay-card .card-title {
             font-family: 'Playfair Display', serif;
             font-size: 2rem;
             font-weight: 700;
@@ -322,165 +324,144 @@
             margin-bottom: 4px;
         }
 
-        .intro-card .intro-sub {
+        .overlay-card .card-sub {
             font-family: 'Patrick Hand', cursive;
-            font-size: 1.05rem;
-            color: #b8a6c9;
+            font-size: 1rem;
+            color: #a392b0;
             letter-spacing: 0.06em;
-            margin-bottom: 14px;
+            margin-bottom: 18px;
         }
 
-        .intro-card .intro-body {
+        .overlay-card .card-body {
             font-family: 'Inter', sans-serif;
-            font-size: 0.92rem;
-            color: #3d344a;
+            font-size: 0.9rem;
+            color: #d4c4e0;
             line-height: 1.7;
             text-align: left;
-            padding: 0 2px;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
 
-        .intro-card .intro-body p {
+        .overlay-card .card-body p {
             margin-bottom: 10px;
         }
 
-        .intro-card .intro-body .highlight {
-            color: #c27b9e;
+        .overlay-card .card-body .highlight {
+            color: #f8a4b8;
             font-weight: 600;
         }
 
-        .intro-card .intro-body .rule-box {
-            background: rgba(199, 139, 219, 0.07);
+        .overlay-card .rule-box {
+            background: rgba(199, 139, 219, 0.08);
             border-radius: 14px;
-            padding: 12px 16px;
-            margin: 12px 0 4px;
-            border-left: 4px solid #c78bdb;
+            padding: 14px 18px;
+            margin: 14px 0 6px;
+            border-left: 3px solid #c78bdb;
         }
 
-        .intro-card .intro-body .rule-box p {
-            margin-bottom: 5px;
-            font-size: 0.88rem;
+        .overlay-card .rule-box p {
+            margin-bottom: 6px;
+            font-size: 0.85rem;
         }
 
-        .intro-card .intro-body .rule-box p:last-child {
+        .overlay-card .rule-box p:last-child {
             margin-bottom: 0;
         }
 
-        /* Map preview */
-        .map-preview {
-            margin: 14px 0 18px;
+        /* Map preview — square, contained, never clipped */
+        .map-container {
+            margin: 16px auto 20px;
+            max-width: 340px;
             border-radius: 16px;
-            overflow: hidden;
-            border: 2px solid rgba(199, 139, 219, 0.2);
-            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.1);
-            background: #1a1228;
+            border: 1px solid rgba(199, 139, 219, 0.25);
+            background: #0d0a14;
             position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            padding-bottom: 28px;
+            overflow: hidden;
         }
 
-        .map-preview canvas {
+        .map-container canvas {
             display: block;
             width: 100%;
             height: auto;
-            max-height: 240px;
-            object-fit: contain;
         }
 
-        .map-preview .map-label {
+        .map-container .map-tag {
             position: absolute;
-            bottom: 8px;
+            bottom: 7px;
             left: 50%;
             transform: translateX(-50%);
             font-family: 'Patrick Hand', cursive;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.7);
-            background: rgba(0, 0, 0, 0.3);
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.6);
+            background: rgba(0, 0, 0, 0.5);
             padding: 2px 14px;
             border-radius: 40px;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(6px);
             white-space: nowrap;
+            letter-spacing: 0.04em;
         }
 
-        .intro-card .intro-actions {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            margin-top: 6px;
+        .overlay-card .card-footer {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.85rem;
+            color: #a392b0;
+            margin-top: 12px;
         }
 
-        .btn-start {
-            padding: 16px 48px;
+        .btn-primary {
+            padding: 15px 44px;
             border-radius: 60px;
             border: none;
             background: linear-gradient(135deg, #f8a4b8, #c78bdb);
             color: #fff;
             font-weight: 700;
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-family: 'Inter', sans-serif;
             cursor: pointer;
-            box-shadow: 0 12px 40px rgba(199, 139, 219, 0.3);
-            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 12px 40px rgba(199, 139, 219, 0.35);
+            transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             letter-spacing: 0.03em;
             width: 100%;
-            max-width: 320px;
+            max-width: 300px;
+            margin-top: 4px;
         }
 
-        .btn-start:hover {
-            transform: translateY(-4px) scale(1.03);
-            box-shadow: 0 18px 56px rgba(199, 139, 219, 0.4);
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 16px 52px rgba(199, 139, 219, 0.5);
         }
 
-        .btn-start:active {
+        .btn-primary:active {
             transform: scale(0.96);
         }
 
-        .intro-card .intro-footer {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 0.85rem;
-            color: #b8a6c9;
-            margin-top: 10px;
-        }
-
-        /* ─── WIN OVERLAY ─── */
-        .win-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(252, 246, 240, 0.88);
-            backdrop-filter: blur(20px);
-            padding: 20px;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
-            overflow-y: auto;
-        }
-
-        .win-overlay.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .win-card {
-            max-width: 560px;
+        .btn-secondary {
+            padding: 13px 36px;
+            border-radius: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.06);
+            color: #d4c4e0;
+            font-weight: 600;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
             width: 100%;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            border-radius: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 30px 80px rgba(199, 139, 219, 0.18);
-            padding: 36px 28px 30px;
-            text-align: center;
-            animation: fadeSlideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-            margin: auto;
+            max-width: 300px;
+            margin-top: 8px;
         }
 
-        .win-card .win-emoji {
-            font-size: 4.5rem;
-            line-height: 1;
-            margin-bottom: 6px;
-            display: block;
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* ─── WIN ─── */
+        .win-card .card-emoji {
+            font-size: 4rem;
             animation: floatEmoji 3s ease-in-out infinite;
         }
 
@@ -489,94 +470,27 @@
             50% { transform: translateY(-10px); }
         }
 
-        .win-card .win-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1.2;
-            margin-bottom: 12px;
-        }
-
-        .win-card .win-message {
+        .win-card .card-body {
+            text-align: center;
             font-family: 'Patrick Hand', cursive;
-            font-size: 1.15rem;
-            color: #3d344a;
+            font-size: 1.1rem;
             line-height: 1.8;
-            padding: 8px 4px 4px;
-            margin-bottom: 6px;
         }
 
-        .win-card .win-message .highlight {
-            color: #c27b9e;
+        .win-card .card-body .highlight {
+            color: #f8a4b8;
             font-weight: 700;
         }
 
-        .win-card .win-message .soft {
-            color: #9b8aa8;
-            font-style: italic;
-        }
-
-        .win-card .win-divider {
-            width: 60px;
-            height: 3px;
+        .win-card .divider {
+            width: 50px;
+            height: 2px;
             background: linear-gradient(90deg, #f8a4b8, #c78bdb);
             border-radius: 10px;
-            margin: 14px auto 16px;
+            margin: 14px auto;
         }
 
-        .win-card .win-actions {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            margin-top: 8px;
-        }
-
-        .btn-win {
-            padding: 14px 40px;
-            border-radius: 60px;
-            border: none;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            color: #fff;
-            font-weight: 600;
-            font-size: 0.95rem;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.2);
-            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            text-decoration: none;
-            display: inline-block;
-            letter-spacing: 0.02em;
-            width: 100%;
-            max-width: 300px;
-        }
-
-        .btn-win:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.3);
-        }
-
-        .btn-win:active {
-            transform: scale(0.95);
-        }
-
-        .btn-win.secondary {
-            background: rgba(255, 255, 255, 0.7);
-            color: #9b7bb0;
-            border: 2px solid rgba(199, 139, 219, 0.2);
-            box-shadow: none;
-        }
-
-        .btn-win.secondary:hover {
-            background: rgba(255, 255, 255, 0.95);
-            border-color: rgba(199, 139, 219, 0.4);
-        }
-
-        /* ─── WIN CONFETTI / SPARKLES ─── */
+        /* ─── EFFECTS ─── */
         .sparkle-burst {
             position: fixed;
             pointer-events: none;
@@ -586,14 +500,8 @@
         }
 
         @keyframes burst {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(0.2) rotate(0deg);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg);
-            }
+            0% { opacity: 1; transform: translate(0, 0) scale(0.2) rotate(0deg); }
+            100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg); }
         }
 
         .confetti-piece {
@@ -607,889 +515,916 @@
         }
 
         @keyframes confettiFall {
-            0% {
-                opacity: 1;
-                transform: translateY(0) rotate(0deg) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(100vh) rotate(720deg) scale(0.2);
-            }
+            0%   { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+            100% { opacity: 0; transform: translate(var(--tx, 0px), calc(var(--ty, 0px) + 100vh)) rotate(720deg) scale(0.3); }
         }
 
-        /* ─── UTILITY ─── */
-        .hidden {
-            display: none !important;
+        /* ─── HINT ─── */
+        .mobile-hint {
+            position: fixed;
+            bottom: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.85rem;
+            color: #d4c4e0;
+            background: rgba(13, 10, 20, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 8px 20px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            white-space: nowrap;
         }
+
+        .mobile-hint.show { opacity: 1; }
 
         /* ─── RESPONSIVE ─── */
         @media (max-width: 600px) {
-            .intro-card {
-                padding: 24px 18px 22px;
-                border-radius: 24px;
-            }
-            .intro-card .intro-title {
-                font-size: 1.6rem;
-            }
-            .intro-card .intro-body {
-                font-size: 0.85rem;
-            }
-            .btn-start {
-                padding: 14px 32px;
-                font-size: 0.95rem;
-            }
-            .win-card {
-                padding: 28px 18px 24px;
-                border-radius: 24px;
-            }
-            .win-card .win-title {
-                font-size: 1.7rem;
-            }
-            .win-card .win-message {
-                font-size: 1rem;
-            }
-            .dpad {
-                grid-template-columns: 48px 48px 48px;
-                grid-template-rows: 48px 48px 48px;
-                gap: 4px;
-            }
-            .dpad-btn {
-                width: 48px;
-                height: 48px;
-                font-size: 1.1rem;
-                border-radius: 12px;
-            }
-            .look-pad {
-                width: 100px;
-                height: 100px;
-            }
-            .look-pad .look-knob {
-                width: 34px;
-                height: 34px;
-            }
-            .controls {
-                padding: 12px 14px calc(16px + env(safe-area-inset-bottom, 0px));
-            }
-            .compass {
-                width: 44px;
-                height: 44px;
-                top: 10px;
-                right: 10px;
-            }
-            .compass::after {
-                font-size: 1.2rem;
-            }
-            .mobile-hint {
-                bottom: 130px;
-                font-size: 0.75rem;
-                padding: 4px 14px;
-            }
+            .overlay-card { padding: 24px 18px 22px; border-radius: 24px; }
+            .overlay-card .card-title { font-size: 1.6rem; }
+            .overlay-card .card-body { font-size: 0.85rem; }
+            .btn-primary { padding: 14px 32px; font-size: 0.95rem; }
+            .dpad { grid-template-columns: 48px 48px 48px; grid-template-rows: 48px 48px 48px; gap: 3px; }
+            .dpad-btn { width: 48px; height: 48px; font-size: 1rem; border-radius: 12px; }
+            .dpad-center { font-size: 0.5rem; }
+            .look-pad { width: 96px; height: 96px; }
+            .look-pad .look-knob { width: 36px; height: 36px; }
+            .look-pad .look-label { font-size: 0.5rem; bottom: -18px; }
+            .controls { padding: 10px 14px calc(14px + env(safe-area-inset-bottom, 0px)); }
+            .hud { padding: 10px 12px; }
+            .hud-badge { font-size: 0.65rem; padding: 5px 12px; }
+            .compass { width: 42px; height: 42px; }
+            .compass-arrow { border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 10px solid #f8a4b8; }
+            .mobile-hint { bottom: 140px; font-size: 0.72rem; padding: 6px 14px; }
+            .map-container { max-width: 300px; }
         }
 
-        @media (max-width: 400px) {
-            .intro-card .intro-title {
-                font-size: 1.3rem;
-            }
-            .intro-card .intro-body {
-                font-size: 0.8rem;
-            }
-            .dpad {
-                grid-template-columns: 42px 42px 42px;
-                grid-template-rows: 42px 42px 42px;
-                gap: 3px;
-            }
-            .dpad-btn {
-                width: 42px;
-                height: 42px;
-                font-size: 1rem;
-                border-radius: 10px;
-            }
-            .look-pad {
-                width: 84px;
-                height: 84px;
-            }
-            .look-pad .look-knob {
-                width: 28px;
-                height: 28px;
-            }
+        @media (max-width: 380px) {
+            .dpad { grid-template-columns: 42px 42px 42px; grid-template-rows: 42px 42px 42px; gap: 2px; }
+            .dpad-btn { width: 42px; height: 42px; font-size: 0.9rem; border-radius: 10px; }
+            .look-pad { width: 80px; height: 80px; }
+            .look-pad .look-knob { width: 30px; height: 30px; }
+            .overlay-card .card-title { font-size: 1.3rem; }
+            .map-container { max-width: 250px; }
         }
 
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            border-radius: 10px;
-        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #f8a4b8, #c78bdb); border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <!-- ─── GAME CANVAS ─── -->
     <canvas id="gameCanvas"></canvas>
 
-    <!-- ─── GAME HUD ─── -->
-    <div class="game-hud" id="gameHud">
-        <div class="hud-badge">
-            💕 day <strong>07</strong> · the path to you
+    <div class="hud">
+        <div class="hud-badge">💕 day <strong>07</strong> · the path to you</div>
+        <div class="compass" id="compass">
+            <div class="compass-arrow"></div>
+            <div class="compass-dot"></div>
         </div>
     </div>
 
-    <!-- ─── COMPASS ─── -->
-    <div class="compass" id="compass">
-        <div class="compass-dot"></div>
-    </div>
-
-    <!-- ─── MOBILE HINT ─── -->
     <div class="mobile-hint" id="mobileHint">
         use the d-pad to move · drag the look pad to turn
     </div>
 
-    <!-- ─── CONTROLS ─── -->
-    <div class="controls" id="controls">
+    <div class="controls">
         <div class="dpad" id="dpad">
             <div class="dpad-btn empty"></div>
-            <div class="dpad-btn" data-dir="forward">▲</div>
+            <div class="dpad-btn" data-dir="forward"><span class="arrow">▲</span></div>
             <div class="dpad-btn empty"></div>
-            <div class="dpad-btn" data-dir="left">◀</div>
+            <div class="dpad-btn" data-dir="left"><span class="arrow">◀</span></div>
             <div class="dpad-center">move</div>
-            <div class="dpad-btn" data-dir="right">▶</div>
+            <div class="dpad-btn" data-dir="right"><span class="arrow">▶</span></div>
             <div class="dpad-btn empty"></div>
-            <div class="dpad-btn" data-dir="backward">▼</div>
+            <div class="dpad-btn" data-dir="backward"><span class="arrow">▼</span></div>
             <div class="dpad-btn empty"></div>
         </div>
         <div class="look-pad" id="lookPad">
+            <div class="look-ring"></div>
             <div class="look-knob" id="lookKnob"></div>
             <div class="look-label">look</div>
         </div>
     </div>
 
-    <!-- ─── INTRO OVERLAY (MAP) ─── -->
-    <div class="intro-overlay" id="introOverlay">
-        <div class="intro-card">
-            <span class="intro-emoji">🗺️</span>
-            <div class="intro-title">The Path to You</div>
-            <div class="intro-sub">day 07 · a maze for your heart</div>
+    <!-- INTRO -->
+    <div class="overlay" id="introOverlay">
+        <div class="overlay-card">
+            <span class="card-emoji">🗺️</span>
+            <div class="card-title">The Path to You</div>
+            <div class="card-sub">day 07 · a maze for your heart</div>
 
-            <div class="intro-body">
+            <div class="card-body">
                 <p>
                     Ruth 💕 — before we celebrate your 21st, I wanted to give you a little journey. A maze, just like the path of love. It's not always straight, and sometimes you'll have to turn around, but every step leads somewhere beautiful.
                 </p>
 
                 <div class="rule-box">
                     <p><span class="highlight">🧭 How it works:</span></p>
-                    <p>· You'll see the map <span class="highlight">only once</span> — right here, right now.</p>
+                    <p>· Study the map below — it shows you the way through.</p>
                     <p>· Use the <span class="highlight">d-pad</span> to move and the <span class="highlight">look pad</span> to turn.</p>
                     <p>· Find your way to the <span class="highlight">glowing heart</span> at the other end.</p>
                     <p>· Take your time — there's no wrong turn that can't be undone.</p>
                 </div>
 
-                <p style="font-family:'Patrick Hand',cursive; font-size:0.9rem; color:#b8a6c9; text-align:center; margin-top:6px;">
+                <p style="font-family:'Patrick Hand',cursive; font-size:0.85rem; color:#a392b0; text-align:center; margin-top:8px;">
                     memorize it if you can 💫
                 </p>
             </div>
 
-            <!-- Map preview -->
-            <div class="map-preview" id="mapPreview">
-                <canvas id="mapCanvas" width="480" height="240"></canvas>
-                <div class="map-label">📌 your map · study it well</div>
+            <div class="map-container">
+                <canvas id="mapCanvas" width="400" height="400"></canvas>
+                <div class="map-tag">📌 your map · study it well</div>
             </div>
 
-            <div class="intro-actions">
-                <button class="btn-start" id="startGameBtn">enter the maze 💖</button>
-            </div>
-            <div class="intro-footer">take your time, my love 🌸</div>
+            <button class="btn-primary" id="startGameBtn">enter the maze 💖</button>
+            <div class="card-footer">take your time, my love 🌸</div>
         </div>
     </div>
 
-    <!-- ─── WIN OVERLAY ─── -->
-    <div class="win-overlay hidden" id="winOverlay">
-        <div class="win-card">
-            <span class="win-emoji">💖</span>
-            <div class="win-title">You found me.</div>
-            <div class="win-message">
+    <!-- WIN -->
+    <div class="overlay hidden" id="winOverlay">
+        <div class="overlay-card win-card">
+            <span class="card-emoji">💖</span>
+            <div class="card-title">You found me.</div>
+            <div class="card-body">
                 <p>
                     The path of relationships isn't always straight, Ruth. Sometimes it winds, sometimes it doubles back, sometimes it feels like you're lost. But every turn, every dead end, every step — it all leads to <span class="highlight">us</span>.
                 </p>
-                <div class="win-divider"></div>
+                <div class="divider"></div>
                 <p>
                     No matter how complicated the maze gets, I'll always be here at the end, waiting for you. <span class="highlight">We'll get through everything together</span> — every twist, every turn, every unknown.
                 </p>
-                <p style="margin-top:10px; font-size:1rem; color:#9b8aa8;">
+                <p style="margin-top:12px; font-size:0.95rem; color:#a392b0;">
                     you are my always, my forever, my home. 💕
                 </p>
             </div>
-            <div class="win-actions">
-                <button class="btn-win" id="playAgainBtn">↺ walk it again</button>
-                <a href="index.html" class="btn-win secondary">← back to celebration</a>
-            </div>
+            <button class="btn-primary" id="playAgainBtn" style="margin-top:18px;">↺ walk it again</button>
+            <a href="index.html" class="btn-secondary">← back to celebration</a>
         </div>
     </div>
 
     <script>
-        (function() {
-            'use strict';
+    (function () {
+        'use strict';
 
-            // ─── MAZE CONFIG ───
-            // 1 = wall, 0 = path, 2 = start, 3 = end
-            // This is a 15x15 maze — complex but solvable
-            const MAZE = [
-                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                [1,2,0,0,1,0,0,0,0,0,1,0,0,0,1],
-                [1,1,1,0,1,0,1,1,1,0,1,0,1,0,1],
-                [1,0,0,0,0,0,1,0,0,0,0,0,1,0,1],
-                [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1],
-                [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
-                [1,0,1,0,1,1,1,1,1,1,1,0,1,0,1],
-                [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
-                [1,1,1,1,1,0,1,1,1,0,1,1,1,1,1],
-                [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
-                [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1],
-                [1,0,1,0,0,0,0,0,1,0,0,0,0,0,1],
-                [1,0,1,0,1,1,1,1,1,0,1,1,1,0,1],
-                [1,0,0,0,1,0,0,0,0,0,1,0,0,3,1],
-                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-            ];
+        // ═══════════════════════════════════════════════════
+        //  MAZE   (1 = wall, 0 = path, 2 = start, 3 = end)
+        // ═══════════════════════════════════════════════════
+        const MAZE = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,2,0,0,0,0,1,0,0,0,0,0,0,0,1],
+            [1,0,1,1,0,1,1,0,1,1,1,1,1,0,1],
+            [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
+            [1,0,1,0,1,1,1,1,1,1,1,0,1,0,1],
+            [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+            [1,1,1,0,1,0,1,1,1,0,1,0,1,1,1],
+            [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1],
+            [1,0,1,0,0,0,0,0,1,0,0,0,1,0,1],
+            [1,0,1,0,1,1,1,1,1,0,1,0,1,0,1],
+            [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+            [1,1,1,0,1,0,1,1,1,1,1,0,1,1,1],
+            [1,0,0,0,0,0,1,0,0,0,0,0,0,3,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
 
-            const ROWS = MAZE.length;
-            const COLS = MAZE[0].length;
-            const CELL_SIZE = 4; // world units per cell
-            const WALL_HEIGHT = 3.5;
-            const MOVE_SPEED = 3.5; // units per second
-            const TURN_SPEED = 2.2; // radians per second
-            const PLAYER_RADIUS = 0.8;
-            const EYE_HEIGHT = 1.6;
+        const ROWS = MAZE.length;
+        const COLS = MAZE[0].length;
 
-            // Find start and end
-            let startRow = 1, startCol = 1;
-            let endRow = ROWS - 2, endCol = COLS - 2;
+        let startRow = 1, startCol = 1, endRow = 13, endCol = 13;
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+                if (MAZE[r][c] === 2) { startRow = r; startCol = c; }
+                else if (MAZE[r][c] === 3) { endRow = r; endCol = c; }
+            }
+        }
+
+        // ── world constants ──
+        const CELL       = 4;              // world units per maze cell
+        const WALL_H     = 3.2;            // wall height
+        const EYE_H      = WALL_H / 2;     // eye height  → horizon = wall mid-line
+        const MOVE_SPEED = 3.6;            // units / second
+        const TURN_SPEED = 2.6;            // radians / second
+        const PLAYER_R   = 0.62;           // collision radius (world units)
+        const FOV        = Math.PI / 3;    // 60°
+        const HALF_FOV   = FOV / 2;
+        const TAN_HALF   = Math.tan(HALF_FOV);
+        const MAX_DIST   = 34;
+
+        const START_X = startCol * CELL + CELL / 2;
+        const START_Z = startRow * CELL + CELL / 2;
+        const END_X   = endCol   * CELL + CELL / 2;
+        const END_Z   = endRow   * CELL + CELL / 2;
+
+        // ═══════════════════════════════════════════════════
+        //  DOM
+        // ═══════════════════════════════════════════════════
+        const canvas        = document.getElementById('gameCanvas');
+        const ctx           = canvas.getContext('2d');
+        const introOverlay  = document.getElementById('introOverlay');
+        const winOverlay    = document.getElementById('winOverlay');
+        const startGameBtn  = document.getElementById('startGameBtn');
+        const playAgainBtn  = document.getElementById('playAgainBtn');
+        const mapCanvas     = document.getElementById('mapCanvas');
+        const mapCtx        = mapCanvas.getContext('2d');
+        const compass       = document.getElementById('compass');
+        const mobileHint    = document.getElementById('mobileHint');
+        const dpad          = document.getElementById('dpad');
+        const lookPad       = document.getElementById('lookPad');
+        const lookKnob      = document.getElementById('lookKnob');
+
+        // ═══════════════════════════════════════════════════
+        //  STATE
+        // ═══════════════════════════════════════════════════
+        let px = START_X, pz = START_Z, angle = 0;
+
+        const keys = {
+            forward: false, backward: false, left: false, right: false,
+            turnL: false, turnR: false
+        };
+
+        let lookX = 0;            // -1 .. 1  (turn rate from look pad)
+        let lookY = 0;            // -1 .. 1  (unused, for the knob visual)
+
+        let gameActive = false;
+        let gameWon    = false;
+        let rafId      = null;
+        let lastT      = 0;
+        let bobPhase   = 0;
+        let bobY       = 0;
+
+        const particles = [];
+        let depthBuf = new Float32Array(1024);
+        let vignette = null;
+        let vignetteKey = '';
+
+        // ═══════════════════════════════════════════════════
+        //  RESIZE
+        // ═══════════════════════════════════════════════════
+        function resize() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            canvas.width  = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            canvas.style.width  = w + 'px';
+            canvas.style.height = h + 'px';
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            vignette = null;   // rebuild next frame
+        }
+        window.addEventListener('resize', resize);
+        window.addEventListener('orientationchange', () => setTimeout(resize, 120));
+
+        // ═══════════════════════════════════════════════════
+        //  MAP  (top-down preview)  +  BFS SOLVER
+        // ═══════════════════════════════════════════════════
+        const DIRS = [[1,0],[-1,0],[0,1],[0,-1]];
+
+        function solveMaze() {
+            const key = (r, c) => r * COLS + c;
+            const prev = new Map();
+            const seen = new Set([key(startRow, startCol)]);
+            const queue = [[startRow, startCol]];
+            let head = 0, found = false;
+
+            while (head < queue.length) {
+                const [r, c] = queue[head++];
+                if (r === endRow && c === endCol) { found = true; break; }
+                for (let d = 0; d < 4; d++) {
+                    const nr = r + DIRS[d][0];
+                    const nc = c + DIRS[d][1];
+                    if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+                    if (MAZE[nr][nc] === 1) continue;
+                    const k = key(nr, nc);
+                    if (seen.has(k)) continue;
+                    seen.add(k);
+                    prev.set(k, key(r, c));
+                    queue.push([nr, nc]);
+                }
+            }
+            if (!found) return [];
+
+            const path = [];
+            let cur = key(endRow, endCol);
+            while (cur !== undefined) {
+                path.push([Math.floor(cur / COLS), cur % COLS]);
+                cur = prev.get(cur);
+            }
+            return path.reverse();
+        }
+
+        function drawMapPreview() {
+            const W = mapCanvas.width;
+            const H = mapCanvas.height;
+            const PAD = 12;
+            const cw = (W - PAD * 2) / COLS;
+            const ch = (H - PAD * 2) / ROWS;
+            const ox = PAD, oy = PAD;
+
+            // background
+            const bg = mapCtx.createLinearGradient(0, 0, W, H);
+            bg.addColorStop(0, '#150f22');
+            bg.addColorStop(1, '#0b0813');
+            mapCtx.fillStyle = bg;
+            mapCtx.fillRect(0, 0, W, H);
+
+            // cells
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
-                    if (MAZE[r][c] === 2) { startRow = r; startCol = c; }
-                    if (MAZE[r][c] === 3) { endRow = r; endCol = c; }
+                    const x = ox + c * cw;
+                    const y = oy + r * ch;
+                    if (MAZE[r][c] === 1) {
+                        mapCtx.fillStyle = '#2b2140';
+                        mapCtx.fillRect(x, y, cw + 0.5, ch + 0.5);
+                        mapCtx.fillStyle = 'rgba(199,139,219,0.10)';
+                        mapCtx.fillRect(x, y, cw + 0.5, Math.max(1, ch * 0.14));
+                    } else {
+                        mapCtx.fillStyle = '#171122';
+                        mapCtx.fillRect(x, y, cw + 0.5, ch + 0.5);
+                    }
                 }
             }
 
-            // ─── DOM REFS ───
-            const canvas = document.getElementById('gameCanvas');
-            const ctx = canvas.getContext('2d');
-            const introOverlay = document.getElementById('introOverlay');
-            const winOverlay = document.getElementById('winOverlay');
-            const startGameBtn = document.getElementById('startGameBtn');
-            const playAgainBtn = document.getElementById('playAgainBtn');
-            const mapCanvas = document.getElementById('mapCanvas');
-            const mapCtx = mapCanvas.getContext('2d');
-            const compass = document.getElementById('compass');
-            const mobileHint = document.getElementById('mobileHint');
-            const dpad = document.getElementById('dpad');
-            const lookPad = document.getElementById('lookPad');
-            const lookKnob = document.getElementById('lookKnob');
-
-            // ─── STATE ───
-            let playerX = startCol * CELL_SIZE + CELL_SIZE / 2;
-            let playerZ = startRow * CELL_SIZE + CELL_SIZE / 2;
-            let playerAngle = 0; // radians, 0 = facing +Z (south)
-            let keys = { forward: false, backward: false, left: false, right: false };
-            let lookVector = { x: 0, y: 0 };
-            let lookActive = false;
-            let lookTouchId = null;
-            let lookStartX = 0, lookStartY = 0;
-            let gameActive = false;
-            let gameWon = false;
-            let lastTime = 0;
-            let animFrame = null;
-            let hasSeenIntro = false;
-            let particles = [];
-
-            // ─── MAP PREVIEW (drawn on intro overlay) ───
-            function drawMapPreview() {
-                const w = mapCanvas.width;
-                const h = mapCanvas.height;
-                const cellW = w / COLS;
-                const cellH = h / ROWS;
-
-                mapCtx.clearRect(0, 0, w, h);
-
-                // Background
-                mapCtx.fillStyle = '#1a1228';
-                mapCtx.fillRect(0, 0, w, h);
-
-                // Draw cells
-                for (let r = 0; r < ROWS; r++) {
-                    for (let c = 0; c < COLS; c++) {
-                        const x = c * cellW;
-                        const y = r * cellH;
-                        if (MAZE[r][c] === 1) {
-                            mapCtx.fillStyle = '#3d2a5c';
-                            mapCtx.fillRect(x, y, cellW, cellH);
-                            // Wall highlight
-                            mapCtx.fillStyle = 'rgba(199, 139, 219, 0.15)';
-                            mapCtx.fillRect(x, y, cellW, cellH * 0.15);
-                        } else {
-                            mapCtx.fillStyle = '#2a1f3d';
-                            mapCtx.fillRect(x, y, cellW, cellH);
-                        }
-                    }
+            // corridor grid dots (so the open cells read as walkable)
+            mapCtx.fillStyle = 'rgba(199,139,219,0.13)';
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (MAZE[r][c] === 1) continue;
+                    mapCtx.beginPath();
+                    mapCtx.arc(ox + c * cw + cw / 2, oy + r * ch + ch / 2, Math.max(0.8, cw * 0.045), 0, Math.PI * 2);
+                    mapCtx.fill();
                 }
+            }
 
-                // Draw start
-                mapCtx.fillStyle = '#f8a4b8';
+            // ── real solution path (never crosses a wall) ──
+            const path = solveMaze();
+            if (path.length > 1) {
+                mapCtx.save();
+                mapCtx.strokeStyle = 'rgba(248,164,184,0.42)';
+                mapCtx.lineWidth = Math.max(2, cw * 0.20);
+                mapCtx.lineCap = 'round';
+                mapCtx.lineJoin = 'round';
+                mapCtx.setLineDash([cw * 0.34, cw * 0.42]);
                 mapCtx.beginPath();
-                mapCtx.arc(
-                    startCol * cellW + cellW / 2,
-                    startRow * cellH + cellH / 2,
-                    Math.min(cellW, cellH) * 0.35,
-                    0, Math.PI * 2
-                );
-                mapCtx.fill();
-                mapCtx.fillStyle = '#fff';
-                mapCtx.font = `bold ${Math.min(cellW, cellH) * 0.5}px Inter, sans-serif`;
-                mapCtx.textAlign = 'center';
-                mapCtx.textBaseline = 'middle';
-                mapCtx.fillText('S', startCol * cellW + cellW / 2, startRow * cellH + cellH / 2);
-
-                // Draw end
-                mapCtx.fillStyle = '#c78bdb';
-                mapCtx.beginPath();
-                mapCtx.arc(
-                    endCol * cellW + cellW / 2,
-                    endRow * cellH + cellH / 2,
-                    Math.min(cellW, cellH) * 0.4,
-                    0, Math.PI * 2
-                );
-                mapCtx.fill();
-                mapCtx.fillStyle = '#fff';
-                mapCtx.font = `bold ${Math.min(cellW, cellH) * 0.5}px Inter, sans-serif`;
-                mapCtx.fillText('♥', endCol * cellW + cellW / 2, endRow * cellH + cellH / 2);
-
-                // Path trace hint (subtle)
-                mapCtx.strokeStyle = 'rgba(248, 164, 184, 0.2)';
-                mapCtx.lineWidth = 2;
-                mapCtx.setLineDash([4, 4]);
-                mapCtx.beginPath();
-                mapCtx.moveTo(startCol * cellW + cellW / 2, startRow * cellH + cellH / 2);
-                // Draw a faint winding line toward the end
-                const waypoints = [
-                    [startCol, startRow],
-                    [3, 1], [3, 3], [1, 3], [1, 7], [3, 7], [3, 5], [7, 5],
-                    [7, 7], [5, 7], [5, 9], [3, 9], [3, 11], [1, 11], [1, 13],
-                    [endCol, endRow]
-                ];
-                for (let i = 1; i < waypoints.length; i++) {
-                    const wp = waypoints[i];
-                    mapCtx.lineTo(wp[0] * cellW + cellW / 2, wp[1] * cellH + cellH / 2);
+                for (let i = 0; i < path.length; i++) {
+                    const x = ox + path[i][1] * cw + cw / 2;
+                    const y = oy + path[i][0] * ch + ch / 2;
+                    if (i === 0) mapCtx.moveTo(x, y);
+                    else mapCtx.lineTo(x, y);
                 }
                 mapCtx.stroke();
-                mapCtx.setLineDash([]);
+                mapCtx.restore();
             }
 
-            // ─── RESIZE ───
-            function resize() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+            // ── start marker ──
+            const sx = ox + startCol * cw + cw / 2;
+            const sy = oy + startRow * ch + ch / 2;
+            mapCtx.beginPath();
+            mapCtx.arc(sx, sy, cw * 0.42, 0, Math.PI * 2);
+            mapCtx.fillStyle = '#f8a4b8';
+            mapCtx.fill();
+            mapCtx.fillStyle = '#2a0f1c';
+            mapCtx.font = 'bold ' + Math.round(cw * 0.55) + 'px Inter, sans-serif';
+            mapCtx.textAlign = 'center';
+            mapCtx.textBaseline = 'middle';
+            mapCtx.fillText('S', sx, sy + cw * 0.03);
+
+            // ── end marker (heart) ──
+            const ex = ox + endCol * cw + cw / 2;
+            const ey = oy + endRow * ch + ch / 2;
+            const glow = mapCtx.createRadialGradient(ex, ey, 0, ex, ey, cw * 1.5);
+            glow.addColorStop(0, 'rgba(199,139,219,0.55)');
+            glow.addColorStop(1, 'rgba(199,139,219,0)');
+            mapCtx.fillStyle = glow;
+            mapCtx.beginPath();
+            mapCtx.arc(ex, ey, cw * 1.5, 0, Math.PI * 2);
+            mapCtx.fill();
+
+            mapCtx.beginPath();
+            mapCtx.arc(ex, ey, cw * 0.46, 0, Math.PI * 2);
+            mapCtx.fillStyle = '#c78bdb';
+            mapCtx.fill();
+            mapCtx.fillStyle = '#fff';
+            mapCtx.font = 'bold ' + Math.round(cw * 0.6) + 'px Inter, sans-serif';
+            mapCtx.fillText('♥', ex, ey + cw * 0.04);
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  COLLISION
+        // ═══════════════════════════════════════════════════
+        function isWall(x, z) {
+            const c = Math.floor(x / CELL);
+            const r = Math.floor(z / CELL);
+            if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return true;
+            return MAZE[r][c] === 1;
+        }
+
+        function canOccupy(x, z) {
+            return !isWall(x, z) &&
+                   !isWall(x - PLAYER_R, z - PLAYER_R) &&
+                   !isWall(x + PLAYER_R, z - PLAYER_R) &&
+                   !isWall(x - PLAYER_R, z + PLAYER_R) &&
+                   !isWall(x + PLAYER_R, z + PLAYER_R);
+        }
+
+        function tryMove(dx, dz) {
+            const dist = Math.hypot(dx, dz);
+            if (dist < 1e-6) return;
+            const steps = Math.max(1, Math.ceil(dist / (PLAYER_R * 0.5)));
+            const sx = dx / steps;
+            const sz = dz / steps;
+
+            for (let i = 0; i < steps; i++) {
+                if (canOccupy(px + sx, pz + sz)) {
+                    px += sx; pz += sz;
+                } else if (canOccupy(px + sx, pz)) {
+                    px += sx;                       // slide along X
+                } else if (canOccupy(px, pz + sz)) {
+                    pz += sz;                       // slide along Z
+                } else {
+                    break;
+                }
             }
-            window.addEventListener('resize', resize);
-            resize();
+        }
 
-            // ─── COLLISION DETECTION ───
-            function isWall(x, z) {
-                const col = Math.floor(x / CELL_SIZE);
-                const row = Math.floor(z / CELL_SIZE);
-                if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return true;
-                return MAZE[row][col] === 1;
+        // ═══════════════════════════════════════════════════
+        //  HEART PATH HELPER
+        // ═══════════════════════════════════════════════════
+        function heartPath(c, x, y, s) {
+            c.beginPath();
+            c.moveTo(x, y + s * 0.35);
+            c.bezierCurveTo(x + s * 1.15, y - s * 0.55, x + s * 0.55, y - s * 1.25, x, y - s * 0.50);
+            c.bezierCurveTo(x - s * 0.55, y - s * 1.25, x - s * 1.15, y - s * 0.55, x, y + s * 0.35);
+            c.closePath();
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  RENDER  (raycaster)
+        // ═══════════════════════════════════════════════════
+        function render() {
+            const W = window.innerWidth;
+            const H = window.innerHeight;
+            const hz = H * 0.5 + bobY;           // horizon line
+
+            // ── ceiling ──
+            let g = ctx.createLinearGradient(0, 0, 0, hz);
+            g.addColorStop(0, '#08060f');
+            g.addColorStop(1, '#241839');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, W, hz);
+
+            // ── floor ──
+            g = ctx.createLinearGradient(0, hz, 0, H);
+            g.addColorStop(0, '#1e1533');
+            g.addColorStop(1, '#08060f');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, hz, W, H - hz);
+
+            // ── raycast walls ──
+            const numRays = Math.min(Math.ceil(W), 700);
+            if (depthBuf.length < numRays) depthBuf = new Float32Array(numRays);
+
+            const colW  = W / numRays;
+            const projK = (H * 0.5) / TAN_HALF;
+
+            for (let i = 0; i < numRays; i++) {
+                const camX = (2 * i + 1) / numRays - 1;
+                const rayAngle = angle + Math.atan(camX * TAN_HALF);
+                const cosA = Math.cos(rayAngle);
+                const sinA = Math.sin(rayAngle);
+
+                const posC = px / CELL;
+                const posR = pz / CELL;
+
+                let mapC = Math.floor(posC);
+                let mapR = Math.floor(posR);
+
+                const deltaX = Math.abs(1 / (cosA || 1e-6));
+                const deltaZ = Math.abs(1 / (sinA || 1e-6));
+
+                let stepC, stepR, sideX, sideZ;
+                if (cosA < 0) { stepC = -1; sideX = (posC - mapC) * deltaX; }
+                else          { stepC =  1; sideX = (mapC + 1 - posC) * deltaX; }
+                if (sinA < 0) { stepR = -1; sideZ = (posR - mapR) * deltaZ; }
+                else          { stepR =  1; sideZ = (mapR + 1 - posR) * deltaZ; }
+
+                let side = 0, hit = false, guard = 0;
+
+                while (!hit && guard++ < 256) {
+                    if (sideX < sideZ) { sideX += deltaX; mapC += stepC; side = 0; }
+                    else               { sideZ += deltaZ; mapR += stepR; side = 1; }
+
+                    if (mapC < 0 || mapC >= COLS || mapR < 0 || mapR >= ROWS) break;
+                    if (MAZE[mapR][mapC] === 1) hit = true;
+                }
+
+                let perpCell;
+                if (!hit) {
+                    perpCell = MAX_DIST / CELL;
+                } else if (side === 0) {
+                    perpCell = sideX - deltaX;
+                } else {
+                    perpCell = sideZ - deltaZ;
+                }
+
+                const dist = Math.max(0.12, Math.min(perpCell * CELL, MAX_DIST));
+                depthBuf[i] = dist;
+
+                const wallH = (WALL_H / dist) * projK;
+                const y0 = hz - wallH * 0.5;
+                const y1 = hz + wallH * 0.5;
+
+                // shading
+                const fog = Math.max(0, 1 - dist / MAX_DIST);
+                const lum = 0.10 + 0.90 * fog * fog;
+                const sideMul = side === 1 ? 0.72 : 1;
+                const v = ((mapC * 31 + mapR * 17) % 7) * 3;
+
+                const rr = Math.min(255, (112 + v) * lum * sideMul);
+                const gg = Math.min(255, ( 74 + v * 0.6) * lum * sideMul);
+                const bb = Math.min(255, (170 + v) * lum * sideMul);
+
+                ctx.fillStyle = 'rgb(' + (rr | 0) + ',' + (gg | 0) + ',' + (bb | 0) + ')';
+                ctx.fillRect(i * colW, y0, colW + 1, y1 - y0);
             }
 
-            function canMoveTo(x, z) {
-                // Check with a small radius around the player
-                const r = PLAYER_RADIUS;
-                return !isWall(x - r, z - r) &&
-                       !isWall(x + r, z - r) &&
-                       !isWall(x - r, z + r) &&
-                       !isWall(x + r, z + r) &&
-                       !isWall(x, z);
+            // ── glowing heart at the exit ──
+            (function drawExitHeart() {
+                const dx = END_X - px;
+                const dz = END_Z - pz;
+                const dist = Math.hypot(dx, dz);
+
+                let rel = Math.atan2(dz, dx) - angle;
+                rel = ((rel + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+
+                if (Math.abs(rel) > HALF_FOV * 1.05 || dist > MAX_DIST) return;
+
+                const camX = Math.tan(rel) / TAN_HALF;
+                const sx = (camX + 1) * 0.5 * W;
+                const idx = Math.max(0, Math.min(numRays - 1, Math.floor(sx / W * numRays)));
+
+                if (depthBuf[idx] <= dist - 0.25) return;   // hidden behind a wall
+
+                let s = (1.5 / dist) * projK;
+                s = Math.min(s, H * 2.2);
+
+                const cy = hz - ((1.35 - EYE_H) / dist) * projK;
+                const pulse = 1 + Math.sin(performance.now() * 0.004) * 0.08;
+
+                // glow
+                const glow = ctx.createRadialGradient(sx, cy, 0, sx, cy, s * 2.2);
+                glow.addColorStop(0, 'rgba(248,164,184,0.55)');
+                glow.addColorStop(0.5, 'rgba(199,139,219,0.22)');
+                glow.addColorStop(1, 'rgba(199,139,219,0)');
+                ctx.fillStyle = glow;
+                ctx.beginPath();
+                ctx.arc(sx, cy, s * 2.2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // heart
+                const hs = s * pulse;
+                heartPath(ctx, sx, cy, hs);
+                const hg = ctx.createLinearGradient(sx, cy - hs, sx, cy + hs);
+                hg.addColorStop(0, '#ffd6e4');
+                hg.addColorStop(0.5, '#f8a4b8');
+                hg.addColorStop(1, '#c78bdb');
+                ctx.fillStyle = hg;
+                ctx.fill();
+            })();
+
+            // ── dust motes ──
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.life -= 0.016;
+                if (p.life <= 0) { particles.splice(i, 1); continue; }
+                p.x += p.vx * 0.016;
+                p.y += p.vy * 0.016;
+                ctx.globalAlpha = p.life * 0.5;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+
+            // ── vignette (cached) ──
+            const vKey = W + 'x' + H;
+            if (!vignette || vignetteKey !== vKey) {
+                vignette = ctx.createRadialGradient(
+                    W / 2, H / 2, Math.min(W, H) * 0.30,
+                    W / 2, H / 2, Math.max(W, H) * 0.72
+                );
+                vignette.addColorStop(0, 'rgba(0,0,0,0)');
+                vignette.addColorStop(1, 'rgba(6,3,14,0.78)');
+                vignetteKey = vKey;
+            }
+            ctx.fillStyle = vignette;
+            ctx.fillRect(0, 0, W, H);
+
+            // ── compass (points where she's heading) ──
+            const bearing = Math.atan2(Math.cos(angle), -Math.sin(angle)) * 180 / Math.PI;
+            compass.style.transform = 'rotate(' + bearing.toFixed(1) + 'deg)';
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  UPDATE
+        // ═══════════════════════════════════════════════════
+        function update(dt) {
+            if (!gameActive || gameWon) return;
+
+            // ── turning ──
+            let turn = 0;
+            if (keys.turnL) turn -= 1;
+            if (keys.turnR) turn += 1;
+
+            // look-pad with a small dead-zone
+            let padTurn = 0;
+            if (Math.abs(lookX) > 0.10) {
+                const s = Math.sign(lookX);
+                padTurn = s * (Math.abs(lookX) - 0.10) / 0.90;
+            }
+            turn += padTurn;
+            turn = Math.max(-1, Math.min(1, turn));
+
+            angle += turn * TURN_SPEED * dt;
+            if (angle >  Math.PI) angle -= Math.PI * 2;
+            if (angle < -Math.PI) angle += Math.PI * 2;
+
+            // ── movement (camera-relative) ──
+            const cosA = Math.cos(angle);
+            const sinA = Math.sin(angle);
+
+            let mx = 0, mz = 0;
+            if (keys.forward)  { mx += cosA;  mz += sinA; }
+            if (keys.backward) { mx -= cosA;  mz -= sinA; }
+            if (keys.right)    { mx += -sinA; mz += cosA; }   // strafe right
+            if (keys.left)     { mx -= -sinA; mz -= cosA; }   // strafe left
+
+            const mag = Math.hypot(mx, mz);
+            if (mag > 0.0001) {
+                const k = (MOVE_SPEED * dt) / mag;
+                tryMove(mx * k, mz * k);
+
+                // head-bob
+                bobPhase += dt * 9.5;
+                bobY = Math.sin(bobPhase) * 2.4;
+            } else {
+                bobPhase = 0;
+                bobY *= 0.86;
+                if (Math.abs(bobY) < 0.05) bobY = 0;
             }
 
-            // ─── 3D RENDERING ───
-            function render() {
-                const W = canvas.width;
-                const H = canvas.height;
-                const fov = Math.PI / 3; // 60 degrees
-                const halfFov = fov / 2;
-
-                // Clear
-                ctx.fillStyle = '#0d0a14';
-                ctx.fillRect(0, 0, W, H);
-
-                // Ceiling gradient
-                const ceilGrad = ctx.createLinearGradient(0, 0, 0, H * 0.5);
-                ceilGrad.addColorStop(0, '#0d0a14');
-                ceilGrad.addColorStop(1, '#1a1228');
-                ctx.fillStyle = ceilGrad;
-                ctx.fillRect(0, 0, W, H * 0.5);
-
-                // Floor gradient
-                const floorGrad = ctx.createLinearGradient(0, H * 0.5, 0, H);
-                floorGrad.addColorStop(0, '#1a1228');
-                floorGrad.addColorStop(1, '#0d0a14');
-                ctx.fillStyle = floorGrad;
-                ctx.fillRect(0, H * 0.5, W, H * 0.5);
-
-                // Cast rays for walls
-                const numRays = Math.min(W, 640); // limit for performance
-                const rayStep = W / numRays;
-                const maxDist = 40;
-
-                for (let i = 0; i < numRays; i++) {
-                    const screenX = i * rayStep;
-                    const rayAngle = playerAngle - halfFov + (i / numRays) * fov;
-
-                    // DDA raycasting
-                    const sinA = Math.sin(rayAngle);
-                    const cosA = Math.cos(rayAngle);
-
-                    let dist = 0;
-                    let hit = false;
-                    let side = 0;
-                    let hitX = 0, hitZ = 0;
-
-                    // Step through the grid
-                    let mapX = Math.floor(playerX / CELL_SIZE);
-                    let mapZ = Math.floor(playerZ / CELL_SIZE);
-
-                    const deltaDistX = Math.abs(1 / (cosA || 0.0001)) * CELL_SIZE;
-                    const deltaDistZ = Math.abs(1 / (sinA || 0.0001)) * CELL_SIZE;
-
-                    let stepX, stepZ;
-                    let sideDistX, sideDistZ;
-
-                    if (cosA < 0) {
-                        stepX = -1;
-                        sideDistX = (playerX - mapX * CELL_SIZE) / Math.abs(cosA || 0.0001);
-                    } else {
-                        stepX = 1;
-                        sideDistX = ((mapX + 1) * CELL_SIZE - playerX) / Math.abs(cosA || 0.0001);
+            // ── win check ──
+            const ddx = px - END_X;
+            const ddz = pz - END_Z;
+            if (Math.hypot(ddx, ddz) < CELL * 0.75) {
+                gameWon = true;
+                gameActive = false;
+                try { sessionStorage.setItem('ruth_day7_won', 'true'); } catch (e) {}
+                setTimeout(() => {
+                    winOverlay.classList.remove('hidden');
+                    for (let i = 0; i < 3; i++) {
+                        setTimeout(() => {
+                            confettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+                            sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 24);
+                        }, i * 240);
                     }
-
-                    if (sinA < 0) {
-                        stepZ = -1;
-                        sideDistZ = (playerZ - mapZ * CELL_SIZE) / Math.abs(sinA || 0.0001);
-                    } else {
-                        stepZ = 1;
-                        sideDistZ = ((mapZ + 1) * CELL_SIZE - playerZ) / Math.abs(sinA || 0.0001);
-                    }
-
-                    // DDA
-                    let iterations = 0;
-                    while (!hit && iterations < 200) {
-                        iterations++;
-                        if (sideDistX < sideDistZ) {
-                            sideDistX += deltaDistX;
-                            mapX += stepX;
-                            side = 0;
-                        } else {
-                            sideDistZ += deltaDistZ;
-                            mapZ += stepZ;
-                            side = 1;
-                        }
-
-                        if (mapX < 0 || mapX >= COLS || mapZ < 0 || mapZ >= ROWS) {
-                            hit = true;
-                            dist = maxDist;
-                            break;
-                        }
-
-                        if (MAZE[mapZ][mapX] === 1) {
-                            hit = true;
-                            // Calculate distance
-                            if (side === 0) {
-                                dist = (mapX * CELL_SIZE - playerX) / (cosA || 0.0001);
-                            } else {
-                                dist = (mapZ * CELL_SIZE - playerZ) / (sinA || 0.0001);
-                            }
-                            if (dist < 0) dist = maxDist;
-                            break;
-                        }
-                    }
-
-                    if (!hit) dist = maxDist;
-                    dist = Math.max(0.1, Math.min(dist, maxDist));
-
-                    // Correct fisheye
-                    const correctedDist = dist * Math.cos(rayAngle - playerAngle);
-                    const wallHeight = (WALL_HEIGHT / correctedDist) * (H / 2);
-
-                    // Wall color based on distance
-                    const shade = Math.max(0.15, Math.min(1, 1 - correctedDist / maxDist));
-                    const r = Math.floor(60 + 80 * shade);
-                    const g = Math.floor(40 + 60 * shade);
-                    const b = Math.floor(90 + 100 * shade);
-
-                    // Side shading
-                    const sideShade = side === 1 ? 0.85 : 1;
-
-                    ctx.fillStyle = `rgb(${Math.floor(r * sideShade)}, ${Math.floor(g * sideShade)}, ${Math.floor(b * sideShade)})`;
-                    ctx.fillRect(screenX, H / 2 - wallHeight, rayStep + 1, wallHeight * 2);
-                }
-
-                // Draw end portal glow (if visible)
-                const endX = endCol * CELL_SIZE + CELL_SIZE / 2;
-                const endZ = endRow * CELL_SIZE + CELL_SIZE / 2;
-                const dx = endX - playerX;
-                const dz = endZ - playerZ;
-                const endDist = Math.sqrt(dx * dx + dz * dz);
-                const endAngle = Math.atan2(dz, dx) - playerAngle;
-
-                // Normalize angle
-                let normAngle = endAngle;
-                while (normAngle > Math.PI) normAngle -= Math.PI * 2;
-                while (normAngle < -Math.PI) normAngle += Math.PI * 2;
-
-                if (Math.abs(normAngle) < fov * 1.5 && endDist < 20) {
-                    const screenX = W / 2 + (normAngle / halfFov) * (W / 2);
-                    const size = Math.max(8, (1 / endDist) * 120);
-                    const alpha = Math.max(0.1, 1 - endDist / 20);
-                    ctx.save();
-                    ctx.globalAlpha = alpha;
-                    ctx.fillStyle = '#c78bdb';
-                    ctx.shadowColor = '#c78bdb';
-                    ctx.shadowBlur = 30;
-                    ctx.beginPath();
-                    ctx.arc(screenX, H / 2, size, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
-                }
-
-                // Update compass rotation
-                compass.style.transform = `rotate(${-playerAngle * (180 / Math.PI)}deg)`;
-
-                // Render particles
-                for (let i = particles.length - 1; i >= 0; i--) {
-                    const p = particles[i];
-                    p.x += p.vx * 0.016;
-                    p.y += p.vy * 0.016;
-                    p.life -= 0.016;
-                    if (p.life <= 0) {
-                        particles.splice(i, 1);
-                        continue;
-                    }
-                    ctx.globalAlpha = p.life;
-                    ctx.fillStyle = p.color;
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                ctx.globalAlpha = 1;
+                }, 320);
             }
 
-            // ─── UPDATE ───
-            function update(dt) {
-                if (!gameActive || gameWon) return;
-
-                // Look controls
-                if (lookActive) {
-                    playerAngle += lookVector.x * TURN_SPEED * dt;
-                }
-
-                // Movement
-                let moveX = 0, moveZ = 0;
-                const sinA = Math.sin(playerAngle);
-                const cosA = Math.cos(playerAngle);
-
-                if (keys.forward) {
-                    moveX += sinA * MOVE_SPEED * dt;
-                    moveZ += cosA * MOVE_SPEED * dt;
-                }
-                if (keys.backward) {
-                    moveX -= sinA * MOVE_SPEED * dt;
-                    moveZ -= cosA * MOVE_SPEED * dt;
-                }
-                if (keys.left) {
-                    moveX -= cosA * MOVE_SPEED * dt;
-                    moveZ += sinA * MOVE_SPEED * dt;
-                }
-                if (keys.right) {
-                    moveX += cosA * MOVE_SPEED * dt;
-                    moveZ -= sinA * MOVE_SPEED * dt;
-                }
-
-                // Try move X
-                const newX = playerX + moveX;
-                const newZ = playerZ + moveZ;
-
-                if (canMoveTo(newX, playerZ)) {
-                    playerX = newX;
-                }
-                if (canMoveTo(playerX, newZ)) {
-                    playerZ = newZ;
-                }
-
-                // Check win condition
-                const dx = playerX - (endCol * CELL_SIZE + CELL_SIZE / 2);
-                const dz = playerZ - (endRow * CELL_SIZE + CELL_SIZE / 2);
-                const distToEnd = Math.sqrt(dx * dx + dz * dz);
-
-                if (distToEnd < CELL_SIZE * 0.8 && !gameWon) {
-                    gameWon = true;
-                    gameActive = false;
-                    setTimeout(() => {
-                        winOverlay.classList.remove('hidden');
-                        // Celebration burst
-                        for (let i = 0; i < 3; i++) {
-                            setTimeout(() => {
-                                confettiBurst(window.innerWidth / 2, window.innerHeight / 2);
-                                sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 30);
-                            }, i * 300);
-                        }
-                    }, 400);
-                }
-
-                // Add subtle particle trail
-                if (Math.random() < 0.15) {
-                    particles.push({
-                        x: playerX * 10 + (Math.random() - 0.5) * 20,
-                        y: playerZ * 10 + (Math.random() - 0.5) * 20,
-                        vx: (Math.random() - 0.5) * 10,
-                        vy: -Math.random() * 15,
-                        life: 0.8,
-                        size: 1 + Math.random() * 2,
-                        color: `rgba(199, 139, 219, ${0.3 + Math.random() * 0.3})`
-                    });
-                }
-            }
-
-            // ─── GAME LOOP ───
-            function gameLoop(time) {
-                const dt = Math.min((time - lastTime) / 1000, 0.1) || 0.016;
-                lastTime = time;
-
-                update(dt);
-                render();
-
-                animFrame = requestAnimationFrame(gameLoop);
-            }
-
-            // ─── START GAME ───
-            function startGame() {
-                introOverlay.classList.add('hidden');
-                gameActive = true;
-                gameWon = false;
-                hasSeenIntro = true;
-
-                // Reset player
-                playerX = startCol * CELL_SIZE + CELL_SIZE / 2;
-                playerZ = startRow * CELL_SIZE + CELL_SIZE / 2;
-                playerAngle = 0;
-
-                // Show hint
-                mobileHint.classList.add('show');
-                setTimeout(() => mobileHint.classList.remove('show'), 4000);
-
-                // Start loop if not already running
-                if (!animFrame) {
-                    lastTime = performance.now();
-                    animFrame = requestAnimationFrame(gameLoop);
-                }
-            }
-
-            // ─── CONTROLS: KEYBOARD ───
-            document.addEventListener('keydown', (e) => {
-                if (!gameActive) return;
-                switch (e.key.toLowerCase()) {
-                    case 'w': case 'arrowup': keys.forward = true; e.preventDefault(); break;
-                    case 's': case 'arrowdown': keys.backward = true; e.preventDefault(); break;
-                    case 'a': case 'arrowleft': keys.left = true; e.preventDefault(); break;
-                    case 'd': case 'arrowright': keys.right = true; e.preventDefault(); break;
-                }
-            });
-
-            document.addEventListener('keyup', (e) => {
-                switch (e.key.toLowerCase()) {
-                    case 'w': case 'arrowup': keys.forward = false; break;
-                    case 's': case 'arrowdown': keys.backward = false; break;
-                    case 'a': case 'arrowleft': keys.left = false; break;
-                    case 'd': case 'arrowright': keys.right = false; break;
-                }
-            });
-
-            // ─── CONTROLS: D-PAD (touch & mouse) ───
-            const dpadBtns = dpad.querySelectorAll('.dpad-btn[data-dir]');
-            dpadBtns.forEach(btn => {
-                const dir = btn.dataset.dir;
-
-                const press = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    keys[dir] = true;
-                    btn.classList.add('active');
-                };
-
-                const release = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    keys[dir] = false;
-                    btn.classList.remove('active');
-                };
-
-                btn.addEventListener('touchstart', press, { passive: false });
-                btn.addEventListener('touchend', release);
-                btn.addEventListener('touchcancel', release);
-                btn.addEventListener('mousedown', press);
-                btn.addEventListener('mouseup', release);
-                btn.addEventListener('mouseleave', release);
-            });
-
-            // ─── CONTROLS: LOOK PAD ───
-            function handleLookStart(e) {
-                e.preventDefault();
-                lookActive = true;
-                const rect = lookPad.getBoundingClientRect();
-                const touch = e.touches ? e.touches[0] : e;
-                lookStartX = touch.clientX;
-                lookStartY = touch.clientY;
-                lookVector.x = 0;
-                lookVector.y = 0;
-                updateLookKnob(0, 0);
-            }
-
-            function handleLookMove(e) {
-                if (!lookActive) return;
-                e.preventDefault();
-                const rect = lookPad.getBoundingClientRect();
-                const touch = e.touches ? e.touches[0] : e;
-                const dx = touch.clientX - lookStartX;
-                const dy = touch.clientY - lookStartY;
-                const maxDist = rect.width * 0.4;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                const clampedDist = Math.min(dist, maxDist);
-                const angle = Math.atan2(dy, dx);
-
-                const kx = Math.cos(angle) * clampedDist;
-                const ky = Math.sin(angle) * clampedDist;
-
-                lookVector.x = kx / maxDist;
-                lookVector.y = ky / maxDist;
-
-                updateLookKnob(kx, ky);
-            }
-
-            function handleLookEnd(e) {
-                if (!lookActive) return;
-                e.preventDefault();
-                lookActive = false;
-                lookVector.x = 0;
-                lookVector.y = 0;
-                updateLookKnob(0, 0);
-            }
-
-            function updateLookKnob(x, y) {
-                lookKnob.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
-            }
-
-            lookPad.addEventListener('touchstart', handleLookStart, { passive: false });
-            lookPad.addEventListener('touchmove', handleLookMove, { passive: false });
-            lookPad.addEventListener('touchend', handleLookEnd);
-            lookPad.addEventListener('touchcancel', handleLookEnd);
-
-            lookPad.addEventListener('mousedown', handleLookStart);
-            document.addEventListener('mousemove', handleLookMove);
-            document.addEventListener('mouseup', handleLookEnd);
-
-            // ─── EFFECTS ───
-            function sparkleBurst(cx, cy, count) {
-                const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
-                const total = count || 24;
-                for (let i = 0; i < total; i++) {
-                    const spark = document.createElement('div');
-                    spark.className = 'sparkle-burst';
-                    spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-                    const angle = Math.random() * 2 * Math.PI;
-                    const dist = 60 + Math.random() * 180;
-                    spark.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-                    spark.style.setProperty('--ty', Math.sin(angle) * dist - 50 + 'px');
-                    spark.style.left = (cx || window.innerWidth / 2) + 'px';
-                    spark.style.top = (cy || window.innerHeight / 2) + 'px';
-                    spark.style.fontSize = 1 + Math.random() * 1.8 + 'rem';
-                    spark.style.animationDuration = 0.4 + Math.random() * 0.6 + 's';
-                    document.body.appendChild(spark);
-                    setTimeout(() => spark.remove(), 1200);
-                }
-            }
-
-            function confettiBurst(cx, cy) {
-                const colors = ['#f8a4b8', '#c78bdb', '#f5c6a0', '#ffd6d6', '#d4b8e0', '#fce7f3', '#ffb3c6', '#b8d4e3'];
-                const count = 40 + Math.floor(Math.random() * 30);
-                for (let i = 0; i < count; i++) {
-                    const piece = document.createElement('div');
-                    piece.className = 'confetti-piece';
-                    piece.style.left = (cx || window.innerWidth / 2) + 'px';
-                    piece.style.top = (cy || window.innerHeight / 2) + 'px';
-                    piece.style.width = (4 + Math.random() * 7) + 'px';
-                    piece.style.height = (4 + Math.random() * 7) + 'px';
-                    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-                    const angle = Math.random() * 2 * Math.PI;
-                    const dist = 60 + Math.random() * 300;
-                    piece.style.animationDuration = (1.0 + Math.random() * 1.6) + 's';
-                    piece.style.animationDelay = (Math.random() * 0.5) + 's';
-                    piece.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-                    piece.style.setProperty('--ty', Math.sin(angle) * dist - 140 + 'px');
-                    document.body.appendChild(piece);
-                    setTimeout(() => piece.remove(), 2800);
-                }
-            }
-
-            // ─── INIT ───
-            function init() {
-                // Draw the map preview
-                drawMapPreview();
-
-                // Check if intro has been seen before (stored in session)
-                const introSeen = sessionStorage.getItem('ruth_day7_intro_seen');
-                if (introSeen === 'true') {
-                    introOverlay.classList.add('hidden');
-                    startGame();
-                }
-
-                // Start button
-                startGameBtn.addEventListener('click', () => {
-                    sessionStorage.setItem('ruth_day7_intro_seen', 'true');
-                    startGame();
+            // ── dust motes ──
+            if (Math.random() < 0.10) {
+                particles.push({
+                    x: Math.random() * window.innerWidth,
+                    y: window.innerHeight * 0.45 + Math.random() * window.innerHeight * 0.45,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: -Math.random() * 12,
+                    life: 0.6 + Math.random() * 0.6,
+                    size: 1 + Math.random() * 1.5,
+                    color: 'rgba(199,139,219,' + (0.15 + Math.random() * 0.2).toFixed(2) + ')'
                 });
-
-                // Play again
-                playAgainBtn.addEventListener('click', () => {
-                    winOverlay.classList.add('hidden');
-                    // Reset player
-                    playerX = startCol * CELL_SIZE + CELL_SIZE / 2;
-                    playerZ = startRow * CELL_SIZE + CELL_SIZE / 2;
-                    playerAngle = 0;
-                    gameWon = false;
-                    gameActive = true;
-                    particles = [];
-                    mobileHint.classList.add('show');
-                    setTimeout(() => mobileHint.classList.remove('show'), 3000);
-                });
-
-                // Initial render
-                render();
-
-                // Start loop if intro seen
-                if (introSeen === 'true') {
-                    if (!animFrame) {
-                        lastTime = performance.now();
-                        animFrame = requestAnimationFrame(gameLoop);
-                    }
-                }
             }
+        }
 
-            init();
+        // ═══════════════════════════════════════════════════
+        //  LOOP
+        // ═══════════════════════════════════════════════════
+        function loop(t) {
+            rafId = requestAnimationFrame(loop);       // schedule FIRST so it can never die
+            const dt = Math.min((t - lastT) / 1000, 0.05) || 0.016;
+            lastT = t;
+            update(dt);
+            render();
+        }
 
-            console.log('🌸 Day 7 · The Path to You · 3D Maze 💖');
-        })();
+        // ═══════════════════════════════════════════════════
+        //  START / RESET
+        // ═══════════════════════════════════════════════════
+        function resetPlayer() {
+            px = START_X;
+            pz = START_Z;
+            angle = 0;                 // facing +X (east)
+            bobPhase = 0;
+            bobY = 0;
+        }
+
+        function startGame() {
+            introOverlay.classList.add('hidden');
+            resetPlayer();
+            particles.length = 0;
+            gameWon = false;
+            gameActive = true;
+
+            mobileHint.classList.add('show');
+            setTimeout(() => mobileHint.classList.remove('show'), 4200);
+
+            lastT = performance.now();
+            if (!rafId) rafId = requestAnimationFrame(loop);
+        }
+
+        function resetGame() {
+            winOverlay.classList.add('hidden');
+            resetPlayer();
+            particles.length = 0;
+            gameWon = false;
+            gameActive = true;
+
+            mobileHint.classList.add('show');
+            setTimeout(() => mobileHint.classList.remove('show'), 3000);
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  KEYBOARD
+        // ═══════════════════════════════════════════════════
+        document.addEventListener('keydown', (e) => {
+            if (!gameActive) return;
+            const k = e.key.toLowerCase();
+            if (k === 'w' || k === 'arrowup')         { keys.forward  = true; e.preventDefault(); }
+            else if (k === 's' || k === 'arrowdown')  { keys.backward = true; e.preventDefault(); }
+            else if (k === 'a')                       { keys.left     = true; e.preventDefault(); }
+            else if (k === 'd')                       { keys.right    = true; e.preventDefault(); }
+            else if (k === 'arrowleft'  || k === 'q') { keys.turnL    = true; e.preventDefault(); }
+            else if (k === 'arrowright' || k === 'e') { keys.turnR    = true; e.preventDefault(); }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            const k = e.key.toLowerCase();
+            if (k === 'w' || k === 'arrowup')         keys.forward  = false;
+            else if (k === 's' || k === 'arrowdown')  keys.backward = false;
+            else if (k === 'a')                       keys.left     = false;
+            else if (k === 'd')                       keys.right    = false;
+            else if (k === 'arrowleft'  || k === 'q') keys.turnL    = false;
+            else if (k === 'arrowright' || k === 'e') keys.turnR    = false;
+        });
+
+        window.addEventListener('blur', () => {
+            keys.forward = keys.backward = keys.left = keys.right = keys.turnL = keys.turnR = false;
+            document.querySelectorAll('.dpad-btn.active').forEach(b => b.classList.remove('active'));
+        });
+
+        // ═══════════════════════════════════════════════════
+        //  D-PAD  (pointer events — works for touch + mouse)
+        // ═══════════════════════════════════════════════════
+        dpad.querySelectorAll('.dpad-btn[data-dir]').forEach((btn) => {
+            const dir = btn.dataset.dir;
+
+            const press = (e) => {
+                e.preventDefault();
+                try { btn.setPointerCapture(e.pointerId); } catch (err) {}
+                keys[dir] = true;
+                btn.classList.add('active');
+            };
+            const release = (e) => {
+                keys[dir] = false;
+                btn.classList.remove('active');
+            };
+
+            btn.addEventListener('pointerdown', press);
+            btn.addEventListener('pointerup', release);
+            btn.addEventListener('pointercancel', release);
+            btn.addEventListener('lostpointercapture', release);
+            btn.addEventListener('contextmenu', (e) => e.preventDefault());
+        });
+
+        // ═══════════════════════════════════════════════════
+        //  LOOK PAD
+        // ═══════════════════════════════════════════════════
+        const lookState = { active: false, id: null, ox: 0, oy: 0, radius: 1 };
+
+        function updateKnob(x, y) {
+            lookKnob.style.transform =
+                'translate(calc(-50% + ' + x + 'px), calc(-50% + ' + y + 'px))';
+        }
+
+        function lookStart(e) {
+            const rect = lookPad.getBoundingClientRect();
+            lookState.active = true;
+            lookState.id = e.pointerId;
+            lookState.radius = Math.max(24, rect.width * 0.38);
+            // origin = where the finger landed  → no sudden jerk
+            lookState.ox = e.clientX;
+            lookState.oy = e.clientY;
+            lookX = 0; lookY = 0;
+            updateKnob(0, 0);
+            try { lookPad.setPointerCapture(e.pointerId); } catch (err) {}
+            e.preventDefault();
+        }
+
+        function lookMove(e) {
+            if (!lookState.active || e.pointerId !== lookState.id) return;
+            let dx = e.clientX - lookState.ox;
+            let dy = e.clientY - lookState.oy;
+            const d = Math.hypot(dx, dy);
+            const r = lookState.radius;
+            if (d > r) { dx = dx / d * r; dy = dy / d * r; }
+            lookX = dx / r;
+            lookY = dy / r;
+            updateKnob(dx, dy);
+            e.preventDefault();
+        }
+
+        function lookEnd(e) {
+            if (e && lookState.id !== null && e.pointerId !== lookState.id) return;
+            lookState.active = false;
+            lookState.id = null;
+            lookX = 0;
+            lookY = 0;
+            updateKnob(0, 0);
+        }
+
+        lookPad.addEventListener('pointerdown', lookStart);
+        lookPad.addEventListener('pointermove', lookMove);
+        lookPad.addEventListener('pointerup', lookEnd);
+        lookPad.addEventListener('pointercancel', lookEnd);
+        lookPad.addEventListener('lostpointercapture', lookEnd);
+        lookPad.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // ═══════════════════════════════════════════════════
+        //  EFFECTS
+        // ═══════════════════════════════════════════════════
+        function sparkleBurst(cx, cy, count) {
+            const emojis = ['❤️','💖','✨','🌟','🎉','💗','🌸','🌺','🥳','💕','🦋','⭐','💫','🎊','🌈'];
+            const total = count || 24;
+            for (let i = 0; i < total; i++) {
+                const s = document.createElement('div');
+                s.className = 'sparkle-burst';
+                s.textContent = emojis[(Math.random() * emojis.length) | 0];
+                const a = Math.random() * Math.PI * 2;
+                const d = 60 + Math.random() * 180;
+                s.style.setProperty('--tx', (Math.cos(a) * d) + 'px');
+                s.style.setProperty('--ty', (Math.sin(a) * d - 50) + 'px');
+                s.style.left = cx + 'px';
+                s.style.top = cy + 'px';
+                s.style.fontSize = (1 + Math.random() * 1.6) + 'rem';
+                s.style.animationDuration = (0.4 + Math.random() * 0.6) + 's';
+                document.body.appendChild(s);
+                setTimeout(() => s.remove(), 1200);
+            }
+        }
+
+        function confettiBurst(cx, cy) {
+            const colors = ['#f8a4b8','#c78bdb','#f5c6a0','#ffd6d6','#d4b8e0','#fce7f3','#ffb3c6'];
+            const count = 40 + ((Math.random() * 30) | 0);
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('div');
+                p.className = 'confetti-piece';
+                p.style.left = cx + 'px';
+                p.style.top = cy + 'px';
+                p.style.width  = (4 + Math.random() * 7) + 'px';
+                p.style.height = (4 + Math.random() * 7) + 'px';
+                p.style.background = colors[(Math.random() * colors.length) | 0];
+                p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                const a = Math.random() * Math.PI * 2;
+                const d = 60 + Math.random() * 300;
+                p.style.animationDuration = (1.0 + Math.random() * 1.5) + 's';
+                p.style.animationDelay = (Math.random() * 0.4) + 's';
+                p.style.setProperty('--tx', (Math.cos(a) * d) + 'px');
+                p.style.setProperty('--ty', (Math.sin(a) * d - 140) + 'px');
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 3200);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  INIT
+        // ═══════════════════════════════════════════════════
+        resize();
+        drawMapPreview();
+        resetPlayer();
+        render();
+
+        startGameBtn.addEventListener('click', startGame);
+        playAgainBtn.addEventListener('click', resetGame);
+
+        console.log('🌸 Day 7 · The Path to You 💖');
+    })();
     </script>
-
 </body>
 </html>
