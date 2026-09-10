@@ -370,7 +370,7 @@
         /* Map preview — square, contained, never clipped */
         .map-container {
             margin: 16px auto 20px;
-            max-width: 340px;
+            max-width: 380px;
             border-radius: 16px;
             border: 1px solid rgba(199, 139, 219, 0.25);
             background: #0d0a14;
@@ -561,7 +561,7 @@
             .compass { width: 42px; height: 42px; }
             .compass-arrow { border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 10px solid #f8a4b8; }
             .mobile-hint { bottom: 140px; font-size: 0.72rem; padding: 6px 14px; }
-            .map-container { max-width: 300px; }
+            .map-container { max-width: 320px; }
         }
 
         @media (max-width: 380px) {
@@ -570,7 +570,7 @@
             .look-pad { width: 80px; height: 80px; }
             .look-pad .look-knob { width: 30px; height: 30px; }
             .overlay-card .card-title { font-size: 1.3rem; }
-            .map-container { max-width: 250px; }
+            .map-container { max-width: 260px; }
         }
 
         ::-webkit-scrollbar { width: 4px; }
@@ -591,7 +591,7 @@
     </div>
 
     <div class="mobile-hint" id="mobileHint">
-        use the d-pad to move · drag the look pad to turn
+        swipe screen or use look pad to turn · d-pad to move
     </div>
 
     <div class="controls">
@@ -628,7 +628,7 @@
                 <div class="rule-box">
                     <p><span class="highlight">🧭 How it works:</span></p>
                     <p>· Study the map below — it shows you the way through.</p>
-                    <p>· Use the <span class="highlight">d-pad</span> to move and the <span class="highlight">look pad</span> to turn.</p>
+                    <p>· Use the <span class="highlight">d-pad</span> to move and <span class="highlight">swipe the screen</span> (or use the look pad) to turn.</p>
                     <p>· Find your way to the <span class="highlight">glowing heart</span> at the other end.</p>
                     <p>· Take your time — there's no wrong turn that can't be undone.</p>
                 </div>
@@ -639,7 +639,7 @@
             </div>
 
             <div class="map-container">
-                <canvas id="mapCanvas" width="400" height="400"></canvas>
+                <canvas id="mapCanvas" width="500" height="500"></canvas>
                 <div class="map-tag">📌 your map · study it well</div>
             </div>
 
@@ -675,30 +675,77 @@
         'use strict';
 
         // ═══════════════════════════════════════════════════
-        //  MAZE   (1 = wall, 0 = path, 2 = start, 3 = end)
+        //  SEEDED RANDOM & MAZE GENERATOR
         // ═══════════════════════════════════════════════════
-        const MAZE = [
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,2,0,0,0,0,1,0,0,0,0,0,0,0,1],
-            [1,0,1,1,0,1,1,0,1,1,1,1,1,0,1],
-            [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
-            [1,0,1,0,1,1,1,1,1,1,1,0,1,0,1],
-            [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
-            [1,1,1,0,1,0,1,1,1,0,1,0,1,1,1],
-            [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
-            [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1],
-            [1,0,1,0,0,0,0,0,1,0,0,0,1,0,1],
-            [1,0,1,0,1,1,1,1,1,0,1,0,1,0,1],
-            [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
-            [1,1,1,0,1,0,1,1,1,1,1,0,1,1,1],
-            [1,0,0,0,0,0,1,0,0,0,0,0,0,3,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-        ];
+        function mulberry32(a) {
+            return function() {
+                var t = a += 0x6D2B79F5;
+                t = Math.imul(t ^ t >>> 15, t | 1);
+                t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+                return ((t ^ t >>> 14) >>> 0) / 4294967296;
+            }
+        }
+
+        function generateMaze(width, height, seed) {
+            // Force odd dimensions for proper maze generation
+            if (width % 2 === 0) width++;
+            if (height % 2 === 0) height++;
+            
+            const rng = mulberry32(seed);
+            const maze = Array(height).fill().map(() => Array(width).fill(1));
+            
+            const stack = [];
+            let current = { x: 1, y: 1 };
+            maze[1][1] = 0;
+            
+            const dirs = [
+                { dx: 0, dy: -2 }, // up
+                { dx: 2, dy: 0 },  // right
+                { dx: 0, dy: 2 },  // down
+                { dx: -2, dy: 0 }  // left
+            ];
+            
+            while (true) {
+                const neighbors = [];
+                for (const d of dirs) {
+                    const nx = current.x + d.dx;
+                    const ny = current.y + d.dy;
+                    if (nx > 0 && nx < width - 1 && ny > 0 && ny < height - 1 && maze[ny][nx] === 1) {
+                        neighbors.push({ x: nx, y: ny, dx: d.dx, dy: d.dy });
+                    }
+                }
+                
+                if (neighbors.length > 0) {
+                    const next = neighbors[Math.floor(rng() * neighbors.length)];
+                    maze[current.y + next.dy / 2][current.x + next.dx / 2] = 0;
+                    maze[next.y][next.x] = 0;
+                    stack.push(current);
+                    current = { x: next.x, y: next.y };
+                } else {
+                    if (stack.length === 0) break;
+                    current = stack.pop();
+                }
+            }
+            
+            // Set start and end
+            maze[1][1] = 2;
+            maze[height - 2][width - 2] = 3;
+            
+            return maze;
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  MAZE CONFIG  (25x25, fixed seed)
+        // ═══════════════════════════════════════════════════
+        const MAZE_W = 25;
+        const MAZE_H = 25;
+        const SEED   = 20240607; // fixed seed → same maze every time
+        const MAZE   = generateMaze(MAZE_W, MAZE_H, SEED);
 
         const ROWS = MAZE.length;
         const COLS = MAZE[0].length;
 
-        let startRow = 1, startCol = 1, endRow = 13, endCol = 13;
+        let startRow = 1, startCol = 1, endRow = ROWS - 2, endCol = COLS - 2;
         for (let r = 0; r < ROWS; r++) {
             for (let c = 0; c < COLS; c++) {
                 if (MAZE[r][c] === 2) { startRow = r; startCol = c; }
@@ -707,16 +754,16 @@
         }
 
         // ── world constants ──
-        const CELL       = 4;              // world units per maze cell
-        const WALL_H     = 3.2;            // wall height
-        const EYE_H      = WALL_H / 2;     // eye height  → horizon = wall mid-line
-        const MOVE_SPEED = 3.6;            // units / second
-        const TURN_SPEED = 2.6;            // radians / second
-        const PLAYER_R   = 0.62;           // collision radius (world units)
-        const FOV        = Math.PI / 3;    // 60°
+        const CELL       = 4;
+        const WALL_H     = 3.2;
+        const EYE_H      = WALL_H / 2;
+        const MOVE_SPEED = 4.2;            // faster for larger maze
+        const TURN_SPEED = 2.8;
+        const PLAYER_R   = 0.62;
+        const FOV        = Math.PI / 3;
         const HALF_FOV   = FOV / 2;
         const TAN_HALF   = Math.tan(HALF_FOV);
-        const MAX_DIST   = 34;
+        const MAX_DIST   = 40;
 
         const START_X = startCol * CELL + CELL / 2;
         const START_Z = startRow * CELL + CELL / 2;
@@ -750,8 +797,8 @@
             turnL: false, turnR: false
         };
 
-        let lookX = 0;            // -1 .. 1  (turn rate from look pad)
-        let lookY = 0;            // -1 .. 1  (unused, for the knob visual)
+        let lookX = 0;
+        let lookY = 0;
 
         let gameActive = false;
         let gameWon    = false;
@@ -777,13 +824,13 @@
             canvas.style.width  = w + 'px';
             canvas.style.height = h + 'px';
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            vignette = null;   // rebuild next frame
+            vignette = null;
         }
         window.addEventListener('resize', resize);
         window.addEventListener('orientationchange', () => setTimeout(resize, 120));
 
         // ═══════════════════════════════════════════════════
-        //  MAP  (top-down preview)  +  BFS SOLVER
+        //  BFS SOLVER
         // ═══════════════════════════════════════════════════
         const DIRS = [[1,0],[-1,0],[0,1],[0,-1]];
 
@@ -820,6 +867,9 @@
             return path.reverse();
         }
 
+        // ═══════════════════════════════════════════════════
+        //  MAP PREVIEW
+        // ═══════════════════════════════════════════════════
         function drawMapPreview() {
             const W = mapCanvas.width;
             const H = mapCanvas.height;
@@ -828,14 +878,12 @@
             const ch = (H - PAD * 2) / ROWS;
             const ox = PAD, oy = PAD;
 
-            // background
             const bg = mapCtx.createLinearGradient(0, 0, W, H);
             bg.addColorStop(0, '#150f22');
             bg.addColorStop(1, '#0b0813');
             mapCtx.fillStyle = bg;
             mapCtx.fillRect(0, 0, W, H);
 
-            // cells
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
                     const x = ox + c * cw;
@@ -852,7 +900,6 @@
                 }
             }
 
-            // corridor grid dots (so the open cells read as walkable)
             mapCtx.fillStyle = 'rgba(199,139,219,0.13)';
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
@@ -863,7 +910,6 @@
                 }
             }
 
-            // ── real solution path (never crosses a wall) ──
             const path = solveMaze();
             if (path.length > 1) {
                 mapCtx.save();
@@ -883,7 +929,6 @@
                 mapCtx.restore();
             }
 
-            // ── start marker ──
             const sx = ox + startCol * cw + cw / 2;
             const sy = oy + startRow * ch + ch / 2;
             mapCtx.beginPath();
@@ -896,7 +941,6 @@
             mapCtx.textBaseline = 'middle';
             mapCtx.fillText('S', sx, sy + cw * 0.03);
 
-            // ── end marker (heart) ──
             const ex = ox + endCol * cw + cw / 2;
             const ey = oy + endRow * ch + ch / 2;
             const glow = mapCtx.createRadialGradient(ex, ey, 0, ex, ey, cw * 1.5);
@@ -945,9 +989,9 @@
                 if (canOccupy(px + sx, pz + sz)) {
                     px += sx; pz += sz;
                 } else if (canOccupy(px + sx, pz)) {
-                    px += sx;                       // slide along X
+                    px += sx;
                 } else if (canOccupy(px, pz + sz)) {
-                    pz += sz;                       // slide along Z
+                    pz += sz;
                 } else {
                     break;
                 }
@@ -955,7 +999,7 @@
         }
 
         // ═══════════════════════════════════════════════════
-        //  HEART PATH HELPER
+        //  HEART PATH
         // ═══════════════════════════════════════════════════
         function heartPath(c, x, y, s) {
             c.beginPath();
@@ -966,28 +1010,25 @@
         }
 
         // ═══════════════════════════════════════════════════
-        //  RENDER  (raycaster)
+        //  RENDER
         // ═══════════════════════════════════════════════════
         function render() {
             const W = window.innerWidth;
             const H = window.innerHeight;
-            const hz = H * 0.5 + bobY;           // horizon line
+            const hz = H * 0.5 + bobY;
 
-            // ── ceiling ──
             let g = ctx.createLinearGradient(0, 0, 0, hz);
             g.addColorStop(0, '#08060f');
             g.addColorStop(1, '#241839');
             ctx.fillStyle = g;
             ctx.fillRect(0, 0, W, hz);
 
-            // ── floor ──
             g = ctx.createLinearGradient(0, hz, 0, H);
             g.addColorStop(0, '#1e1533');
             g.addColorStop(1, '#08060f');
             ctx.fillStyle = g;
             ctx.fillRect(0, hz, W, H - hz);
 
-            // ── raycast walls ──
             const numRays = Math.min(Math.ceil(W), 700);
             if (depthBuf.length < numRays) depthBuf = new Float32Array(numRays);
 
@@ -1041,7 +1082,6 @@
                 const y0 = hz - wallH * 0.5;
                 const y1 = hz + wallH * 0.5;
 
-                // shading
                 const fog = Math.max(0, 1 - dist / MAX_DIST);
                 const lum = 0.10 + 0.90 * fog * fog;
                 const sideMul = side === 1 ? 0.72 : 1;
@@ -1055,7 +1095,7 @@
                 ctx.fillRect(i * colW, y0, colW + 1, y1 - y0);
             }
 
-            // ── glowing heart at the exit ──
+            // Glowing heart at exit
             (function drawExitHeart() {
                 const dx = END_X - px;
                 const dz = END_Z - pz;
@@ -1070,7 +1110,7 @@
                 const sx = (camX + 1) * 0.5 * W;
                 const idx = Math.max(0, Math.min(numRays - 1, Math.floor(sx / W * numRays)));
 
-                if (depthBuf[idx] <= dist - 0.25) return;   // hidden behind a wall
+                if (depthBuf[idx] <= dist - 0.25) return;
 
                 let s = (1.5 / dist) * projK;
                 s = Math.min(s, H * 2.2);
@@ -1078,7 +1118,6 @@
                 const cy = hz - ((1.35 - EYE_H) / dist) * projK;
                 const pulse = 1 + Math.sin(performance.now() * 0.004) * 0.08;
 
-                // glow
                 const glow = ctx.createRadialGradient(sx, cy, 0, sx, cy, s * 2.2);
                 glow.addColorStop(0, 'rgba(248,164,184,0.55)');
                 glow.addColorStop(0.5, 'rgba(199,139,219,0.22)');
@@ -1088,7 +1127,6 @@
                 ctx.arc(sx, cy, s * 2.2, 0, Math.PI * 2);
                 ctx.fill();
 
-                // heart
                 const hs = s * pulse;
                 heartPath(ctx, sx, cy, hs);
                 const hg = ctx.createLinearGradient(sx, cy - hs, sx, cy + hs);
@@ -1099,7 +1137,7 @@
                 ctx.fill();
             })();
 
-            // ── dust motes ──
+            // Dust motes
             for (let i = particles.length - 1; i >= 0; i--) {
                 const p = particles[i];
                 p.life -= 0.016;
@@ -1114,7 +1152,7 @@
             }
             ctx.globalAlpha = 1;
 
-            // ── vignette (cached) ──
+            // Vignette
             const vKey = W + 'x' + H;
             if (!vignette || vignetteKey !== vKey) {
                 vignette = ctx.createRadialGradient(
@@ -1128,7 +1166,6 @@
             ctx.fillStyle = vignette;
             ctx.fillRect(0, 0, W, H);
 
-            // ── compass (points where she's heading) ──
             const bearing = Math.atan2(Math.cos(angle), -Math.sin(angle)) * 180 / Math.PI;
             compass.style.transform = 'rotate(' + bearing.toFixed(1) + 'deg)';
         }
@@ -1139,12 +1176,10 @@
         function update(dt) {
             if (!gameActive || gameWon) return;
 
-            // ── turning ──
             let turn = 0;
             if (keys.turnL) turn -= 1;
             if (keys.turnR) turn += 1;
 
-            // look-pad with a small dead-zone
             let padTurn = 0;
             if (Math.abs(lookX) > 0.10) {
                 const s = Math.sign(lookX);
@@ -1157,22 +1192,20 @@
             if (angle >  Math.PI) angle -= Math.PI * 2;
             if (angle < -Math.PI) angle += Math.PI * 2;
 
-            // ── movement (camera-relative) ──
             const cosA = Math.cos(angle);
             const sinA = Math.sin(angle);
 
             let mx = 0, mz = 0;
             if (keys.forward)  { mx += cosA;  mz += sinA; }
             if (keys.backward) { mx -= cosA;  mz -= sinA; }
-            if (keys.right)    { mx += -sinA; mz += cosA; }   // strafe right
-            if (keys.left)     { mx -= -sinA; mz -= cosA; }   // strafe left
+            if (keys.right)    { mx += -sinA; mz += cosA; }
+            if (keys.left)     { mx -= -sinA; mz -= cosA; }
 
             const mag = Math.hypot(mx, mz);
             if (mag > 0.0001) {
                 const k = (MOVE_SPEED * dt) / mag;
                 tryMove(mx * k, mz * k);
 
-                // head-bob
                 bobPhase += dt * 9.5;
                 bobY = Math.sin(bobPhase) * 2.4;
             } else {
@@ -1181,7 +1214,6 @@
                 if (Math.abs(bobY) < 0.05) bobY = 0;
             }
 
-            // ── win check ──
             const ddx = px - END_X;
             const ddz = pz - END_Z;
             if (Math.hypot(ddx, ddz) < CELL * 0.75) {
@@ -1199,7 +1231,6 @@
                 }, 320);
             }
 
-            // ── dust motes ──
             if (Math.random() < 0.10) {
                 particles.push({
                     x: Math.random() * window.innerWidth,
@@ -1217,7 +1248,7 @@
         //  LOOP
         // ═══════════════════════════════════════════════════
         function loop(t) {
-            rafId = requestAnimationFrame(loop);       // schedule FIRST so it can never die
+            rafId = requestAnimationFrame(loop);
             const dt = Math.min((t - lastT) / 1000, 0.05) || 0.016;
             lastT = t;
             update(dt);
@@ -1230,7 +1261,7 @@
         function resetPlayer() {
             px = START_X;
             pz = START_Z;
-            angle = 0;                 // facing +X (east)
+            angle = 0;
             bobPhase = 0;
             bobY = 0;
         }
@@ -1290,7 +1321,7 @@
         });
 
         // ═══════════════════════════════════════════════════
-        //  D-PAD  (pointer events — works for touch + mouse)
+        //  D-PAD
         // ═══════════════════════════════════════════════════
         dpad.querySelectorAll('.dpad-btn[data-dir]').forEach((btn) => {
             const dir = btn.dataset.dir;
@@ -1328,7 +1359,6 @@
             lookState.active = true;
             lookState.id = e.pointerId;
             lookState.radius = Math.max(24, rect.width * 0.38);
-            // origin = where the finger landed  → no sudden jerk
             lookState.ox = e.clientX;
             lookState.oy = e.clientY;
             lookX = 0; lookY = 0;
@@ -1365,6 +1395,43 @@
         lookPad.addEventListener('pointercancel', lookEnd);
         lookPad.addEventListener('lostpointercapture', lookEnd);
         lookPad.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // ═══════════════════════════════════════════════════
+        //  SWIPE-TO-LOOK ON CANVAS (mobile)
+        // ═══════════════════════════════════════════════════
+        let touchLookActive = false;
+        let touchLookLastX = 0;
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.target !== canvas) return;
+            const touch = e.touches[0];
+            touchLookActive = true;
+            touchLookLastX = touch.clientX;
+            e.preventDefault();
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (!touchLookActive) return;
+            const touch = e.touches[0];
+            const dx = touch.clientX - touchLookLastX;
+            touchLookLastX = touch.clientX;
+
+            // Rotate proportionally to horizontal drag
+            const sensitivity = 0.006;
+            angle += dx * sensitivity;
+
+            e.preventDefault();
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            if (e.target !== canvas) return;
+            touchLookActive = false;
+            e.preventDefault();
+        }, { passive: false });
+
+        canvas.addEventListener('touchcancel', (e) => {
+            touchLookActive = false;
+        });
 
         // ═══════════════════════════════════════════════════
         //  EFFECTS
