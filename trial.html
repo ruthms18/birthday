@@ -3,135 +3,1329 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Site Error</title>
+    <title>Day 08 · How well do you know me?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
     <style>
+        /* ─── RESET ─── */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --pink: #f5a0b8;
+            --purple: #c78bdb;
+            --peach: #f5c6a0;
+            --cream: #fcf6f0;
+            --text: #2d2a3a;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
+            --radius: 16px;
+            --quiz-bg: rgba(255, 255, 255, 0.7);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f5f5f5;
+            font-family: 'Inter', sans-serif;
+            background: var(--cream);
+            color: var(--text);
             min-height: 100vh;
+            padding: 20px;
+            line-height: 1.5;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
         }
 
-        .container {
-            max-width: 480px;
+        .bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse at 20% 30%, rgba(248, 164, 184, 0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 70%, rgba(199, 139, 219, 0.20) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 50%, rgba(245, 198, 160, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .placeholder {
+            position: relative;
+            z-index: 1;
+            max-width: 780px;
             width: 100%;
-            background: white;
-            padding: 50px 40px;
-            border-radius: 12px;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+            margin: 0 auto;
+            padding: 30px 20px 40px;
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(16px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
             text-align: center;
+            transition: 0.3s ease;
         }
 
-        .icon {
+        .header .name {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.4rem, 8vw, 3.6rem);
+            font-weight: 700;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+
+        .header .sub {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1rem;
+            color: #b8a6c9;
+            margin-top: -2px;
+            letter-spacing: 0.08em;
+        }
+
+        .day-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 6px 24px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #c27b9e;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 20px rgba(194, 123, 158, 0.08);
+            margin-top: 12px;
+            transition: 0.3s ease;
+        }
+
+        .day-badge strong {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            background: linear-gradient(135deg, #f5b8b8, #c78bdb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ─── INTRO OVERLAY ─── */
+        .intro-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(252, 246, 240, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .intro-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .intro-card {
+            max-width: 620px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 30px 80px rgba(199, 139, 219, 0.15);
+            padding: 40px 32px 36px;
+            text-align: center;
+            animation: fadeSlideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes fadeSlideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(40px) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .intro-card .intro-emoji {
             font-size: 4rem;
+            line-height: 1;
+            margin-bottom: 8px;
             display: block;
+        }
+
+        .intro-card .intro-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            margin-bottom: 6px;
+        }
+
+        .intro-card .intro-sub {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            color: #b8a6c9;
+            letter-spacing: 0.06em;
+            margin-bottom: 20px;
+        }
+
+        .intro-card .intro-body {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.98rem;
+            color: #3d344a;
+            line-height: 1.8;
+            text-align: left;
+            padding: 0 4px;
             margin-bottom: 16px;
         }
 
-        h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 8px;
+        .intro-card .intro-body p {
+            margin-bottom: 12px;
         }
 
-        p {
-            color: #666;
-            font-size: 1rem;
+        .intro-card .intro-body .highlight {
+            color: #c27b9e;
+            font-weight: 600;
+        }
+
+        .intro-card .intro-body .rule-box {
+            background: rgba(199, 139, 219, 0.07);
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin: 14px 0 6px;
+            border-left: 4px solid #c78bdb;
+        }
+
+        .intro-card .intro-body .rule-box p {
+            margin-bottom: 6px;
+            font-size: 0.92rem;
+        }
+
+        .intro-card .intro-body .rule-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .intro-card .intro-body .rule-box .rule-label {
+            font-weight: 700;
+            color: #c27b9e;
+        }
+
+        .intro-card .intro-body .small-note {
+            font-size: 0.85rem;
+            color: #b8a6c9;
+            font-style: italic;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .intro-card .intro-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .btn-start {
+            padding: 16px 52px;
+            border-radius: 60px;
+            border: none;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 12px 40px rgba(199, 139, 219, 0.3);
+            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            letter-spacing: 0.03em;
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 18px 56px rgba(199, 139, 219, 0.4);
+        }
+
+        .btn-start:active {
+            transform: scale(0.96);
+        }
+
+        .intro-card .intro-footer {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.9rem;
+            color: #b8a6c9;
+            margin-top: 12px;
+        }
+
+        /* ─── QUIZ AREA ─── */
+        .quiz-intro {
+            margin: 20px 0 12px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            color: #5a4a6a;
             line-height: 1.6;
-            margin-bottom: 24px;
+        }
+
+        .quiz-intro .highlight {
+            color: #c27b9e;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 16px 0 20px;
+            padding: 0 8px;
+        }
+
+        .progress-track {
+            flex: 1;
+            height: 8px;
+            background: rgba(199, 139, 219, 0.15);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f8a4b8, #c78bdb);
+            border-radius: 20px;
+            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .progress-text {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #b8a6c9;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .question-card {
+            background: var(--quiz-bg);
+            backdrop-filter: blur(8px);
+            border-radius: 20px;
+            padding: 28px 24px 24px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.08);
+            margin: 8px 0 18px;
+            transition: 0.3s ease;
+            text-align: left;
+        }
+
+        .question-number {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1rem;
+            color: #c27b9e;
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
+        }
+
+        .question-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #3d344a;
+            line-height: 1.4;
+            margin-bottom: 18px;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            border: 2px solid rgba(199, 139, 219, 0.15);
+            background: rgba(255, 255, 255, 0.6);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: #3d344a;
+            cursor: pointer;
+            transition: 0.25s ease;
+            text-align: left;
+            width: 100%;
+        }
+
+        .option-btn:hover {
+            border-color: rgba(199, 139, 219, 0.4);
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateX(4px);
+        }
+
+        .option-btn.selected {
+            border-color: #c78bdb;
+            background: rgba(199, 139, 219, 0.12);
+            box-shadow: 0 4px 16px rgba(199, 139, 219, 0.12);
+        }
+
+        .option-btn .opt-letter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(199, 139, 219, 0.12);
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #9b7bb0;
+            flex-shrink: 0;
+            transition: 0.25s ease;
+        }
+
+        .option-btn.selected .opt-letter {
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            color: #fff;
+        }
+
+        .option-btn .opt-text {
+            flex: 1;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-buttons .spacer {
+            flex: 1;
         }
 
         .btn {
-            display: inline-block;
-            padding: 12px 32px;
-            border-radius: 8px;
+            padding: 12px 28px;
+            border-radius: 60px;
             border: none;
-            background: #0066ff;
-            color: white;
-            font-size: 0.95rem;
-            font-weight: 500;
-            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
-            transition: 0.2s ease;
-            text-decoration: none;
+            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            letter-spacing: 0.02em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .btn:hover {
-            background: #0052cc;
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            color: #fff;
+            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.18);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.28);
         }
 
         .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-            margin-left: 8px;
+            background: rgba(255, 255, 255, 0.7);
+            color: #9b7bb0;
+            border: 2px solid rgba(199, 139, 219, 0.2);
         }
 
         .btn-secondary:hover {
-            background: #e0e0e0;
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(199, 139, 219, 0.4);
+            transform: translateY(-2px);
         }
 
-        .timestamp {
-            margin-top: 16px;
-            font-size: 0.75rem;
-            color: #999;
+        .btn-submit {
+            background: linear-gradient(135deg, #c78bdb, #f5c6a0);
+            color: #fff;
+            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.2);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .result-screen {
+            display: none;
+            padding: 12px 0 8px;
+        }
+
+        .result-screen.active {
+            display: block;
+        }
+
+        .result-card {
+            background: var(--quiz-bg);
+            backdrop-filter: blur(8px);
+            border-radius: 24px;
+            padding: 32px 24px 28px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.08);
+            margin: 8px 0 18px;
+        }
+
+        .result-emoji {
+            font-size: 4rem;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .result-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+
+        .result-score {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.6rem;
+            color: #5a4a6a;
+            margin: 8px 0 4px;
+        }
+
+        .result-score strong {
+            color: #c27b9e;
+            font-size: 2.2rem;
+        }
+
+        .result-percentage {
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #b8a6c9;
+            margin-bottom: 16px;
+        }
+
+        .result-message {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            color: #3d344a;
+            line-height: 1.7;
+            padding: 16px 12px 8px;
+            border-top: 1px solid rgba(199, 139, 219, 0.12);
+            margin-top: 8px;
+        }
+
+        .result-message .win {
+            color: #c27b9e;
+            font-weight: 700;
+        }
+
+        .result-message .lose {
+            color: #9b8aa8;
+        }
+
+        .result-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 12px 36px;
+            border-radius: 60px;
+            border: none;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.18);
+            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            margin-top: 6px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.28);
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .footer-note {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.9rem;
+            color: #b8a6c9;
+            margin-top: 18px;
+        }
+
+        .sparkle-burst {
+            position: fixed;
+            pointer-events: none;
+            font-size: 1.4rem;
+            animation: burst 0.8s ease-out forwards;
+            z-index: 999;
+        }
+
+        @keyframes burst {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(0.2) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg);
+            }
+        }
+
+        .confetti-piece {
+            position: fixed;
+            pointer-events: none;
+            z-index: 998;
+            width: 7px;
+            height: 7px;
+            border-radius: 2px;
+            animation: confettiFall linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(720deg) scale(0.2);
+            }
         }
 
         @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
+            .placeholder {
+                padding: 20px 14px 30px;
+                border-radius: 24px;
             }
-            .icon {
-                font-size: 3rem;
+            .header .name {
+                font-size: 2.6rem;
             }
-            h1 {
-                font-size: 1.2rem;
+            .header .sub {
+                font-size: 0.9rem;
+            }
+            .question-card {
+                padding: 20px 16px 18px;
+            }
+            .question-text {
+                font-size: 1.15rem;
+            }
+            .option-btn {
+                padding: 12px 14px;
+                font-size: 0.88rem;
             }
             .btn {
-                width: 100%;
-                margin: 4px 0;
+                padding: 10px 22px;
+                font-size: 0.82rem;
             }
-            .btn-secondary {
-                margin-left: 0;
+            .result-title {
+                font-size: 1.6rem;
             }
+            .result-score strong {
+                font-size: 1.8rem;
+            }
+            .result-message {
+                font-size: 1rem;
+            }
+            .back-btn {
+                padding: 10px 28px;
+                font-size: 0.85rem;
+            }
+            .intro-card {
+                padding: 28px 18px 24px;
+            }
+            .intro-card .intro-title {
+                font-size: 1.6rem;
+            }
+            .intro-card .intro-body {
+                font-size: 0.9rem;
+            }
+            .btn-start {
+                padding: 14px 36px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .header .name {
+                font-size: 2.2rem;
+            }
+            .question-text {
+                font-size: 1rem;
+            }
+            .option-btn {
+                padding: 10px 12px;
+                font-size: 0.8rem;
+                gap: 10px;
+            }
+            .option-btn .opt-letter {
+                width: 26px;
+                height: 26px;
+                font-size: 0.75rem;
+            }
+            .btn {
+                padding: 8px 18px;
+                font-size: 0.78rem;
+            }
+            .intro-card {
+                padding: 22px 14px 20px;
+                border-radius: 24px;
+            }
+            .intro-card .intro-title {
+                font-size: 1.3rem;
+            }
+            .intro-card .intro-body {
+                font-size: 0.82rem;
+            }
+            .btn-start {
+                padding: 12px 28px;
+                font-size: 0.9rem;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--cream);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <span class="icon">💥</span>
-        <h1>Site Crash</h1>
-        <p>
-            Oops! Something went wrong and the site crashed.<br />
-            Please try refreshing the page or come back later.
-        </p>
+    <div class="bg" aria-hidden="true"></div>
 
-        <div>
-            <button onclick="location.reload()" class="btn">🔄 Refresh Page</button>
-            <a href="index.html" class="btn btn-secondary">🏠 Home</a>
-        </div>
+    <!-- ─── INTRO OVERLAY ─── -->
+    <div class="intro-overlay" id="introOverlay">
+        <div class="intro-card">
+            <span class="intro-emoji">🎀</span>
+            <div class="intro-title">How well do you know me?</div>
+            <div class="intro-sub">a little game for your 21st · day 08</div>
 
-        <div class="timestamp">
-            Error occurred: <span id="time"></span>
+            <div class="intro-body">
+                <p>
+                    Hey Ruth 💕 — someone very special wanted to give you a <span class="highlight">mark X</span> for your birthday this year. But before you can have it, there's a little challenge...
+                </p>
+
+                <div class="rule-box">
+                    <p><span class="rule-label">📝 The rules:</span></p>
+                    <p>· There are <span class="highlight">21 questions</span> about me — all about how well you know me.</p>
+                    <p>· Each question has <span class="highlight">4 choices</span> — only one is correct.</p>
+                    <p>· You need to score <span class="highlight">95% or higher</span> (that's at least 20 out of 21) to win the mark X.</p>
+                    <p>· You can go <span class="highlight">back and forward</span> between questions — your answers are saved automatically.</p>
+                    <p>· Once you submit, that's it — <span class="highlight">no extra chances</span>. So take your time.</p>
+                </div>
+
+                <p class="small-note">
+                    if you win, your mark X is coming in 08 days 🎁 · if not, we try again next year 💫
+                </p>
+            </div>
+
+            <div class="intro-actions">
+                <button class="btn-start" id="startQuizBtn">let's go 💖</button>
+            </div>
+            <div class="intro-footer">good luck, beautiful 🌸</div>
         </div>
     </div>
 
-    <script>
-        // Show current time
-        document.getElementById('time').textContent = new Date().toLocaleString();
+    <!-- ─── MAIN APP ─── -->
+    <div class="placeholder" id="app">
 
-        // Log error
-        console.error('Site crashed at:', new Date().toISOString());
+        <header class="header">
+            <div class="name">Ruth</div>
+            <div class="sub">twenty‑one · a celebration</div>
+            <div class="day-badge" id="dayBadge">
+                💕 day <strong>08</strong> · how well do you know me?
+            </div>
+        </header>
+
+        <div class="quiz-intro" id="quizIntro">
+            <span class="highlight">21 questions</span> · answer 95% correctly to unlock a <span class="highlight">mark X</span> for your birthday 🎁
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">0 / 21</div>
+        </div>
+
+        <!-- Quiz area -->
+        <div id="quizArea">
+            <div class="question-card" id="questionCard">
+                <div class="question-number" id="questionNumber">Question 1 of 21</div>
+                <div class="question-text" id="questionText">Loading question...</div>
+                <div class="options-list" id="optionsList"></div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" id="prevBtn" disabled>← back</button>
+                <div class="spacer"></div>
+                <button class="btn btn-primary" id="nextBtn">next →</button>
+                <button class="btn btn-submit hidden" id="submitBtn">✨ submit answers</button>
+            </div>
+        </div>
+
+        <!-- Result screen -->
+        <div class="result-screen" id="resultScreen">
+            <div class="result-card">
+                <div class="result-emoji" id="resultEmoji">🌸</div>
+                <div class="result-title" id="resultTitle">Your results</div>
+                <div class="result-score" id="resultScore">— / 21</div>
+                <div class="result-percentage" id="resultPercentage">—%</div>
+                <div class="result-message" id="resultMessage"></div>
+                <div class="result-actions">
+                    <button class="btn btn-secondary" id="retryBtn">↺ review answers</button>
+                    <a href="index.html" class="back-btn">← back to celebration</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-note" id="footerNote">day 08 · 21 questions · good luck 💕</div>
+
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ─── CONFIG ───
+            const TOTAL_QUESTIONS = 21;
+            const PASS_PERCENTAGE = 95;
+            const STORAGE_KEY = 'ruth_day8_quiz_progress';
+            const RESULT_KEY = 'ruth_day8_quiz_result';
+            const INTRO_SEEN_KEY = 'ruth_day8_intro_seen';
+
+            // ─── PLACEHOLDER MATH QUESTIONS (replace with your own) ───
+            const QUESTIONS = [
+                {
+                    question: "What is 2 + 2?",
+                    options: ["3", "4", "5", "6"],
+                    correct: 1
+                },
+                {
+                    question: "What is 7 × 3?",
+                    options: ["18", "21", "24", "27"],
+                    correct: 1
+                },
+                {
+                    question: "What is the square root of 64?",
+                    options: ["6", "7", "8", "9"],
+                    correct: 2
+                },
+                {
+                    question: "What is 15 ÷ 3?",
+                    options: ["3", "4", "5", "6"],
+                    correct: 2
+                },
+                {
+                    question: "What is 9 + 6?",
+                    options: ["13", "14", "15", "16"],
+                    correct: 2
+                },
+                {
+                    question: "What is 12 × 2?",
+                    options: ["22", "24", "26", "28"],
+                    correct: 1
+                },
+                {
+                    question: "What is 100 - 37?",
+                    options: ["63", "67", "73", "77"],
+                    correct: 0
+                },
+                {
+                    question: "What is 5³?",
+                    options: ["15", "25", "125", "625"],
+                    correct: 2
+                },
+                {
+                    question: "What is 18 ÷ 6?",
+                    options: ["2", "3", "4", "5"],
+                    correct: 1
+                },
+                {
+                    question: "What is 11 × 11?",
+                    options: ["111", "121", "131", "141"],
+                    correct: 1
+                },
+                {
+                    question: "What is 45 + 55?",
+                    options: ["90", "95", "100", "105"],
+                    correct: 2
+                },
+                {
+                    question: "What is 144 ÷ 12?",
+                    options: ["10", "11", "12", "13"],
+                    correct: 2
+                },
+                {
+                    question: "What is 7²?",
+                    options: ["14", "21", "49", "56"],
+                    correct: 2
+                },
+                {
+                    question: "What is 3 × 9?",
+                    options: ["21", "24", "27", "30"],
+                    correct: 2
+                },
+                {
+                    question: "What is 200 - 85?",
+                    options: ["105", "110", "115", "120"],
+                    correct: 2
+                },
+                {
+                    question: "What is 16 + 28?",
+                    options: ["34", "40", "44", "48"],
+                    correct: 2
+                },
+                {
+                    question: "What is 6 × 8?",
+                    options: ["42", "46", "48", "54"],
+                    correct: 2
+                },
+                {
+                    question: "What is 81 ÷ 9?",
+                    options: ["7", "8", "9", "10"],
+                    correct: 2
+                },
+                {
+                    question: "What is 13 × 3?",
+                    options: ["36", "39", "42", "45"],
+                    correct: 1
+                },
+                {
+                    question: "What is 50 + 75?",
+                    options: ["115", "120", "125", "130"],
+                    correct: 2
+                },
+                {
+                    question: "What is 10³?",
+                    options: ["100", "1000", "10000", "100000"],
+                    correct: 1
+                }
+            ];
+
+            // ─── STATE ───
+            let currentIndex = 0;
+            let answers = new Array(TOTAL_QUESTIONS).fill(null);
+            let quizCompleted = false;
+
+            // ─── DOM REFS ───
+            const introOverlay = document.getElementById('introOverlay');
+            const startQuizBtn = document.getElementById('startQuizBtn');
+            const questionNumber = document.getElementById('questionNumber');
+            const questionText = document.getElementById('questionText');
+            const optionsList = document.getElementById('optionsList');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            const quizArea = document.getElementById('quizArea');
+            const resultScreen = document.getElementById('resultScreen');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const resultEmoji = document.getElementById('resultEmoji');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultScore = document.getElementById('resultScore');
+            const resultPercentage = document.getElementById('resultPercentage');
+            const resultMessage = document.getElementById('resultMessage');
+            const retryBtn = document.getElementById('retryBtn');
+            const footerNote = document.getElementById('footerNote');
+            const quizIntro = document.getElementById('quizIntro');
+            const progressBar = document.getElementById('progressBar');
+
+            // ─── STORAGE HELPERS ───
+            function saveProgress() {
+                try {
+                    const data = {
+                        answers: answers,
+                        currentIndex: currentIndex,
+                        completed: quizCompleted,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                } catch (e) {
+                    // silent
+                }
+            }
+
+            function loadProgress() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (!raw) return false;
+                    const data = JSON.parse(raw);
+                    if (data.answers && Array.isArray(data.answers)) {
+                        answers = data.answers;
+                    }
+                    if (typeof data.currentIndex === 'number') {
+                        currentIndex = Math.min(data.currentIndex, TOTAL_QUESTIONS - 1);
+                    }
+                    if (data.completed) {
+                        quizCompleted = true;
+                    }
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            function saveResult(result) {
+                try {
+                    localStorage.setItem(RESULT_KEY, JSON.stringify(result));
+                } catch (e) {
+                    // silent
+                }
+            }
+
+            function loadResult() {
+                try {
+                    const raw = localStorage.getItem(RESULT_KEY);
+                    if (!raw) return null;
+                    return JSON.parse(raw);
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function hasSeenIntro() {
+                try {
+                    return localStorage.getItem(INTRO_SEEN_KEY) === 'true';
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            function markIntroSeen() {
+                try {
+                    localStorage.setItem(INTRO_SEEN_KEY, 'true');
+                } catch (e) {
+                    // silent
+                }
+            }
+
+            // ─── INTRO LOGIC ───
+            function showIntro() {
+                introOverlay.classList.remove('hidden');
+            }
+
+            function hideIntro() {
+                introOverlay.classList.add('hidden');
+                markIntroSeen();
+            }
+
+            // ─── RENDER ───
+            function renderQuestion() {
+                const q = QUESTIONS[currentIndex];
+                if (!q) return;
+
+                questionNumber.textContent = `Question ${currentIndex + 1} of ${TOTAL_QUESTIONS}`;
+                questionText.textContent = q.question;
+
+                optionsList.innerHTML = '';
+                const letters = ['A', 'B', 'C', 'D'];
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn' + (answers[currentIndex] === idx ? ' selected' : '');
+                    btn.innerHTML = `
+                        <span class="opt-letter">${letters[idx]}</span>
+                        <span class="opt-text">${opt}</span>
+                    `;
+                    btn.addEventListener('click', () => {
+                        if (quizCompleted) return;
+                        answers[currentIndex] = idx;
+                        saveProgress();
+                        renderQuestion();
+                        updateNavButtons();
+                    });
+                    optionsList.appendChild(btn);
+                });
+
+                updateProgress();
+                updateNavButtons();
+            }
+
+            function updateProgress() {
+                const answered = answers.filter(a => a !== null).length;
+                const pct = (answered / TOTAL_QUESTIONS) * 100;
+                progressFill.style.width = pct + '%';
+                progressText.textContent = `${answered} / ${TOTAL_QUESTIONS}`;
+            }
+
+            function updateNavButtons() {
+                prevBtn.disabled = currentIndex === 0 || quizCompleted;
+
+                if (currentIndex === TOTAL_QUESTIONS - 1) {
+                    nextBtn.classList.add('hidden');
+                    submitBtn.classList.remove('hidden');
+                } else {
+                    nextBtn.classList.remove('hidden');
+                    submitBtn.classList.add('hidden');
+                }
+
+                if (quizCompleted) {
+                    nextBtn.classList.add('hidden');
+                    submitBtn.classList.add('hidden');
+                    prevBtn.disabled = true;
+                }
+            }
+
+            function showResult() {
+                const result = loadResult();
+                if (!result) return;
+
+                quizArea.classList.add('hidden');
+                quizIntro.classList.add('hidden');
+                progressBar.classList.add('hidden');
+                resultScreen.classList.add('active');
+
+                resultEmoji.textContent = result.emoji || '🌸';
+                resultTitle.textContent = result.title || 'Your results';
+                resultScore.textContent = `${result.correct} / ${TOTAL_QUESTIONS}`;
+                resultPercentage.textContent = `${result.percentage}%`;
+
+                let msg = '';
+                if (result.passed) {
+                    msg = `<span class="win">🎉 Congratulations!</span> You scored <strong>${result.percentage}%</strong> — that's above 95%! Your <strong>mark X</strong> is coming in <strong>08 days</strong> 💖`;
+                } else {
+                    msg = `<span class="lose">💫 So close!</span> You scored <strong>${result.percentage}%</strong> — you need 95% to unlock the mark X. We'll try again next year, beautiful 🌸`;
+                }
+                resultMessage.innerHTML = msg;
+
+                footerNote.textContent = result.passed ? 'you did it! mark X incoming 💕' : 'keep shining, Ruth 🌟';
+            }
+
+            function submitQuiz() {
+                const unanswered = answers.filter(a => a === null).length;
+                if (unanswered > 0) {
+                    alert(`Please answer all ${TOTAL_QUESTIONS} questions. You have ${unanswered} unanswered.`);
+                    return;
+                }
+
+                let correct = 0;
+                for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+                    if (answers[i] === QUESTIONS[i].correct) {
+                        correct++;
+                    }
+                }
+
+                const percentage = Math.round((correct / TOTAL_QUESTIONS) * 100);
+                const passed = percentage >= PASS_PERCENTAGE;
+
+                const result = {
+                    correct: correct,
+                    percentage: percentage,
+                    passed: passed,
+                    emoji: passed ? '🎉' : '🌸',
+                    title: passed ? 'You did it!' : 'Good try!',
+                    timestamp: Date.now()
+                };
+
+                saveResult(result);
+                quizCompleted = true;
+                saveProgress();
+                showResult();
+
+                if (passed) {
+                    setTimeout(() => {
+                        confettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+                        sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 40);
+                    }, 300);
+                }
+            }
+
+            // ─── EFFECTS ───
+            function sparkleBurst(cx, cy, count) {
+                const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
+                const total = count || 24 + Math.floor(Math.random() * 16);
+                for (let i = 0; i < total; i++) {
+                    const spark = document.createElement('div');
+                    spark.className = 'sparkle-burst';
+                    spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    const angle = Math.random() * 2 * Math.PI;
+                    const dist = 60 + Math.random() * 180;
+                    const tx = Math.cos(angle) * dist;
+                    const ty = Math.sin(angle) * dist - 50;
+                    spark.style.setProperty('--tx', tx + 'px');
+                    spark.style.setProperty('--ty', ty + 'px');
+                    spark.style.left = (cx || window.innerWidth / 2) + 'px';
+                    spark.style.top = (cy || window.innerHeight / 2) + 'px';
+                    spark.style.fontSize = 1 + Math.random() * 1.8 + 'rem';
+                    spark.style.animationDuration = 0.4 + Math.random() * 0.6 + 's';
+                    document.body.appendChild(spark);
+                    setTimeout(() => spark.remove(), 1200);
+                }
+            }
+
+            function confettiBurst(cx, cy) {
+                const colors = ['#f8a4b8', '#c78bdb', '#f5c6a0', '#ffd6d6', '#d4b8e0', '#fce7f3', '#ffb3c6', '#b8d4e3'];
+                const count = 40 + Math.floor(Math.random() * 30);
+                for (let i = 0; i < count; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    piece.style.left = (cx || window.innerWidth / 2) + 'px';
+                    piece.style.top = (cy || window.innerHeight / 2) + 'px';
+                    piece.style.width = (4 + Math.random() * 7) + 'px';
+                    piece.style.height = (4 + Math.random() * 7) + 'px';
+                    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    const angle = Math.random() * 2 * Math.PI;
+                    const dist = 60 + Math.random() * 300;
+                    piece.style.animationDuration = (1.0 + Math.random() * 1.6) + 's';
+                    piece.style.animationDelay = (Math.random() * 0.5) + 's';
+                    piece.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                    piece.style.setProperty('--ty', Math.sin(angle) * dist - 140 + 'px');
+                    document.body.appendChild(piece);
+                    setTimeout(() => piece.remove(), 2800);
+                }
+            }
+
+            // ─── EVENT LISTENERS ───
+            startQuizBtn.addEventListener('click', () => {
+                hideIntro();
+                // Small sparkle on start
+                sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 20);
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentIndex > 0 && !quizCompleted) {
+                    currentIndex--;
+                    saveProgress();
+                    renderQuestion();
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (currentIndex < TOTAL_QUESTIONS - 1 && !quizCompleted) {
+                    currentIndex++;
+                    saveProgress();
+                    renderQuestion();
+                }
+            });
+
+            submitBtn.addEventListener('click', submitQuiz);
+
+            retryBtn.addEventListener('click', () => {
+                answers = new Array(TOTAL_QUESTIONS).fill(null);
+                currentIndex = 0;
+                quizCompleted = false;
+                localStorage.removeItem(STORAGE_KEY);
+                localStorage.removeItem(RESULT_KEY);
+
+                quizArea.classList.remove('hidden');
+                quizIntro.classList.remove('hidden');
+                progressBar.classList.remove('hidden');
+                resultScreen.classList.remove('active');
+                footerNote.textContent = 'day 08 · 21 questions · good luck 💕';
+
+                renderQuestion();
+                updateProgress();
+                updateNavButtons();
+            });
+
+            document.addEventListener('click', function(e) {
+                const tag = e.target.tagName.toLowerCase();
+                if (tag === 'a' || tag === 'button' || e.target.closest('.sparkle-burst')) return;
+                if (Math.random() > 0.25) return;
+                sparkleBurst(e.clientX, e.clientY, 6);
+            });
+
+            // ─── INIT ───
+            function init() {
+                const loaded = loadProgress();
+                const savedResult = loadResult();
+
+                if (savedResult) {
+                    quizCompleted = true;
+                    hideIntro();
+                    showResult();
+                    return;
+                }
+
+                if (loaded && quizCompleted) {
+                    let correct = 0;
+                    for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+                        if (answers[i] === QUESTIONS[i].correct) correct++;
+                    }
+                    const percentage = Math.round((correct / TOTAL_QUESTIONS) * 100);
+                    const passed = percentage >= PASS_PERCENTAGE;
+                    const result = {
+                        correct, percentage, passed,
+                        emoji: passed ? '🎉' : '🌸',
+                        title: passed ? 'You did it!' : 'Good try!'
+                    };
+                    saveResult(result);
+                    hideIntro();
+                    showResult();
+                    return;
+                }
+
+                if (answers.length !== TOTAL_QUESTIONS) {
+                    answers = new Array(TOTAL_QUESTIONS).fill(null);
+                }
+
+                // Show intro only if not seen before
+                if (!hasSeenIntro()) {
+                    showIntro();
+                } else {
+                    hideIntro();
+                }
+
+                renderQuestion();
+                updateProgress();
+                updateNavButtons();
+            }
+
+            init();
+
+            console.log('🌸 Day 8 · 21 Questions · How well do you know me? 💖');
+        })();
     </script>
 
 </body>

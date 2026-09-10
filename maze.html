@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Day 07 · The Path to You</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <style>
+        /* ─── RESET ─── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --pink: #f5a0b8;
+            --purple: #c78bdb;
+            --peach: #f5c6a0;
+            --cream: #fcf6f0;
+            --text: #2d2a3a;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
+            --radius: 16px;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--cream);
+            color: var(--text);
+            line-height: 1.5;
+            position: fixed;
+            inset: 0;
+        }
+
+        #gameCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none;
+            z-index: 1;
+        }
+
+        /* ─── 3D GAME UI ─── */
+        .game-hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none;
+        }
+
+        .game-hud > * {
+            pointer-events: auto;
+        }
+
+        .hud-badge {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #c27b9e;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 20px rgba(194, 123, 158, 0.08);
+        }
+
+        .hud-badge strong {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, #f5b8b8, #c78bdb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .compass {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 10;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 20px rgba(194, 123, 158, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            transition: transform 0.1s ease-out;
+        }
+
+        .compass::after {
+            content: '↑';
+            font-size: 1.6rem;
+            color: #c78bdb;
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            line-height: 1;
+        }
+
+        .compass .compass-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            box-shadow: 0 0 8px rgba(199, 139, 219, 0.4);
+        }
+
+        /* ─── CONTROLS ─── */
+        .controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            padding: 20px 24px calc(24px + env(safe-area-inset-bottom, 0px));
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            pointer-events: none;
+        }
+
+        .controls > * {
+            pointer-events: auto;
+        }
+
+        .dpad {
+            display: grid;
+            grid-template-columns: 60px 60px 60px;
+            grid-template-rows: 60px 60px 60px;
+            gap: 6px;
+            opacity: 0.85;
+        }
+
+        .dpad-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #9b7bb0;
+            cursor: pointer;
+            transition: 0.15s ease;
+            user-select: none;
+            box-shadow: 0 4px 16px rgba(194, 123, 158, 0.08);
+        }
+
+        .dpad-btn:active,
+        .dpad-btn.active {
+            background: rgba(199, 139, 219, 0.25);
+            transform: scale(0.92);
+            color: #c27b9e;
+        }
+
+        .dpad-btn.empty {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            pointer-events: none;
+        }
+
+        .dpad-center {
+            background: rgba(199, 139, 219, 0.12);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #b8a6c9;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .look-pad {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+            touch-action: none;
+            box-shadow: 0 4px 20px rgba(194, 123, 158, 0.08);
+        }
+
+        .look-pad .look-knob {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(248, 164, 184, 0.7), rgba(199, 139, 219, 0.7));
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 16px rgba(199, 139, 219, 0.25);
+            transition: 0.05s ease;
+        }
+
+        .look-pad .look-label {
+            position: absolute;
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: #b8a6c9;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .mobile-hint {
+            position: fixed;
+            bottom: 170px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.9rem;
+            color: #b8a6c9;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 6px 18px;
+            border-radius: 40px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            white-space: nowrap;
+        }
+
+        .mobile-hint.show {
+            opacity: 1;
+        }
+
+        /* ─── INTRO OVERLAY (MAP) ─── */
+        .intro-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(252, 246, 240, 0.92);
+            backdrop-filter: blur(16px);
+            padding: 20px;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+            overflow-y: auto;
+        }
+
+        .intro-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .intro-card {
+            max-width: 580px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 30px 80px rgba(199, 139, 219, 0.15);
+            padding: 32px 28px 28px;
+            text-align: center;
+            animation: fadeSlideUp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin: auto;
+        }
+
+        @keyframes fadeSlideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(40px) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .intro-card .intro-emoji {
+            font-size: 3.4rem;
+            line-height: 1;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .intro-card .intro-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .intro-card .intro-sub {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.05rem;
+            color: #b8a6c9;
+            letter-spacing: 0.06em;
+            margin-bottom: 14px;
+        }
+
+        .intro-card .intro-body {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.92rem;
+            color: #3d344a;
+            line-height: 1.7;
+            text-align: left;
+            padding: 0 2px;
+            margin-bottom: 12px;
+        }
+
+        .intro-card .intro-body p {
+            margin-bottom: 10px;
+        }
+
+        .intro-card .intro-body .highlight {
+            color: #c27b9e;
+            font-weight: 600;
+        }
+
+        .intro-card .intro-body .rule-box {
+            background: rgba(199, 139, 219, 0.07);
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin: 12px 0 4px;
+            border-left: 4px solid #c78bdb;
+        }
+
+        .intro-card .intro-body .rule-box p {
+            margin-bottom: 5px;
+            font-size: 0.88rem;
+        }
+
+        .intro-card .intro-body .rule-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Map preview */
+        .map-preview {
+            margin: 14px 0 18px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid rgba(199, 139, 219, 0.2);
+            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.1);
+            background: #1a1228;
+            position: relative;
+        }
+
+        .map-preview canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 240px;
+            object-fit: contain;
+        }
+
+        .map-preview .map-label {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 14px;
+            border-radius: 40px;
+            backdrop-filter: blur(4px);
+            white-space: nowrap;
+        }
+
+        .intro-card .intro-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .btn-start {
+            padding: 16px 48px;
+            border-radius: 60px;
+            border: none;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.05rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 12px 40px rgba(199, 139, 219, 0.3);
+            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            letter-spacing: 0.03em;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 18px 56px rgba(199, 139, 219, 0.4);
+        }
+
+        .btn-start:active {
+            transform: scale(0.96);
+        }
+
+        .intro-card .intro-footer {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.85rem;
+            color: #b8a6c9;
+            margin-top: 10px;
+        }
+
+        /* ─── WIN OVERLAY ─── */
+        .win-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(252, 246, 240, 0.88);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+            overflow-y: auto;
+        }
+
+        .win-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .win-card {
+            max-width: 560px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 30px 80px rgba(199, 139, 219, 0.18);
+            padding: 36px 28px 30px;
+            text-align: center;
+            animation: fadeSlideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin: auto;
+        }
+
+        .win-card .win-emoji {
+            font-size: 4.5rem;
+            line-height: 1;
+            margin-bottom: 6px;
+            display: block;
+            animation: floatEmoji 3s ease-in-out infinite;
+        }
+
+        @keyframes floatEmoji {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .win-card .win-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            margin-bottom: 12px;
+        }
+
+        .win-card .win-message {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.15rem;
+            color: #3d344a;
+            line-height: 1.8;
+            padding: 8px 4px 4px;
+            margin-bottom: 6px;
+        }
+
+        .win-card .win-message .highlight {
+            color: #c27b9e;
+            font-weight: 700;
+        }
+
+        .win-card .win-message .soft {
+            color: #9b8aa8;
+            font-style: italic;
+        }
+
+        .win-card .win-divider {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #f8a4b8, #c78bdb);
+            border-radius: 10px;
+            margin: 14px auto 16px;
+        }
+
+        .win-card .win-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .btn-win {
+            padding: 14px 40px;
+            border-radius: 60px;
+            border: none;
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.2);
+            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-decoration: none;
+            display: inline-block;
+            letter-spacing: 0.02em;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn-win:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.3);
+        }
+
+        .btn-win:active {
+            transform: scale(0.95);
+        }
+
+        .btn-win.secondary {
+            background: rgba(255, 255, 255, 0.7);
+            color: #9b7bb0;
+            border: 2px solid rgba(199, 139, 219, 0.2);
+            box-shadow: none;
+        }
+
+        .btn-win.secondary:hover {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(199, 139, 219, 0.4);
+        }
+
+        /* ─── WIN CONFETTI / SPARKLES ─── */
+        .sparkle-burst {
+            position: fixed;
+            pointer-events: none;
+            font-size: 1.4rem;
+            animation: burst 0.8s ease-out forwards;
+            z-index: 999;
+        }
+
+        @keyframes burst {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(0.2) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg);
+            }
+        }
+
+        .confetti-piece {
+            position: fixed;
+            pointer-events: none;
+            z-index: 998;
+            width: 7px;
+            height: 7px;
+            border-radius: 2px;
+            animation: confettiFall linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(720deg) scale(0.2);
+            }
+        }
+
+        /* ─── UTILITY ─── */
+        .hidden {
+            display: none !important;
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 600px) {
+            .intro-card {
+                padding: 24px 18px 22px;
+                border-radius: 24px;
+            }
+            .intro-card .intro-title {
+                font-size: 1.6rem;
+            }
+            .intro-card .intro-body {
+                font-size: 0.85rem;
+            }
+            .btn-start {
+                padding: 14px 32px;
+                font-size: 0.95rem;
+            }
+            .win-card {
+                padding: 28px 18px 24px;
+                border-radius: 24px;
+            }
+            .win-card .win-title {
+                font-size: 1.7rem;
+            }
+            .win-card .win-message {
+                font-size: 1rem;
+            }
+            .dpad {
+                grid-template-columns: 48px 48px 48px;
+                grid-template-rows: 48px 48px 48px;
+                gap: 4px;
+            }
+            .dpad-btn {
+                width: 48px;
+                height: 48px;
+                font-size: 1.1rem;
+                border-radius: 12px;
+            }
+            .look-pad {
+                width: 100px;
+                height: 100px;
+            }
+            .look-pad .look-knob {
+                width: 34px;
+                height: 34px;
+            }
+            .controls {
+                padding: 12px 14px calc(16px + env(safe-area-inset-bottom, 0px));
+            }
+            .compass {
+                width: 44px;
+                height: 44px;
+                top: 10px;
+                right: 10px;
+            }
+            .compass::after {
+                font-size: 1.2rem;
+            }
+            .mobile-hint {
+                bottom: 130px;
+                font-size: 0.75rem;
+                padding: 4px 14px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .intro-card .intro-title {
+                font-size: 1.3rem;
+            }
+            .intro-card .intro-body {
+                font-size: 0.8rem;
+            }
+            .dpad {
+                grid-template-columns: 42px 42px 42px;
+                grid-template-rows: 42px 42px 42px;
+                gap: 3px;
+            }
+            .dpad-btn {
+                width: 42px;
+                height: 42px;
+                font-size: 1rem;
+                border-radius: 10px;
+            }
+            .look-pad {
+                width: 84px;
+                height: 84px;
+            }
+            .look-pad .look-knob {
+                width: 28px;
+                height: 28px;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ─── GAME CANVAS ─── -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- ─── GAME HUD ─── -->
+    <div class="game-hud" id="gameHud">
+        <div class="hud-badge">
+            💕 day <strong>07</strong> · the path to you
+        </div>
+    </div>
+
+    <!-- ─── COMPASS ─── -->
+    <div class="compass" id="compass">
+        <div class="compass-dot"></div>
+    </div>
+
+    <!-- ─── MOBILE HINT ─── -->
+    <div class="mobile-hint" id="mobileHint">
+        use the d-pad to move · drag the look pad to turn
+    </div>
+
+    <!-- ─── CONTROLS ─── -->
+    <div class="controls" id="controls">
+        <div class="dpad" id="dpad">
+            <div class="dpad-btn empty"></div>
+            <div class="dpad-btn" data-dir="forward">▲</div>
+            <div class="dpad-btn empty"></div>
+            <div class="dpad-btn" data-dir="left">◀</div>
+            <div class="dpad-center">move</div>
+            <div class="dpad-btn" data-dir="right">▶</div>
+            <div class="dpad-btn empty"></div>
+            <div class="dpad-btn" data-dir="backward">▼</div>
+            <div class="dpad-btn empty"></div>
+        </div>
+        <div class="look-pad" id="lookPad">
+            <div class="look-knob" id="lookKnob"></div>
+            <div class="look-label">look</div>
+        </div>
+    </div>
+
+    <!-- ─── INTRO OVERLAY (MAP) ─── -->
+    <div class="intro-overlay" id="introOverlay">
+        <div class="intro-card">
+            <span class="intro-emoji">🗺️</span>
+            <div class="intro-title">The Path to You</div>
+            <div class="intro-sub">day 07 · a maze for your heart</div>
+
+            <div class="intro-body">
+                <p>
+                    Ruth 💕 — before we celebrate your 21st, I wanted to give you a little journey. A maze, just like the path of love. It's not always straight, and sometimes you'll have to turn around, but every step leads somewhere beautiful.
+                </p>
+
+                <div class="rule-box">
+                    <p><span class="highlight">🧭 How it works:</span></p>
+                    <p>· You'll see the map <span class="highlight">only once</span> — right here, right now.</p>
+                    <p>· Use the <span class="highlight">d-pad</span> to move and the <span class="highlight">look pad</span> to turn.</p>
+                    <p>· Find your way to the <span class="highlight">glowing heart</span> at the other end.</p>
+                    <p>· Take your time — there's no wrong turn that can't be undone.</p>
+                </div>
+
+                <p style="font-family:'Patrick Hand',cursive; font-size:0.9rem; color:#b8a6c9; text-align:center; margin-top:6px;">
+                    memorize it if you can 💫
+                </p>
+            </div>
+
+            <!-- Map preview -->
+            <div class="map-preview" id="mapPreview">
+                <canvas id="mapCanvas" width="480" height="240"></canvas>
+                <div class="map-label">📌 your map · study it well</div>
+            </div>
+
+            <div class="intro-actions">
+                <button class="btn-start" id="startGameBtn">enter the maze 💖</button>
+            </div>
+            <div class="intro-footer">take your time, my love 🌸</div>
+        </div>
+    </div>
+
+    <!-- ─── WIN OVERLAY ─── -->
+    <div class="win-overlay hidden" id="winOverlay">
+        <div class="win-card">
+            <span class="win-emoji">💖</span>
+            <div class="win-title">You found me.</div>
+            <div class="win-message">
+                <p>
+                    The path of relationships isn't always straight, Ruth. Sometimes it winds, sometimes it doubles back, sometimes it feels like you're lost. But every turn, every dead end, every step — it all leads to <span class="highlight">us</span>.
+                </p>
+                <div class="win-divider"></div>
+                <p>
+                    No matter how complicated the maze gets, I'll always be here at the end, waiting for you. <span class="highlight">We'll get through everything together</span> — every twist, every turn, every unknown.
+                </p>
+                <p style="margin-top:10px; font-size:1rem; color:#9b8aa8;">
+                    you are my always, my forever, my home. 💕
+                </p>
+            </div>
+            <div class="win-actions">
+                <button class="btn-win" id="playAgainBtn">↺ walk it again</button>
+                <a href="index.html" class="btn-win secondary">← back to celebration</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ─── MAZE CONFIG ───
+            // 1 = wall, 0 = path, 2 = start, 3 = end
+            // This is a 15x15 maze — complex but solvable
+            const MAZE = [
+                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                [1,2,0,0,1,0,0,0,0,0,1,0,0,0,1],
+                [1,1,1,0,1,0,1,1,1,0,1,0,1,0,1],
+                [1,0,0,0,0,0,1,0,0,0,0,0,1,0,1],
+                [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1],
+                [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
+                [1,0,1,0,1,1,1,1,1,1,1,0,1,0,1],
+                [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+                [1,1,1,1,1,0,1,1,1,0,1,1,1,1,1],
+                [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
+                [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1],
+                [1,0,1,0,0,0,0,0,1,0,0,0,0,0,1],
+                [1,0,1,0,1,1,1,1,1,0,1,1,1,0,1],
+                [1,0,0,0,1,0,0,0,0,0,1,0,0,3,1],
+                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+            ];
+
+            const ROWS = MAZE.length;
+            const COLS = MAZE[0].length;
+            const CELL_SIZE = 4; // world units per cell
+            const WALL_HEIGHT = 3.5;
+            const MOVE_SPEED = 3.5; // units per second
+            const TURN_SPEED = 2.2; // radians per second
+            const PLAYER_RADIUS = 0.8;
+            const EYE_HEIGHT = 1.6;
+
+            // Find start and end
+            let startRow = 1, startCol = 1;
+            let endRow = ROWS - 2, endCol = COLS - 2;
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (MAZE[r][c] === 2) { startRow = r; startCol = c; }
+                    if (MAZE[r][c] === 3) { endRow = r; endCol = c; }
+                }
+            }
+
+            // ─── DOM REFS ───
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const introOverlay = document.getElementById('introOverlay');
+            const winOverlay = document.getElementById('winOverlay');
+            const startGameBtn = document.getElementById('startGameBtn');
+            const playAgainBtn = document.getElementById('playAgainBtn');
+            const mapCanvas = document.getElementById('mapCanvas');
+            const mapCtx = mapCanvas.getContext('2d');
+            const compass = document.getElementById('compass');
+            const mobileHint = document.getElementById('mobileHint');
+            const dpad = document.getElementById('dpad');
+            const lookPad = document.getElementById('lookPad');
+            const lookKnob = document.getElementById('lookKnob');
+
+            // ─── STATE ───
+            let playerX = startCol * CELL_SIZE + CELL_SIZE / 2;
+            let playerZ = startRow * CELL_SIZE + CELL_SIZE / 2;
+            let playerAngle = 0; // radians, 0 = facing +Z (south)
+            let keys = { forward: false, backward: false, left: false, right: false };
+            let lookVector = { x: 0, y: 0 };
+            let lookActive = false;
+            let lookTouchId = null;
+            let lookStartX = 0, lookStartY = 0;
+            let gameActive = false;
+            let gameWon = false;
+            let lastTime = 0;
+            let animFrame = null;
+            let hasSeenIntro = false;
+            let particles = [];
+
+            // ─── MAP PREVIEW (drawn on intro overlay) ───
+            function drawMapPreview() {
+                const w = mapCanvas.width;
+                const h = mapCanvas.height;
+                const cellW = w / COLS;
+                const cellH = h / ROWS;
+
+                mapCtx.clearRect(0, 0, w, h);
+
+                // Background
+                mapCtx.fillStyle = '#1a1228';
+                mapCtx.fillRect(0, 0, w, h);
+
+                // Draw cells
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        const x = c * cellW;
+                        const y = r * cellH;
+                        if (MAZE[r][c] === 1) {
+                            mapCtx.fillStyle = '#3d2a5c';
+                            mapCtx.fillRect(x, y, cellW, cellH);
+                            // Wall highlight
+                            mapCtx.fillStyle = 'rgba(199, 139, 219, 0.15)';
+                            mapCtx.fillRect(x, y, cellW, cellH * 0.15);
+                        } else {
+                            mapCtx.fillStyle = '#2a1f3d';
+                            mapCtx.fillRect(x, y, cellW, cellH);
+                        }
+                    }
+                }
+
+                // Draw start
+                mapCtx.fillStyle = '#f8a4b8';
+                mapCtx.beginPath();
+                mapCtx.arc(
+                    startCol * cellW + cellW / 2,
+                    startRow * cellH + cellH / 2,
+                    Math.min(cellW, cellH) * 0.35,
+                    0, Math.PI * 2
+                );
+                mapCtx.fill();
+                mapCtx.fillStyle = '#fff';
+                mapCtx.font = `bold ${Math.min(cellW, cellH) * 0.5}px Inter, sans-serif`;
+                mapCtx.textAlign = 'center';
+                mapCtx.textBaseline = 'middle';
+                mapCtx.fillText('S', startCol * cellW + cellW / 2, startRow * cellH + cellH / 2);
+
+                // Draw end
+                mapCtx.fillStyle = '#c78bdb';
+                mapCtx.beginPath();
+                mapCtx.arc(
+                    endCol * cellW + cellW / 2,
+                    endRow * cellH + cellH / 2,
+                    Math.min(cellW, cellH) * 0.4,
+                    0, Math.PI * 2
+                );
+                mapCtx.fill();
+                mapCtx.fillStyle = '#fff';
+                mapCtx.font = `bold ${Math.min(cellW, cellH) * 0.5}px Inter, sans-serif`;
+                mapCtx.fillText('♥', endCol * cellW + cellW / 2, endRow * cellH + cellH / 2);
+
+                // Path trace hint (subtle)
+                mapCtx.strokeStyle = 'rgba(248, 164, 184, 0.2)';
+                mapCtx.lineWidth = 2;
+                mapCtx.setLineDash([4, 4]);
+                mapCtx.beginPath();
+                mapCtx.moveTo(startCol * cellW + cellW / 2, startRow * cellH + cellH / 2);
+                // Draw a faint winding line toward the end
+                const waypoints = [
+                    [startCol, startRow],
+                    [3, 1], [3, 3], [1, 3], [1, 7], [3, 7], [3, 5], [7, 5],
+                    [7, 7], [5, 7], [5, 9], [3, 9], [3, 11], [1, 11], [1, 13],
+                    [endCol, endRow]
+                ];
+                for (let i = 1; i < waypoints.length; i++) {
+                    const wp = waypoints[i];
+                    mapCtx.lineTo(wp[0] * cellW + cellW / 2, wp[1] * cellH + cellH / 2);
+                }
+                mapCtx.stroke();
+                mapCtx.setLineDash([]);
+            }
+
+            // ─── RESIZE ───
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            // ─── COLLISION DETECTION ───
+            function isWall(x, z) {
+                const col = Math.floor(x / CELL_SIZE);
+                const row = Math.floor(z / CELL_SIZE);
+                if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return true;
+                return MAZE[row][col] === 1;
+            }
+
+            function canMoveTo(x, z) {
+                // Check with a small radius around the player
+                const r = PLAYER_RADIUS;
+                return !isWall(x - r, z - r) &&
+                       !isWall(x + r, z - r) &&
+                       !isWall(x - r, z + r) &&
+                       !isWall(x + r, z + r) &&
+                       !isWall(x, z);
+            }
+
+            // ─── 3D RENDERING ───
+            function render() {
+                const W = canvas.width;
+                const H = canvas.height;
+                const fov = Math.PI / 3; // 60 degrees
+                const halfFov = fov / 2;
+
+                // Clear
+                ctx.fillStyle = '#0d0a14';
+                ctx.fillRect(0, 0, W, H);
+
+                // Ceiling gradient
+                const ceilGrad = ctx.createLinearGradient(0, 0, 0, H * 0.5);
+                ceilGrad.addColorStop(0, '#0d0a14');
+                ceilGrad.addColorStop(1, '#1a1228');
+                ctx.fillStyle = ceilGrad;
+                ctx.fillRect(0, 0, W, H * 0.5);
+
+                // Floor gradient
+                const floorGrad = ctx.createLinearGradient(0, H * 0.5, 0, H);
+                floorGrad.addColorStop(0, '#1a1228');
+                floorGrad.addColorStop(1, '#0d0a14');
+                ctx.fillStyle = floorGrad;
+                ctx.fillRect(0, H * 0.5, W, H * 0.5);
+
+                // Cast rays for walls
+                const numRays = Math.min(W, 640); // limit for performance
+                const rayStep = W / numRays;
+                const maxDist = 40;
+
+                for (let i = 0; i < numRays; i++) {
+                    const screenX = i * rayStep;
+                    const rayAngle = playerAngle - halfFov + (i / numRays) * fov;
+
+                    // DDA raycasting
+                    const sinA = Math.sin(rayAngle);
+                    const cosA = Math.cos(rayAngle);
+
+                    let dist = 0;
+                    let hit = false;
+                    let side = 0;
+                    let hitX = 0, hitZ = 0;
+
+                    // Step through the grid
+                    let mapX = Math.floor(playerX / CELL_SIZE);
+                    let mapZ = Math.floor(playerZ / CELL_SIZE);
+
+                    const deltaDistX = Math.abs(1 / (cosA || 0.0001)) * CELL_SIZE;
+                    const deltaDistZ = Math.abs(1 / (sinA || 0.0001)) * CELL_SIZE;
+
+                    let stepX, stepZ;
+                    let sideDistX, sideDistZ;
+
+                    if (cosA < 0) {
+                        stepX = -1;
+                        sideDistX = (playerX - mapX * CELL_SIZE) / Math.abs(cosA || 0.0001);
+                    } else {
+                        stepX = 1;
+                        sideDistX = ((mapX + 1) * CELL_SIZE - playerX) / Math.abs(cosA || 0.0001);
+                    }
+
+                    if (sinA < 0) {
+                        stepZ = -1;
+                        sideDistZ = (playerZ - mapZ * CELL_SIZE) / Math.abs(sinA || 0.0001);
+                    } else {
+                        stepZ = 1;
+                        sideDistZ = ((mapZ + 1) * CELL_SIZE - playerZ) / Math.abs(sinA || 0.0001);
+                    }
+
+                    // DDA
+                    let iterations = 0;
+                    while (!hit && iterations < 200) {
+                        iterations++;
+                        if (sideDistX < sideDistZ) {
+                            sideDistX += deltaDistX;
+                            mapX += stepX;
+                            side = 0;
+                        } else {
+                            sideDistZ += deltaDistZ;
+                            mapZ += stepZ;
+                            side = 1;
+                        }
+
+                        if (mapX < 0 || mapX >= COLS || mapZ < 0 || mapZ >= ROWS) {
+                            hit = true;
+                            dist = maxDist;
+                            break;
+                        }
+
+                        if (MAZE[mapZ][mapX] === 1) {
+                            hit = true;
+                            // Calculate distance
+                            if (side === 0) {
+                                dist = (mapX * CELL_SIZE - playerX) / (cosA || 0.0001);
+                            } else {
+                                dist = (mapZ * CELL_SIZE - playerZ) / (sinA || 0.0001);
+                            }
+                            if (dist < 0) dist = maxDist;
+                            break;
+                        }
+                    }
+
+                    if (!hit) dist = maxDist;
+                    dist = Math.max(0.1, Math.min(dist, maxDist));
+
+                    // Correct fisheye
+                    const correctedDist = dist * Math.cos(rayAngle - playerAngle);
+                    const wallHeight = (WALL_HEIGHT / correctedDist) * (H / 2);
+
+                    // Wall color based on distance
+                    const shade = Math.max(0.15, Math.min(1, 1 - correctedDist / maxDist));
+                    const r = Math.floor(60 + 80 * shade);
+                    const g = Math.floor(40 + 60 * shade);
+                    const b = Math.floor(90 + 100 * shade);
+
+                    // Side shading
+                    const sideShade = side === 1 ? 0.85 : 1;
+
+                    ctx.fillStyle = `rgb(${Math.floor(r * sideShade)}, ${Math.floor(g * sideShade)}, ${Math.floor(b * sideShade)})`;
+                    ctx.fillRect(screenX, H / 2 - wallHeight, rayStep + 1, wallHeight * 2);
+                }
+
+                // Draw end portal glow (if visible)
+                const endX = endCol * CELL_SIZE + CELL_SIZE / 2;
+                const endZ = endRow * CELL_SIZE + CELL_SIZE / 2;
+                const dx = endX - playerX;
+                const dz = endZ - playerZ;
+                const endDist = Math.sqrt(dx * dx + dz * dz);
+                const endAngle = Math.atan2(dz, dx) - playerAngle;
+
+                // Normalize angle
+                let normAngle = endAngle;
+                while (normAngle > Math.PI) normAngle -= Math.PI * 2;
+                while (normAngle < -Math.PI) normAngle += Math.PI * 2;
+
+                if (Math.abs(normAngle) < fov * 1.5 && endDist < 20) {
+                    const screenX = W / 2 + (normAngle / halfFov) * (W / 2);
+                    const size = Math.max(8, (1 / endDist) * 120);
+                    const alpha = Math.max(0.1, 1 - endDist / 20);
+                    ctx.save();
+                    ctx.globalAlpha = alpha;
+                    ctx.fillStyle = '#c78bdb';
+                    ctx.shadowColor = '#c78bdb';
+                    ctx.shadowBlur = 30;
+                    ctx.beginPath();
+                    ctx.arc(screenX, H / 2, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                // Update compass rotation
+                compass.style.transform = `rotate(${-playerAngle * (180 / Math.PI)}deg)`;
+
+                // Render particles
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx * 0.016;
+                    p.y += p.vy * 0.016;
+                    p.life -= 0.016;
+                    if (p.life <= 0) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+                    ctx.globalAlpha = p.life;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+            }
+
+            // ─── UPDATE ───
+            function update(dt) {
+                if (!gameActive || gameWon) return;
+
+                // Look controls
+                if (lookActive) {
+                    playerAngle += lookVector.x * TURN_SPEED * dt;
+                }
+
+                // Movement
+                let moveX = 0, moveZ = 0;
+                const sinA = Math.sin(playerAngle);
+                const cosA = Math.cos(playerAngle);
+
+                if (keys.forward) {
+                    moveX += sinA * MOVE_SPEED * dt;
+                    moveZ += cosA * MOVE_SPEED * dt;
+                }
+                if (keys.backward) {
+                    moveX -= sinA * MOVE_SPEED * dt;
+                    moveZ -= cosA * MOVE_SPEED * dt;
+                }
+                if (keys.left) {
+                    moveX -= cosA * MOVE_SPEED * dt;
+                    moveZ += sinA * MOVE_SPEED * dt;
+                }
+                if (keys.right) {
+                    moveX += cosA * MOVE_SPEED * dt;
+                    moveZ -= sinA * MOVE_SPEED * dt;
+                }
+
+                // Try move X
+                const newX = playerX + moveX;
+                const newZ = playerZ + moveZ;
+
+                if (canMoveTo(newX, playerZ)) {
+                    playerX = newX;
+                }
+                if (canMoveTo(playerX, newZ)) {
+                    playerZ = newZ;
+                }
+
+                // Check win condition
+                const dx = playerX - (endCol * CELL_SIZE + CELL_SIZE / 2);
+                const dz = playerZ - (endRow * CELL_SIZE + CELL_SIZE / 2);
+                const distToEnd = Math.sqrt(dx * dx + dz * dz);
+
+                if (distToEnd < CELL_SIZE * 0.8 && !gameWon) {
+                    gameWon = true;
+                    gameActive = false;
+                    setTimeout(() => {
+                        winOverlay.classList.remove('hidden');
+                        // Celebration burst
+                        for (let i = 0; i < 3; i++) {
+                            setTimeout(() => {
+                                confettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+                                sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 30);
+                            }, i * 300);
+                        }
+                    }, 400);
+                }
+
+                // Add subtle particle trail
+                if (Math.random() < 0.15) {
+                    particles.push({
+                        x: playerX * 10 + (Math.random() - 0.5) * 20,
+                        y: playerZ * 10 + (Math.random() - 0.5) * 20,
+                        vx: (Math.random() - 0.5) * 10,
+                        vy: -Math.random() * 15,
+                        life: 0.8,
+                        size: 1 + Math.random() * 2,
+                        color: `rgba(199, 139, 219, ${0.3 + Math.random() * 0.3})`
+                    });
+                }
+            }
+
+            // ─── GAME LOOP ───
+            function gameLoop(time) {
+                const dt = Math.min((time - lastTime) / 1000, 0.1) || 0.016;
+                lastTime = time;
+
+                update(dt);
+                render();
+
+                animFrame = requestAnimationFrame(gameLoop);
+            }
+
+            // ─── START GAME ───
+            function startGame() {
+                introOverlay.classList.add('hidden');
+                gameActive = true;
+                gameWon = false;
+                hasSeenIntro = true;
+
+                // Reset player
+                playerX = startCol * CELL_SIZE + CELL_SIZE / 2;
+                playerZ = startRow * CELL_SIZE + CELL_SIZE / 2;
+                playerAngle = 0;
+
+                // Show hint
+                mobileHint.classList.add('show');
+                setTimeout(() => mobileHint.classList.remove('show'), 4000);
+
+                // Start loop if not already running
+                if (!animFrame) {
+                    lastTime = performance.now();
+                    animFrame = requestAnimationFrame(gameLoop);
+                }
+            }
+
+            // ─── CONTROLS: KEYBOARD ───
+            document.addEventListener('keydown', (e) => {
+                if (!gameActive) return;
+                switch (e.key.toLowerCase()) {
+                    case 'w': case 'arrowup': keys.forward = true; e.preventDefault(); break;
+                    case 's': case 'arrowdown': keys.backward = true; e.preventDefault(); break;
+                    case 'a': case 'arrowleft': keys.left = true; e.preventDefault(); break;
+                    case 'd': case 'arrowright': keys.right = true; e.preventDefault(); break;
+                }
+            });
+
+            document.addEventListener('keyup', (e) => {
+                switch (e.key.toLowerCase()) {
+                    case 'w': case 'arrowup': keys.forward = false; break;
+                    case 's': case 'arrowdown': keys.backward = false; break;
+                    case 'a': case 'arrowleft': keys.left = false; break;
+                    case 'd': case 'arrowright': keys.right = false; break;
+                }
+            });
+
+            // ─── CONTROLS: D-PAD (touch & mouse) ───
+            const dpadBtns = dpad.querySelectorAll('.dpad-btn[data-dir]');
+            dpadBtns.forEach(btn => {
+                const dir = btn.dataset.dir;
+
+                const press = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    keys[dir] = true;
+                    btn.classList.add('active');
+                };
+
+                const release = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    keys[dir] = false;
+                    btn.classList.remove('active');
+                };
+
+                btn.addEventListener('touchstart', press, { passive: false });
+                btn.addEventListener('touchend', release);
+                btn.addEventListener('touchcancel', release);
+                btn.addEventListener('mousedown', press);
+                btn.addEventListener('mouseup', release);
+                btn.addEventListener('mouseleave', release);
+            });
+
+            // ─── CONTROLS: LOOK PAD ───
+            function handleLookStart(e) {
+                e.preventDefault();
+                lookActive = true;
+                const rect = lookPad.getBoundingClientRect();
+                const touch = e.touches ? e.touches[0] : e;
+                lookStartX = touch.clientX;
+                lookStartY = touch.clientY;
+                lookVector.x = 0;
+                lookVector.y = 0;
+                updateLookKnob(0, 0);
+            }
+
+            function handleLookMove(e) {
+                if (!lookActive) return;
+                e.preventDefault();
+                const rect = lookPad.getBoundingClientRect();
+                const touch = e.touches ? e.touches[0] : e;
+                const dx = touch.clientX - lookStartX;
+                const dy = touch.clientY - lookStartY;
+                const maxDist = rect.width * 0.4;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const clampedDist = Math.min(dist, maxDist);
+                const angle = Math.atan2(dy, dx);
+
+                const kx = Math.cos(angle) * clampedDist;
+                const ky = Math.sin(angle) * clampedDist;
+
+                lookVector.x = kx / maxDist;
+                lookVector.y = ky / maxDist;
+
+                updateLookKnob(kx, ky);
+            }
+
+            function handleLookEnd(e) {
+                if (!lookActive) return;
+                e.preventDefault();
+                lookActive = false;
+                lookVector.x = 0;
+                lookVector.y = 0;
+                updateLookKnob(0, 0);
+            }
+
+            function updateLookKnob(x, y) {
+                lookKnob.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+            }
+
+            lookPad.addEventListener('touchstart', handleLookStart, { passive: false });
+            lookPad.addEventListener('touchmove', handleLookMove, { passive: false });
+            lookPad.addEventListener('touchend', handleLookEnd);
+            lookPad.addEventListener('touchcancel', handleLookEnd);
+
+            lookPad.addEventListener('mousedown', handleLookStart);
+            document.addEventListener('mousemove', handleLookMove);
+            document.addEventListener('mouseup', handleLookEnd);
+
+            // ─── EFFECTS ───
+            function sparkleBurst(cx, cy, count) {
+                const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
+                const total = count || 24;
+                for (let i = 0; i < total; i++) {
+                    const spark = document.createElement('div');
+                    spark.className = 'sparkle-burst';
+                    spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    const angle = Math.random() * 2 * Math.PI;
+                    const dist = 60 + Math.random() * 180;
+                    spark.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                    spark.style.setProperty('--ty', Math.sin(angle) * dist - 50 + 'px');
+                    spark.style.left = (cx || window.innerWidth / 2) + 'px';
+                    spark.style.top = (cy || window.innerHeight / 2) + 'px';
+                    spark.style.fontSize = 1 + Math.random() * 1.8 + 'rem';
+                    spark.style.animationDuration = 0.4 + Math.random() * 0.6 + 's';
+                    document.body.appendChild(spark);
+                    setTimeout(() => spark.remove(), 1200);
+                }
+            }
+
+            function confettiBurst(cx, cy) {
+                const colors = ['#f8a4b8', '#c78bdb', '#f5c6a0', '#ffd6d6', '#d4b8e0', '#fce7f3', '#ffb3c6', '#b8d4e3'];
+                const count = 40 + Math.floor(Math.random() * 30);
+                for (let i = 0; i < count; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    piece.style.left = (cx || window.innerWidth / 2) + 'px';
+                    piece.style.top = (cy || window.innerHeight / 2) + 'px';
+                    piece.style.width = (4 + Math.random() * 7) + 'px';
+                    piece.style.height = (4 + Math.random() * 7) + 'px';
+                    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    const angle = Math.random() * 2 * Math.PI;
+                    const dist = 60 + Math.random() * 300;
+                    piece.style.animationDuration = (1.0 + Math.random() * 1.6) + 's';
+                    piece.style.animationDelay = (Math.random() * 0.5) + 's';
+                    piece.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                    piece.style.setProperty('--ty', Math.sin(angle) * dist - 140 + 'px');
+                    document.body.appendChild(piece);
+                    setTimeout(() => piece.remove(), 2800);
+                }
+            }
+
+            // ─── INIT ───
+            function init() {
+                // Draw the map preview
+                drawMapPreview();
+
+                // Check if intro has been seen before (stored in session)
+                const introSeen = sessionStorage.getItem('ruth_day7_intro_seen');
+                if (introSeen === 'true') {
+                    introOverlay.classList.add('hidden');
+                    startGame();
+                }
+
+                // Start button
+                startGameBtn.addEventListener('click', () => {
+                    sessionStorage.setItem('ruth_day7_intro_seen', 'true');
+                    startGame();
+                });
+
+                // Play again
+                playAgainBtn.addEventListener('click', () => {
+                    winOverlay.classList.add('hidden');
+                    // Reset player
+                    playerX = startCol * CELL_SIZE + CELL_SIZE / 2;
+                    playerZ = startRow * CELL_SIZE + CELL_SIZE / 2;
+                    playerAngle = 0;
+                    gameWon = false;
+                    gameActive = true;
+                    particles = [];
+                    mobileHint.classList.add('show');
+                    setTimeout(() => mobileHint.classList.remove('show'), 3000);
+                });
+
+                // Initial render
+                render();
+
+                // Start loop if intro seen
+                if (introSeen === 'true') {
+                    if (!animFrame) {
+                        lastTime = performance.now();
+                        animFrame = requestAnimationFrame(gameLoop);
+                    }
+                }
+            }
+
+            init();
+
+            console.log('🌸 Day 7 · The Path to You · 3D Maze 💖');
+        })();
+    </script>
+
+</body>
+</html>
