@@ -1,1332 +1,1290 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Day 08 · How well do you know me?</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
-    <style>
-        /* ─── RESET ─── */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --pink: #f5a0b8;
-            --purple: #c78bdb;
-            --peach: #f5c6a0;
-            --cream: #fcf6f0;
-            --text: #2d2a3a;
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
-            --radius: 16px;
-            --quiz-bg: rgba(255, 255, 255, 0.7);
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--cream);
-            color: var(--text);
-            min-height: 100vh;
-            padding: 20px;
-            line-height: 1.5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .bg {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            background:
-                radial-gradient(ellipse at 20% 30%, rgba(248, 164, 184, 0.25) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 70%, rgba(199, 139, 219, 0.20) 0%, transparent 60%),
-                radial-gradient(ellipse at 50% 50%, rgba(245, 198, 160, 0.15) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        .placeholder {
-            position: relative;
-            z-index: 1;
-            max-width: 780px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 30px 20px 40px;
-            background: rgba(255, 255, 255, 0.55);
-            backdrop-filter: blur(16px);
-            border-radius: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
-            text-align: center;
-            transition: 0.3s ease;
-        }
-
-        .header .name {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(2.4rem, 8vw, 3.6rem);
-            font-weight: 700;
-            line-height: 1.1;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 1px;
-        }
-
-        .header .sub {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.1rem;
-            color: #b8a6c9;
-            margin-top: -2px;
-            letter-spacing: 0.08em;
-        }
-
-        .day-badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(8px);
-            padding: 6px 24px;
-            border-radius: 60px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #c27b9e;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 4px 20px rgba(194, 123, 158, 0.08);
-            margin-top: 12px;
-            transition: 0.3s ease;
-        }
-
-        .day-badge strong {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.4rem;
-            background: linear-gradient(135deg, #f5b8b8, #c78bdb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* ─── INTRO OVERLAY ─── */
-        .intro-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(252, 246, 240, 0.85);
-            backdrop-filter: blur(12px);
-            padding: 20px;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
-        }
-
-        .intro-overlay.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .intro-card {
-            max-width: 620px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-            border-radius: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 30px 80px rgba(199, 139, 219, 0.15);
-            padding: 40px 32px 36px;
-            text-align: center;
-            animation: fadeSlideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        @keyframes fadeSlideUp {
-            0% {
-                opacity: 0;
-                transform: translateY(40px) scale(0.96);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .intro-card .intro-emoji {
-            font-size: 4rem;
-            line-height: 1;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .intro-card .intro-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1.2;
-            margin-bottom: 6px;
-        }
-
-        .intro-card .intro-sub {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.2rem;
-            color: #b8a6c9;
-            letter-spacing: 0.06em;
-            margin-bottom: 20px;
-        }
-
-        .intro-card .intro-body {
-            font-family: 'Inter', sans-serif;
-            font-size: 0.98rem;
-            color: #3d344a;
-            line-height: 1.8;
-            text-align: left;
-            padding: 0 4px;
-            margin-bottom: 16px;
-        }
-
-        .intro-card .intro-body p {
-            margin-bottom: 12px;
-        }
-
-        .intro-card .intro-body .highlight {
-            color: #c27b9e;
-            font-weight: 600;
-        }
-
-        .intro-card .intro-body .rule-box {
-            background: rgba(199, 139, 219, 0.07);
-            border-radius: 14px;
-            padding: 14px 18px;
-            margin: 14px 0 6px;
-            border-left: 4px solid #c78bdb;
-        }
-
-        .intro-card .intro-body .rule-box p {
-            margin-bottom: 6px;
-            font-size: 0.92rem;
-        }
-
-        .intro-card .intro-body .rule-box p:last-child {
-            margin-bottom: 0;
-        }
-
-        .intro-card .intro-body .rule-box .rule-label {
-            font-weight: 700;
-            color: #c27b9e;
-        }
-
-        .intro-card .intro-body .small-note {
-            font-size: 0.85rem;
-            color: #b8a6c9;
-            font-style: italic;
-            text-align: center;
-            margin-top: 12px;
-        }
-
-        .intro-card .intro-actions {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            margin-top: 18px;
-        }
-
-        .btn-start {
-            padding: 16px 52px;
-            border-radius: 60px;
-            border: none;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            color: #fff;
-            font-weight: 700;
-            font-size: 1.1rem;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            box-shadow: 0 12px 40px rgba(199, 139, 219, 0.3);
-            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            letter-spacing: 0.03em;
-            width: 100%;
-            max-width: 360px;
-        }
-
-        .btn-start:hover {
-            transform: translateY(-4px) scale(1.03);
-            box-shadow: 0 18px 56px rgba(199, 139, 219, 0.4);
-        }
-
-        .btn-start:active {
-            transform: scale(0.96);
-        }
-
-        .intro-card .intro-footer {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 0.9rem;
-            color: #b8a6c9;
-            margin-top: 12px;
-        }
-
-        /* ─── QUIZ AREA ─── */
-        .quiz-intro {
-            margin: 20px 0 12px;
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.2rem;
-            color: #5a4a6a;
-            line-height: 1.6;
-        }
-
-        .quiz-intro .highlight {
-            color: #c27b9e;
-            font-weight: 600;
-        }
-
-        .progress-bar {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 16px 0 20px;
-            padding: 0 8px;
-        }
-
-        .progress-track {
-            flex: 1;
-            height: 8px;
-            background: rgba(199, 139, 219, 0.15);
-            border-radius: 20px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #f8a4b8, #c78bdb);
-            border-radius: 20px;
-            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .progress-text {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #b8a6c9;
-            min-width: 60px;
-            text-align: right;
-        }
-
-        .question-card {
-            background: var(--quiz-bg);
-            backdrop-filter: blur(8px);
-            border-radius: 20px;
-            padding: 28px 24px 24px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.08);
-            margin: 8px 0 18px;
-            transition: 0.3s ease;
-            text-align: left;
-        }
-
-        .question-number {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1rem;
-            color: #c27b9e;
-            letter-spacing: 0.06em;
-            margin-bottom: 6px;
-        }
-
-        .question-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: #3d344a;
-            line-height: 1.4;
-            margin-bottom: 18px;
-        }
-
-        .options-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .option-btn {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 18px;
-            border-radius: 14px;
-            border: 2px solid rgba(199, 139, 219, 0.15);
-            background: rgba(255, 255, 255, 0.6);
-            font-family: 'Inter', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 400;
-            color: #3d344a;
-            cursor: pointer;
-            transition: 0.25s ease;
-            text-align: left;
-            width: 100%;
-        }
-
-        .option-btn:hover {
-            border-color: rgba(199, 139, 219, 0.4);
-            background: rgba(255, 255, 255, 0.9);
-            transform: translateX(4px);
-        }
-
-        .option-btn.selected {
-            border-color: #c78bdb;
-            background: rgba(199, 139, 219, 0.12);
-            box-shadow: 0 4px 16px rgba(199, 139, 219, 0.12);
-        }
-
-        .option-btn .opt-letter {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(199, 139, 219, 0.12);
-            font-weight: 700;
-            font-size: 0.85rem;
-            color: #9b7bb0;
-            flex-shrink: 0;
-            transition: 0.25s ease;
-        }
-
-        .option-btn.selected .opt-letter {
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            color: #fff;
-        }
-
-        .option-btn .opt-text {
-            flex: 1;
-        }
-
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
-
-        .nav-buttons .spacer {
-            flex: 1;
-        }
-
-        .btn {
-            padding: 12px 28px;
-            border-radius: 60px;
-            border: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            letter-spacing: 0.02em;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            color: #fff;
-            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.18);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.28);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.7);
-            color: #9b7bb0;
-            border: 2px solid rgba(199, 139, 219, 0.2);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.95);
-            border-color: rgba(199, 139, 219, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .btn-submit {
-            background: linear-gradient(135deg, #c78bdb, #f5c6a0);
-            color: #fff;
-            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.2);
-        }
-
-        .btn-submit:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.3);
-        }
-
-        .btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .result-screen {
-            display: none;
-            padding: 12px 0 8px;
-        }
-
-        .result-screen.active {
-            display: block;
-        }
-
-        .result-card {
-            background: var(--quiz-bg);
-            backdrop-filter: blur(8px);
-            border-radius: 24px;
-            padding: 32px 24px 28px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.08);
-            margin: 8px 0 18px;
-        }
-
-        .result-emoji {
-            font-size: 4rem;
-            line-height: 1;
-            margin-bottom: 8px;
-        }
-
-        .result-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 4px;
-        }
-
-        .result-score {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.6rem;
-            color: #5a4a6a;
-            margin: 8px 0 4px;
-        }
-
-        .result-score strong {
-            color: #c27b9e;
-            font-size: 2.2rem;
-        }
-
-        .result-percentage {
-            font-family: 'Inter', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            color: #b8a6c9;
-            margin-bottom: 16px;
-        }
-
-        .result-message {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.2rem;
-            color: #3d344a;
-            line-height: 1.7;
-            padding: 16px 12px 8px;
-            border-top: 1px solid rgba(199, 139, 219, 0.12);
-            margin-top: 8px;
-        }
-
-        .result-message .win {
-            color: #c27b9e;
-            font-weight: 700;
-        }
-
-        .result-message .lose {
-            color: #9b8aa8;
-        }
-
-        .result-actions {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 18px;
-        }
-
-        .back-btn {
-            display: inline-block;
-            padding: 12px 36px;
-            border-radius: 60px;
-            border: none;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            color: #fff;
-            font-weight: 600;
-            font-size: 0.95rem;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.18);
-            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            text-decoration: none;
-            letter-spacing: 0.02em;
-            margin-top: 6px;
-        }
-
-        .back-btn:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.28);
-        }
-
-        .back-btn:active {
-            transform: scale(0.95);
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .footer-note {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 0.9rem;
-            color: #b8a6c9;
-            margin-top: 18px;
-        }
-
-        .sparkle-burst {
-            position: fixed;
-            pointer-events: none;
-            font-size: 1.4rem;
-            animation: burst 0.8s ease-out forwards;
-            z-index: 999;
-        }
-
-        @keyframes burst {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(0.2) rotate(0deg);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg);
-            }
-        }
-
-        .confetti-piece {
-            position: fixed;
-            pointer-events: none;
-            z-index: 998;
-            width: 7px;
-            height: 7px;
-            border-radius: 2px;
-            animation: confettiFall linear forwards;
-        }
-
-        @keyframes confettiFall {
-            0% {
-                opacity: 1;
-                transform: translateY(0) rotate(0deg) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(100vh) rotate(720deg) scale(0.2);
-            }
-        }
-
-        @media (max-width: 600px) {
-            .placeholder {
-                padding: 20px 14px 30px;
-                border-radius: 24px;
-            }
-            .header .name {
-                font-size: 2.6rem;
-            }
-            .header .sub {
-                font-size: 0.9rem;
-            }
-            .question-card {
-                padding: 20px 16px 18px;
-            }
-            .question-text {
-                font-size: 1.15rem;
-            }
-            .option-btn {
-                padding: 12px 14px;
-                font-size: 0.88rem;
-            }
-            .btn {
-                padding: 10px 22px;
-                font-size: 0.82rem;
-            }
-            .result-title {
-                font-size: 1.6rem;
-            }
-            .result-score strong {
-                font-size: 1.8rem;
-            }
-            .result-message {
-                font-size: 1rem;
-            }
-            .back-btn {
-                padding: 10px 28px;
-                font-size: 0.85rem;
-            }
-            .intro-card {
-                padding: 28px 18px 24px;
-            }
-            .intro-card .intro-title {
-                font-size: 1.6rem;
-            }
-            .intro-card .intro-body {
-                font-size: 0.9rem;
-            }
-            .btn-start {
-                padding: 14px 36px;
-                font-size: 1rem;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .header .name {
-                font-size: 2.2rem;
-            }
-            .question-text {
-                font-size: 1rem;
-            }
-            .option-btn {
-                padding: 10px 12px;
-                font-size: 0.8rem;
-                gap: 10px;
-            }
-            .option-btn .opt-letter {
-                width: 26px;
-                height: 26px;
-                font-size: 0.75rem;
-            }
-            .btn {
-                padding: 8px 18px;
-                font-size: 0.78rem;
-            }
-            .intro-card {
-                padding: 22px 14px 20px;
-                border-radius: 24px;
-            }
-            .intro-card .intro-title {
-                font-size: 1.3rem;
-            }
-            .intro-card .intro-body {
-                font-size: 0.82rem;
-            }
-            .btn-start {
-                padding: 12px 28px;
-                font-size: 0.9rem;
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--cream);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            border-radius: 10px;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Day 06 · Ruth's 21st</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* ─── RESET ─── */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --pink: #f5a0b8;
+    --purple: #c78bdb;
+    --peach: #f5c6a0;
+    --cream: #fcf6f0;
+    --text: #2d2a3a;
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
+    --radius: 16px;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px;
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse at 20% 30%, rgba(248, 164, 184, 0.25) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 70%, rgba(199, 139, 219, 0.20) 0%, transparent 60%),
+      radial-gradient(ellipse at 50% 50%, rgba(245, 198, 160, 0.15) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .placeholder {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 30px 20px 40px;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(16px);
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
+    text-align: center;
+  }
+
+  /* ─── HEADER ─── */
+  .header .name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 8vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 1px;
+  }
+
+  .header .sub {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.1rem;
+    color: #b8a6c9;
+    margin-top: -2px;
+    letter-spacing: 0.08em;
+  }
+
+  .header .day-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    padding: 6px 22px;
+    border-radius: 60px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #c27b9e;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 4px 20px rgba(194, 123, 158, 0.08);
+    margin-top: 12px;
+    transition: 0.3s ease;
+  }
+
+  .header .day-badge strong {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, #f5b8b8, #c78bdb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .day-display { margin: 18px 0 4px; }
+
+  .day-display .big-day {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.4rem, 12vw, 5.2rem);
+    font-weight: 700;
+    background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    letter-spacing: 2px;
+  }
+
+  .day-display .day-label {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.1rem;
+    color: #b8a6c9;
+    letter-spacing: 0.12em;
+    margin-top: -2px;
+  }
+
+  /* ─── GAME ─── */
+  .game-wrap { margin: 22px 0 6px; }
+
+  .progress-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-family: 'Patrick Hand', cursive;
+    color: #b8a6c9;
+    font-size: 1rem;
+    margin-bottom: 14px;
+  }
+
+  .progress-bar {
+    flex: 1;
+    max-width: 170px;
+    height: 7px;
+    border-radius: 99px;
+    background: rgba(199, 139, 219, 0.15);
+    overflow: hidden;
+  }
+
+  .progress-bar i {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #f8a4b8, #c78bdb, #f5c6a0);
+    border-radius: 99px;
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+
+  .chip {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(199, 139, 219, 0.18);
+    background: rgba(255, 255, 255, 0.6);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.7rem;
+    color: #b8a6c9;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding: 0;
+  }
+
+  .chip:hover { transform: translateY(-2px); }
+
+  .chip.active {
+    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 6px 18px rgba(199, 139, 219, 0.32);
+    transform: translateY(-2px) scale(1.07);
+  }
+
+  .chip.done {
+    background: rgba(199, 139, 219, 0.13);
+    color: #c78bdb;
+    border-color: rgba(199, 139, 219, 0.32);
+    font-size: 0.85rem;
+  }
+
+  .chip.done.active {
+    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+    color: #fff;
+  }
+
+  .play-card {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 24px;
+    padding: 22px 14px 18px;
+    box-shadow: 0 12px 36px rgba(199, 139, 219, 0.08);
+  }
+
+  .word-meta {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 0.9rem;
+    color: #b8a6c9;
+    letter-spacing: 0.06em;
+    margin-bottom: 14px;
+  }
+
+  .answer-row,
+  .pool-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    min-height: 52px;
+    user-select: none;
+  }
+
+  .answer-row { margin-bottom: 22px; }
+
+  .slot {
+    width: 44px;
+    height: 52px;
+    border-radius: 12px;
+    border: 2px dashed rgba(199, 139, 219, 0.28);
+    background: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1.45rem;
+    color: #c27b9e;
+    transition: border-color 0.25s ease, background 0.25s ease, color 0.25s ease;
+  }
+
+  .slot.filled {
+    border-style: solid;
+    border-color: transparent;
+    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(199, 139, 219, 0.28);
+    animation: slotPop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .slot.peek {
+    border-color: rgba(199, 139, 219, 0.6);
+    background: rgba(199, 139, 219, 0.1);
+    color: rgba(194, 123, 158, 0.6);
+  }
+
+  @keyframes slotPop {
+    0% { transform: scale(0.6); opacity: 0.3; }
+    60% { transform: scale(1.12); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .tile {
+    width: 44px;
+    height: 52px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(199, 139, 219, 0.2);
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1.45rem;
+    color: #5a4a68;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(199, 139, 219, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    padding: 0;
+  }
+
+  .tile:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(199, 139, 219, 0.22); }
+  .tile:active { transform: scale(0.94); }
+
+  .flying-tile {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+    color: #fff;
+    border-radius: 12px;
+    z-index: 900;
+    pointer-events: none;
+    box-shadow: 0 10px 28px rgba(199, 139, 219, 0.4);
+    transition: transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.4s ease;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-9px); }
+    40% { transform: translateX(9px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+
+  .shake { animation: shake 0.4s ease; }
+
+  .game-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .mini-btn {
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(199, 139, 219, 0.22);
+    color: #b18bc4;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 0.95rem;
+    padding: 8px 20px;
+    border-radius: 60px;
+    cursor: pointer;
+    transition: 0.3s ease;
+  }
+
+  .mini-btn:hover {
+    color: #c27b9e;
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(199, 139, 219, 0.14);
+  }
+
+  .mini-btn:active { transform: scale(0.95); }
+
+  .letter-btn {
+    display: none;
+    margin: 20px auto 0;
+    padding: 13px 32px;
+    border-radius: 60px;
+    border: none;
+    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(199, 139, 219, 0.3);
+    transition: 0.3s ease;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .letter-btn.show { display: inline-flex; animation: slotPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .letter-btn:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(199, 139, 219, 0.36); }
+  .letter-btn:active { transform: scale(0.96); }
+
+  /* ─── MESSAGE ─── */
+  .message-box {
+    margin: 26px 0 22px;
+    padding: 20px 24px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: var(--radius);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 16px rgba(199, 139, 219, 0.04);
+  }
+
+  .message-box .message-content {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.05rem;
+    color: #3d344a;
+    line-height: 1.7;
+  }
+
+  .message-box .highlight-emoji {
+    font-size: 1.8rem;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* ─── BACK BUTTON ─── */
+  .back-btn {
+    display: inline-block;
+    padding: 12px 36px;
+    border-radius: 60px;
+    border: none;
+    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.95rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(199, 139, 219, 0.18);
+    transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+
+  .back-btn:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 14px 44px rgba(199, 139, 219, 0.28); }
+  .back-btn:active { transform: scale(0.95); }
+
+  /* ─── OVERLAYS ─── */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(252, 246, 240, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.45s ease;
+  }
+
+  .overlay.show { opacity: 1; pointer-events: auto; }
+
+  .overlay-card {
+    width: 100%;
+    max-width: 440px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 28px;
+    padding: 34px 28px 30px;
+    box-shadow: 0 30px 80px rgba(199, 139, 219, 0.16);
+    text-align: center;
+    transform: translateY(16px) scale(0.97);
+    transition: transform 0.5s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+
+  .overlay.show .overlay-card { transform: translateY(0) scale(1); }
+
+  .overlay-card .ov-emoji { font-size: 2.6rem; display: block; margin-bottom: 8px; }
+
+  .overlay-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+    line-height: 1.25;
+  }
+
+  .overlay-card .ov-sub {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1rem;
+    color: #b8a6c9;
+    letter-spacing: 0.08em;
+    margin-bottom: 18px;
+  }
+
+  .overlay-card p {
+    font-size: 0.95rem;
+    color: #4a4056;
+    line-height: 1.75;
+    margin-bottom: 14px;
+  }
+
+  .overlay-card .hint-line {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 0.95rem;
+    color: #c27b9e;
+    background: rgba(248, 164, 184, 0.1);
+    border-radius: 60px;
+    padding: 8px 16px;
+    display: inline-block;
+    margin-bottom: 20px;
+  }
+
+  .primary-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 34px;
+    border-radius: 60px;
+    border: none;
+    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(199, 139, 219, 0.3);
+    transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .primary-btn:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 16px 40px rgba(199, 139, 219, 0.36); }
+  .primary-btn:active { transform: scale(0.95); }
+
+  /* ─── LETTER ─── */
+  .letter-overlay { background: rgba(250, 242, 245, 0.88); }
+
+  .letter-card {
+    width: 100%;
+    max-width: 600px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    background: linear-gradient(180deg, #fffdfb 0%, #fdf5f8 100%);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 28px;
+    padding: 36px 30px 34px;
+    box-shadow: 0 30px 90px rgba(199, 139, 219, 0.2);
+    text-align: left;
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.6s cubic-bezier(0.34, 1.3, 0.64, 1);
+  }
+
+  .letter-overlay.show .letter-card { transform: translateY(0) scale(1); }
+
+  .letter-seal {
+    font-size: 2.4rem;
+    text-align: center;
+    display: block;
+    margin-bottom: 10px;
+    animation: sealFloat 3.5s ease-in-out infinite;
+  }
+
+  @keyframes sealFloat {
+    0%, 100% { transform: translateY(0) rotate(-4deg); }
+    50% { transform: translateY(-8px) rotate(4deg); }
+  }
+
+  .letter-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.55rem;
+    text-align: center;
+    background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  .letter-card .letter-sub {
+    text-align: center;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 0.98rem;
+    color: #b8a6c9;
+    letter-spacing: 0.06em;
+    margin-bottom: 22px;
+  }
+
+  .letter-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(199, 139, 219, 0.3), transparent);
+    margin: 0 0 22px;
+  }
+
+  .letter-body {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.06rem;
+    line-height: 1.9;
+    color: #3d344a;
+  }
+
+  .letter-body p { margin-bottom: 15px; }
+
+  .letter-body .greet {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #c27b9e;
+    margin-bottom: 18px;
+  }
+
+  .letter-body .signoff {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #c27b9e;
+    margin-top: 22px;
+    text-align: right;
+  }
+
+  .kw {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 0.86em;
+    letter-spacing: 0.03em;
+    background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    padding: 0 1px;
+    text-shadow: 0 0 22px rgba(199, 139, 219, 0.25);
+  }
+
+  .letter-overlay.show .kw { animation: kwIn 0.7s ease forwards; }
+
+  @keyframes kwIn {
+    from { opacity: 0; filter: blur(7px); transform: translateY(4px); }
+    to { opacity: 1; filter: blur(0); transform: translateY(0); }
+  }
+
+  .letter-close-row { text-align: center; margin-top: 26px; }
+
+  /* ─── TOAST ─── */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    transform: translate(-50%, 20px);
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(199, 139, 219, 0.22);
+    color: #c27b9e;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1rem;
+    padding: 10px 24px;
+    border-radius: 60px;
+    box-shadow: 0 12px 34px rgba(199, 139, 219, 0.18);
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+    z-index: 950;
+    white-space: nowrap;
+  }
+
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ─── EFFECTS ─── */
+  .sparkle-burst {
+    position: fixed;
+    pointer-events: none;
+    font-size: 1.4rem;
+    animation: burst 0.8s ease-out forwards;
+    z-index: 999;
+  }
+
+  @keyframes burst {
+    0% { opacity: 1; transform: translate(0, 0) scale(0.2) rotate(0deg); }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg); }
+  }
+
+  .confetti-piece {
+    position: fixed;
+    pointer-events: none;
+    z-index: 998;
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+  }
+
+  @keyframes confettiFall {
+    0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translate(var(--tx), 110vh) rotate(720deg) scale(0.2); }
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 600px) {
+    body { padding: 12px; }
+    .placeholder { padding: 22px 14px 30px; border-radius: 24px; }
+    .header .name { font-size: 2.6rem; }
+    .header .sub { font-size: 0.9rem; }
+    .slot, .tile { width: 36px; height: 44px; font-size: 1.15rem; border-radius: 10px; }
+    .answer-row, .pool-row { gap: 6px; }
+    .answer-row { margin-bottom: 18px; }
+    .chip { width: 30px; height: 30px; font-size: 0.64rem; border-radius: 9px; }
+    .chip.done { font-size: 0.78rem; }
+    .play-card { padding: 18px 10px 16px; border-radius: 20px; }
+    .overlay-card { padding: 28px 20px 26px; }
+    .letter-card { padding: 28px 20px 26px; }
+    .letter-body { font-size: 1rem; }
+    .message-box { padding: 16px; }
+    .message-box .message-content { font-size: 0.95rem; }
+    .back-btn { padding: 10px 28px; font-size: 0.85rem; }
+  }
+
+  @media (max-width: 400px) {
+    .slot, .tile { width: 32px; height: 40px; font-size: 1rem; }
+    .chip { width: 27px; height: 27px; font-size: 0.6rem; }
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+    border-radius: 10px;
+  }
+</style>
 </head>
 <body>
 
-    <div class="bg" aria-hidden="true"></div>
+<div class="bg" aria-hidden="true"></div>
 
-    <!-- ─── INTRO OVERLAY ─── -->
-    <div class="intro-overlay" id="introOverlay">
-        <div class="intro-card">
-            <span class="intro-emoji">🎀</span>
-            <div class="intro-title">How well do you know me?</div>
-            <div class="intro-sub">a little game for your 21st · day 08</div>
+<div class="placeholder" id="app">
 
-            <div class="intro-body">
-                <p>
-                    Hey Mama 💕 someone said they wanted a  <span class="highlight">mark X</span> for their birthday this year. But before you can have it, there's a little challenge...
-                </p>
+  <header class="header">
+    <div class="name">Ruth</div>
+    <div class="sub">twenty‑one · a celebration</div>
+    <div class="day-badge" id="dayBadge">
+      💕 day <strong>06</strong> · six days!
+    </div>
+  </header>
 
-                <div class="rule-box">
-                    <p><span class="rule-label">📝 The rules:</span></p>
-                    <p>· There are <span class="highlight">21 questions</span> about me, mostly.</p>
-                    <p>· Each question has <span class="highlight">4 choices</span>, only one is correct.</p>
-                    <p>· You need to score <span class="highlight">95% or higher</span> (that's at least 20 out of 21) to win the mark X.</p>
-                    <p>· You can go <span class="highlight">back and forward</span> between questions</p>
-                    <p>· Once you submit, that's it — <span class="highlight">no extra chances</span>. So take your time.</p>
-                </div>
+  <div class="day-display">
+    <div class="big-day">06</div>
+    <div class="day-label">days to go ✦</div>
+  </div>
 
-                <p class="small-note">
-                    if you win, your mark X is coming in 08 days 🎁 · if not, we try again next year 💫
-                </p>
-            </div>
+  <!-- ─── GAME ─── -->
+  <div class="game-wrap">
 
-            <div class="intro-actions">
-                <button class="btn-start" id="startQuizBtn">let's go 💖</button>
-            </div>
-            <div class="intro-footer">good luck, beautiful 🌸</div>
-        </div>
+    <div class="progress-line">
+      <span id="progressText">0 / 21 words</span>
+      <span class="progress-bar"><i id="progressFill"></i></span>
     </div>
 
-    <!-- ─── MAIN APP ─── -->
-    <div class="placeholder" id="app">
+    <div class="chips" id="chips"></div>
 
-        <header class="header">
-            <div class="name">Ruth</div>
-            <div class="sub">twenty‑one · a gal worthy celebration</div>
-            <div class="day-badge" id="dayBadge">
-                💕 day <strong>08</strong> · do you even know me?
-            </div>
-        </header>
+    <div class="play-card">
+      <div class="word-meta" id="wordMeta">word 01 of 21</div>
 
-        <div class="quiz-intro" id="quizIntro">
-            <span class="highlight">21 questions</span> · answer 95% correctly to unlock a <span class="highlight">mark X</span> for your birthday 🎁
-        </div>
-
-        <!-- Progress bar -->
-        <div class="progress-bar" id="progressBar">
-            <div class="progress-track">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            <div class="progress-text" id="progressText">0 / 21</div>
-        </div>
-
-        <!-- Quiz area -->
-        <div id="quizArea">
-            <div class="question-card" id="questionCard">
-                <div class="question-number" id="questionNumber">Question 1 of 21</div>
-                <div class="question-text" id="questionText">Loading question...</div>
-                <div class="options-list" id="optionsList"></div>
-            </div>
-
-            <div class="nav-buttons">
-                <button class="btn btn-secondary" id="prevBtn" disabled>← back</button>
-                <div class="spacer"></div>
-                <button class="btn btn-primary" id="nextBtn">next →</button>
-                <button class="btn btn-submit hidden" id="submitBtn">✨ submit answers</button>
-            </div>
-        </div>
-
-        <!-- Result screen -->
-        <div class="result-screen" id="resultScreen">
-            <div class="result-card">
-                <div class="result-emoji" id="resultEmoji">🌸</div>
-                <div class="result-title" id="resultTitle">Your results</div>
-                <div class="result-score" id="resultScore">— / 21</div>
-                <div class="result-percentage" id="resultPercentage">—%</div>
-                <div class="result-message" id="resultMessage"></div>
-                <div class="result-actions">
-                    <button class="btn btn-secondary" id="retryBtn">↺ review answers</button>
-                    <a href="index.html" class="back-btn">← back to celebration</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer-note" id="footerNote">day 08 · 21 questions · good luck 💕</div>
-
+      <div class="answer-row" id="answerRow" aria-label="Your answer"></div>
+      <div class="pool-row" id="poolRow" aria-label="Scrambled letters"></div>
     </div>
 
-    <script>
-        (function() {
-            'use strict';
+    <div class="game-actions">
+      <button class="mini-btn" id="hintBtn" type="button">👀 peek at the next letter</button>
+      <button class="mini-btn" id="resetBtn" type="button">↺ start over</button>
+    </div>
 
-            // ─── CONFIG ───
-            const TOTAL_QUESTIONS = 21;
-            const PASS_PERCENTAGE = 95;
-            const STORAGE_KEY = 'ruth_day8_quiz_progress';
-            const RESULT_KEY = 'ruth_day8_quiz_result';
-            const INTRO_SEEN_KEY = 'ruth_day8_intro_seen';
+    <button class="letter-btn" id="letterBtn" type="button">💌 read the letter</button>
 
-            // ─── PLACEHOLDER MATH QUESTIONS (replace with your own) ───
-            const QUESTIONS = [
-                {
-                    question: "Where was i born?",
-                    options: ["Kamwala Clinic", "UTH", "Chilenje Hospital", "Coptic"],
-                    correct: 1
-                },
-                {
-                    question: "Where did i do my education from grade 1 to 7?",
-                    options: ["Bobs School", "Overhill School", "Libala Primary", "B-Wise Sch"],
-                    correct: 1
-                },
-                {
-                    question: "How many Provinces have i stepped foot in?",
-                    options: ["2", "3", "4", "5"],
-                    correct: 2
-                },
-                {
-                    question: "How many Provinces have i Lived in for more than a day??",
-                    options: ["3", "1", "4", "2"],
-                    correct: 0
-                },
-                {
-                    question: "How many biological siblings do i have??",
-                    options: ["1", "3", "4", "2"],
-                    correct: 1
-                },
-                {
-                    question: "My Favourite Sibling of yours?",
-                    options: ["Jimmy", "Ivana", "Nelia", "Rose"],
-                    correct: 3
-                },
-                {
-                    question: "Which Person in your family did you first tell me about?",
-                    options: ["Dad", "Aunty", "Ruth", "Rose"],
-                    correct: 2
-                },
-                {
-                    question: "What instrument do i play?",
-                    options: ["Piano", "Guitar", "Flute", "Violin"],
-                    correct: 0
-                },
-                {
-                    question: "What do i go steal in the girls bedroom?",
-                    options: ["Vaseline", "A Chitenge", "Perfume", "Joy's nice Iphone"],
-                    correct: 2
-                },
-                {
-                    question: "What vegetabe do i hate?",
-                    options: ["Impwa", "Spinach", "Cabbage", "Chinese"],
-                    correct: 1
-                },
-                {
-                    question: "If i didnt study my program, what would i have pursued?",
-                    options: ["Entrepreneurship", "Aviation", "Astrology", "Software Development"],
-                    correct: 1
-                },
-                {
-                    question: "What type of a person am i?",
-                    options: ["Morning", "Afternoon", "Night", "Difficult"],
-                    correct: 2
-                },
-                {
-                    question: "If I went back in time to secondary school, what would i have done differently?",
-                    options: ["Study hard and get 6 points", "been more serious about God", "written SATs and went to USA", "Started a business"],
-                    correct: 2
-                },
-                {
-                    question: "How much do i love you?",
-                    options: ["Infinitely more", "horizontal 8", "a billion times more than what you say", "more than you"],
-                    correct: 1
-                },
-                {
-                    question: "Fvourite activity?",
-                    options: ["Sleeping", "Driving", "Worrying too much", "talking to you"],
-                    correct: 3
-                },
-                {
-                    question: "What did i hate most about my first job?",
-                    options: ["Studying Accounts", "Marking", "Responding to texts", "Using Public Transport"],
-                    correct: 0
-                },
-                {
-                    question: "Who texted first, cause women are always right?",
-                    options: ["Ru", "was not me", "i was just asking a question", "You"],
-                    correct: 3
-                },
-                {
-                    question: "What did i hate most about boarding school?",
-                    options: ["Working", "Academics", "The Food", "Attending Assembly"],
-                    correct: 0
-                },
-                {
-                    question: "What do i do too much of?",
-                    options: ["Working", "Eating", "Interacting", "Sleeping"],
-                    correct: 3
-                },
-                {
-                    question: "Have i ever had an android phone?",
-                    options: ["Yes", "No", "Androids are for poor people", "c'mon, i'm a bougie guy"],
-                    correct: 0
-                },
-                {
-                    question: "Where did i first see you?",
-                    options: ["The Courtyard", "TG", "Matero", "Sliding in my DM"],
-                    correct: 2
-                }
-            ];
+  </div>
 
-            // ─── STATE ───
-            let currentIndex = 0;
-            let answers = new Array(TOTAL_QUESTIONS).fill(null);
-            let quizCompleted = false;
+  <!-- ─── DAY MESSAGE ─── -->
+  <div class="message-box">
+    <div class="message-content">
+      <span class="highlight-emoji">✨</span>
+      <strong>Six days!</strong><br />
+      My greatest blessing is you, Ruth. Every heartbeat brings me closer to the day I get to see you shine even brighter. You are my miracle, my forever, my home.
+    </div>
+  </div>
 
-            // ─── DOM REFS ───
-            const introOverlay = document.getElementById('introOverlay');
-            const startQuizBtn = document.getElementById('startQuizBtn');
-            const questionNumber = document.getElementById('questionNumber');
-            const questionText = document.getElementById('questionText');
-            const optionsList = document.getElementById('optionsList');
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            const submitBtn = document.getElementById('submitBtn');
-            const quizArea = document.getElementById('quizArea');
-            const resultScreen = document.getElementById('resultScreen');
-            const progressFill = document.getElementById('progressFill');
-            const progressText = document.getElementById('progressText');
-            const resultEmoji = document.getElementById('resultEmoji');
-            const resultTitle = document.getElementById('resultTitle');
-            const resultScore = document.getElementById('resultScore');
-            const resultPercentage = document.getElementById('resultPercentage');
-            const resultMessage = document.getElementById('resultMessage');
-            const retryBtn = document.getElementById('retryBtn');
-            const footerNote = document.getElementById('footerNote');
-            const quizIntro = document.getElementById('quizIntro');
-            const progressBar = document.getElementById('progressBar');
+  <a href="index.html" class="back-btn">← back to celebration</a>
 
-            // ─── STORAGE HELPERS ───
-            function saveProgress() {
-                try {
-                    const data = {
-                        answers: answers,
-                        currentIndex: currentIndex,
-                        completed: quizCompleted,
-                        timestamp: Date.now()
-                    };
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-                } catch (e) {
-                    // silent
-                }
-            }
+</div>
 
-            function loadProgress() {
-                try {
-                    const raw = localStorage.getItem(STORAGE_KEY);
-                    if (!raw) return false;
-                    const data = JSON.parse(raw);
-                    if (data.answers && Array.isArray(data.answers)) {
-                        answers = data.answers;
-                    }
-                    if (typeof data.currentIndex === 'number') {
-                        currentIndex = Math.min(data.currentIndex, TOTAL_QUESTIONS - 1);
-                    }
-                    if (data.completed) {
-                        quizCompleted = true;
-                    }
-                    return true;
-                } catch (e) {
-                    return false;
-                }
-            }
+<!-- ─── INTRO OVERLAY ─── -->
+<div class="overlay show" id="introOverlay">
+  <div class="overlay-card">
+    <span class="ov-emoji">🔤</span>
+    <h2>21 words, one secret</h2>
+    <div class="ov-sub">day 06 · a little anagram for you</div>
+    <p>
+      Somewhere inside these twenty‑one scrambled words is a letter I wrote for you.
+      Unscramble each one — <strong>type the letters</strong> on your keyboard, or tap them —
+      and the words will unlock it.
+    </p>
+    <p>
+      You can jump between words whenever you like. Everything you solve is saved,
+      so you can come back any time. 💗
+    </p>
+    <div class="hint-line">✦ letters only fall into place when they're the right ones ✦</div>
+    <div><button class="primary-btn" id="startBtn" type="button">start unscrambling</button></div>
+  </div>
+</div>
 
-            function saveResult(result) {
-                try {
-                    localStorage.setItem(RESULT_KEY, JSON.stringify(result));
-                } catch (e) {
-                    // silent
-                }
-            }
+<!-- ─── LETTER OVERLAY ─── -->
+<div class="overlay letter-overlay" id="letterOverlay">
+  <div class="letter-card">
+    <span class="letter-seal">💌</span>
+    <h2>The words were hiding this</h2>
+    <div class="letter-sub">21 words · 21 pieces of how I feel about you</div>
+    <div class="letter-divider"></div>
 
-            function loadResult() {
-                try {
-                    const raw = localStorage.getItem(RESULT_KEY);
-                    if (!raw) return null;
-                    return JSON.parse(raw);
-                } catch (e) {
-                    return null;
-                }
-            }
+    <div class="letter-body" id="letterBody">
+      <p class="greet">Hey Baby Girl,</p>
 
-            function hasSeenIntro() {
-                try {
-                    return localStorage.getItem(INTRO_SEEN_KEY) === 'true';
-                } catch (e) {
-                    return false;
-                }
-            }
+      <p>We're now counting down to 6 days since someone decided they no longer wanted to be just a bunch of molecules.</p>
 
-            function markIntroSeen() {
-                try {
-                    localStorage.setItem(INTRO_SEEN_KEY, 'true');
-                } catch (e) {
-                    // silent
-                }
-            }
+      <p>Looking back at the past few months, I honestly can't begin to explain how <span class="kw">lucky</span> I feel to have you in my <span class="kw">life</span>.</p>
 
-            // ─── INTRO LOGIC ───
-            function showIntro() {
-                introOverlay.classList.remove('hidden');
-            }
+      <p>You make my world have more <span class="kw">colour</span>. You make me <span class="kw">smile</span>, like, a lot. Every <span class="kw">moment</span> with you feels special, even the little ones that probably don't seem like much at the time.</p>
 
-            function hideIntro() {
-                introOverlay.classList.add('hidden');
-                markIntroSeen();
-            }
+      <p>And I'm genuinely <span class="kw">grateful</span> that somehow, out of everyone in this <span class="kw">world</span>, I found you.</p>
 
-            // ─── RENDER ───
-            function renderQuestion() {
-                const q = QUESTIONS[currentIndex];
-                if (!q) return;
+      <p>But more than anything, I really value our <span class="kw">friendship</span>. I love how <span class="kw">natural</span> it feels to <span class="kw">talk</span> to you. Nothing ever feels forced. I can just be <span class="kw">myself</span> around you, talk about the most <span class="kw">random</span> things, <span class="kw">laugh</span> about stupid things, and somehow still feel like I could talk to you for <span class="kw">hours</span>.</p>
 
-                questionNumber.textContent = `Question ${currentIndex + 1} of ${TOTAL_QUESTIONS}`;
-                questionText.textContent = q.question;
+      <p>I don't think I tell you enough how much that means to me.</p>
 
-                optionsList.innerHTML = '';
-                const letters = ['A', 'B', 'C', 'D'];
-                q.options.forEach((opt, idx) => {
-                    const btn = document.createElement('button');
-                    btn.className = 'option-btn' + (answers[currentIndex] === idx ? ' selected' : '');
-                    btn.innerHTML = `
-                        <span class="opt-letter">${letters[idx]}</span>
-                        <span class="opt-text">${opt}</span>
-                    `;
-                    btn.addEventListener('click', () => {
-                        if (quizCompleted) return;
-                        answers[currentIndex] = idx;
-                        saveProgress();
-                        renderQuestion();
-                        updateNavButtons();
-                    });
-                    optionsList.appendChild(btn);
-                });
+      <p>You've become such a <span class="kw">beautiful</span> <span class="kw">part</span> of my life, and I'm really <span class="kw">happy</span> that I get to know you, grow with you, annoy you, make you laugh, and hopefully make your life a little more <span class="kw">colourful</span> too.</p>
 
-                updateProgress();
-                updateNavButtons();
-            }
+      <p>So, 6 days until your birthday, Baby Girl — and I can't wait to celebrate <span class="kw">together</span>.</p>
 
-            function updateProgress() {
-                const answered = answers.filter(a => a !== null).length;
-                const pct = (answered / TOTAL_QUESTIONS) * 100;
-                progressFill.style.width = pct + '%';
-                progressText.textContent = `${answered} / ${TOTAL_QUESTIONS}`;
-            }
+      <p>And somehow, I'm still trying to find the right words to explain just how <span class="kw">special</span> you are to me.</p>
 
-            function updateNavButtons() {
-                prevBtn.disabled = currentIndex === 0 || quizCompleted;
+      <p class="signoff">I <span class="kw">love</span> you ❤️</p>
+    </div>
 
-                if (currentIndex === TOTAL_QUESTIONS - 1) {
-                    nextBtn.classList.add('hidden');
-                    submitBtn.classList.remove('hidden');
-                } else {
-                    nextBtn.classList.remove('hidden');
-                    submitBtn.classList.add('hidden');
-                }
+    <div class="letter-close-row">
+      <button class="primary-btn" id="closeLetter" type="button">back to the words</button>
+    </div>
+  </div>
+</div>
 
-                if (quizCompleted) {
-                    nextBtn.classList.add('hidden');
-                    submitBtn.classList.add('hidden');
-                    prevBtn.disabled = true;
-                }
-            }
+<div class="toast" id="toast"></div>
 
-            function showResult() {
-                const result = loadResult();
-                if (!result) return;
+<script>
+(function () {
+  'use strict';
 
-                quizArea.classList.add('hidden');
-                quizIntro.classList.add('hidden');
-                progressBar.classList.add('hidden');
-                resultScreen.classList.add('active');
+  /* ══════════════════════════════════════════
+     WORDS  (answer · scrambled)
+     ══════════════════════════════════════════ */
+  const WORDS = [
+    { a: 'LUCKY',      s: 'KYLUC'      },
+    { a: 'LIFE',       s: 'EFIL'       },
+    { a: 'COLOUR',     s: 'OULROC'     },
+    { a: 'SMILE',      s: 'EILMS'      },
+    { a: 'SPECIAL',    s: 'CPEISAL'    },
+    { a: 'GRATEFUL',   s: 'TFLAERGU'   },
+    { a: 'FRIENDSHIP', s: 'PISFRENHDI' },
+    { a: 'NATURAL',    s: 'TRANULA'    },
+    { a: 'TALK',       s: 'LKTA'       },
+    { a: 'HOURS',      s: 'RUSHO'      },
+    { a: 'BEAUTIFUL',  s: 'TIFULBEAU'  },
+    { a: 'PART',       s: 'RTPA'       },
+    { a: 'WORLD',      s: 'RLDWO'      },
+    { a: 'MOMENT',     s: 'NTOEMM'     },
+    { a: 'HAPPY',      s: 'YAPHP'      },
+    { a: 'LAUGH',      s: 'HGUAL'      },
+    { a: 'RANDOM',     s: 'ODMARN'     },
+    { a: 'MYSELF',     s: 'LFYSEM'     },
+    { a: 'TOGETHER',   s: 'GETHERTO'   },
+    { a: 'COLOURFUL',  s: 'LOUFRCOUL'  },
+    { a: 'LOVE',       s: 'VELO'       }
+  ];
 
-                resultEmoji.textContent = result.emoji || '🌸';
-                resultTitle.textContent = result.title || 'Your results';
-                resultScore.textContent = `${result.correct} / ${TOTAL_QUESTIONS}`;
-                resultPercentage.textContent = `${result.percentage}%`;
+  const STORE_KEY = 'ruth21_day6_anagram_v1';
+  const TOTAL = WORDS.length;
 
-                let msg = '';
-                if (result.passed) {
-                    msg = `<span class="win">🎉 Congratulations!</span> You scored <strong>${result.percentage}%</strong> — that's above 95%! Your <strong>mark X</strong> is coming in <strong>08 days</strong> 💖`;
-                } else {
-                    msg = `<span class="lose">💫 So close!</span> You scored <strong>${result.percentage}%</strong> — you need 95% to unlock the mark X. We'll try again next year, beautiful 🌸`;
-                }
-                resultMessage.innerHTML = msg;
+  /* ══════════════════════════════════════════
+     DOM
+     ══════════════════════════════════════════ */
+  const answerRow   = document.getElementById('answerRow');
+  const poolRow     = document.getElementById('poolRow');
+  const chipsEl     = document.getElementById('chips');
+  const wordMeta    = document.getElementById('wordMeta');
+  const progressText= document.getElementById('progressText');
+  const progressFill= document.getElementById('progressFill');
+  const hintBtn     = document.getElementById('hintBtn');
+  const resetBtn    = document.getElementById('resetBtn');
+  const letterBtn   = document.getElementById('letterBtn');
+  const toastEl     = document.getElementById('toast');
+  const introOverlay= document.getElementById('introOverlay');
+  const letterOverlay = document.getElementById('letterOverlay');
+  const startBtn    = document.getElementById('startBtn');
+  const closeLetter = document.getElementById('closeLetter');
 
-                footerNote.textContent = result.passed ? 'you did it! mark X incoming 💕' : 'keep shining, Ruth 🌟';
-            }
+  /* ══════════════════════════════════════════
+     STATE
+     ══════════════════════════════════════════ */
+  let state = {};       // { wordIndex: [scrambleIndices placed in order] }
+  let current = 0;
+  let busyAdvancing = false;
 
-            function submitQuiz() {
-                const unanswered = answers.filter(a => a === null).length;
-                if (unanswered > 0) {
-                    alert(`Please answer all ${TOTAL_QUESTIONS} questions. You have ${unanswered} unanswered.`);
-                    return;
-                }
+  /* ── storage ── */
+  function validatePlaced(i, arr) {
+    const w = WORDS[i];
+    if (!Array.isArray(arr)) return [];
+    const used = new Set();
+    const out = [];
+    for (let k = 0; k < arr.length; k++) {
+      const n = arr[k];
+      if (!Number.isInteger(n) || n < 0 || n >= w.s.length) break;
+      if (used.has(n)) break;
+      if (w.s[n] !== w.a[out.length]) break;
+      used.add(n);
+      out.push(n);
+    }
+    return out;
+  }
 
-                let correct = 0;
-                for (let i = 0; i < TOTAL_QUESTIONS; i++) {
-                    if (answers[i] === QUESTIONS[i].correct) {
-                        correct++;
-                    }
-                }
+  function load() {
+    state = {};
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return;
+      Object.keys(parsed).forEach(function (key) {
+        const i = parseInt(key, 10);
+        if (!(i >= 0 && i < TOTAL)) return;
+        const clean = validatePlaced(i, parsed[key]);
+        if (clean.length) state[i] = clean;
+      });
+    } catch (e) { state = {}; }
+  }
 
-                const percentage = Math.round((correct / TOTAL_QUESTIONS) * 100);
-                const passed = percentage >= PASS_PERCENTAGE;
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
 
-                const result = {
-                    correct: correct,
-                    percentage: percentage,
-                    passed: passed,
-                    emoji: passed ? '🎉' : '🌸',
-                    title: passed ? 'You did it!' : 'Good try!',
-                    timestamp: Date.now()
-                };
+  /* ── helpers ── */
+  function placedOf(i) { return state[i] || []; }
+  function isSolved(i) { return placedOf(i).length === WORDS[i].a.length; }
+  function solvedCount() {
+    let c = 0;
+    for (let i = 0; i < TOTAL; i++) if (isSolved(i)) c++;
+    return c;
+  }
 
-                saveResult(result);
-                quizCompleted = true;
-                saveProgress();
-                showResult();
+  /* ══════════════════════════════════════════
+     RENDER
+     ══════════════════════════════════════════ */
+  function renderChips() {
+    chipsEl.innerHTML = '';
+    for (let i = 0; i < TOTAL; i++) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip';
+      if (i === current) btn.classList.add('active');
+      if (isSolved(i)) {
+        btn.classList.add('done');
+        btn.textContent = '✓';
+        btn.setAttribute('aria-label', 'word ' + (i + 1) + ' solved');
+      } else {
+        btn.textContent = String(i + 1).padStart(2, '0');
+        btn.setAttribute('aria-label', 'go to word ' + (i + 1));
+      }
+      btn.addEventListener('click', (function (idx) {
+        return function () {
+          if (idx === current) return;
+          current = idx;
+          renderAll();
+        };
+      })(i));
+      chipsEl.appendChild(btn);
+    }
+  }
 
-                if (passed) {
-                    setTimeout(() => {
-                        confettiBurst(window.innerWidth / 2, window.innerHeight / 2);
-                        sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 40);
-                    }, 300);
-                }
-            }
+  function renderProgress() {
+    const c = solvedCount();
+    progressText.textContent = c + ' / ' + TOTAL + ' words';
+    progressFill.style.width = (c / TOTAL * 100) + '%';
+    letterBtn.classList.toggle('show', c === TOTAL);
+  }
 
-            // ─── EFFECTS ───
-            function sparkleBurst(cx, cy, count) {
-                const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
-                const total = count || 24 + Math.floor(Math.random() * 16);
-                for (let i = 0; i < total; i++) {
-                    const spark = document.createElement('div');
-                    spark.className = 'sparkle-burst';
-                    spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-                    const angle = Math.random() * 2 * Math.PI;
-                    const dist = 60 + Math.random() * 180;
-                    const tx = Math.cos(angle) * dist;
-                    const ty = Math.sin(angle) * dist - 50;
-                    spark.style.setProperty('--tx', tx + 'px');
-                    spark.style.setProperty('--ty', ty + 'px');
-                    spark.style.left = (cx || window.innerWidth / 2) + 'px';
-                    spark.style.top = (cy || window.innerHeight / 2) + 'px';
-                    spark.style.fontSize = 1 + Math.random() * 1.8 + 'rem';
-                    spark.style.animationDuration = 0.4 + Math.random() * 0.6 + 's';
-                    document.body.appendChild(spark);
-                    setTimeout(() => spark.remove(), 1200);
-                }
-            }
+  function renderBoard() {
+    const w = WORDS[current];
+    const placed = placedOf(current);
+    const usedSet = new Set(placed);
 
-            function confettiBurst(cx, cy) {
-                const colors = ['#f8a4b8', '#c78bdb', '#f5c6a0', '#ffd6d6', '#d4b8e0', '#fce7f3', '#ffb3c6', '#b8d4e3'];
-                const count = 40 + Math.floor(Math.random() * 30);
-                for (let i = 0; i < count; i++) {
-                    const piece = document.createElement('div');
-                    piece.className = 'confetti-piece';
-                    piece.style.left = (cx || window.innerWidth / 2) + 'px';
-                    piece.style.top = (cy || window.innerHeight / 2) + 'px';
-                    piece.style.width = (4 + Math.random() * 7) + 'px';
-                    piece.style.height = (4 + Math.random() * 7) + 'px';
-                    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-                    const angle = Math.random() * 2 * Math.PI;
-                    const dist = 60 + Math.random() * 300;
-                    piece.style.animationDuration = (1.0 + Math.random() * 1.6) + 's';
-                    piece.style.animationDelay = (Math.random() * 0.5) + 's';
-                    piece.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-                    piece.style.setProperty('--ty', Math.sin(angle) * dist - 140 + 'px');
-                    document.body.appendChild(piece);
-                    setTimeout(() => piece.remove(), 2800);
-                }
-            }
+    /* answer slots */
+    answerRow.innerHTML = '';
+    for (let i = 0; i < w.a.length; i++) {
+      const slot = document.createElement('div');
+      slot.className = 'slot';
+      slot.dataset.slot = i;
+      if (i < placed.length) {
+        slot.classList.add('filled');
+        slot.textContent = w.a[i];
+      }
+      answerRow.appendChild(slot);
+    }
 
-            // ─── EVENT LISTENERS ───
-            startQuizBtn.addEventListener('click', () => {
-                hideIntro();
-                // Small sparkle on start
-                sparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 20);
-            });
+    /* scrambled pool */
+    poolRow.innerHTML = '';
+    for (let i = 0; i < w.s.length; i++) {
+      if (usedSet.has(i)) continue;
+      const t = document.createElement('button');
+      t.type = 'button';
+      t.className = 'tile';
+      t.dataset.index = i;
+      t.textContent = w.s[i];
+      t.addEventListener('click', function () { onTileClick(t); });
+      poolRow.appendChild(t);
+    }
 
-            prevBtn.addEventListener('click', () => {
-                if (currentIndex > 0 && !quizCompleted) {
-                    currentIndex--;
-                    saveProgress();
-                    renderQuestion();
-                }
-            });
+    wordMeta.textContent =
+      'word ' + String(current + 1).padStart(2, '0') + ' of ' + TOTAL +
+      ' · ' + w.a.length + ' letters';
+  }
 
-            nextBtn.addEventListener('click', () => {
-                if (currentIndex < TOTAL_QUESTIONS - 1 && !quizCompleted) {
-                    currentIndex++;
-                    saveProgress();
-                    renderQuestion();
-                }
-            });
+  function renderAll() {
+    renderChips();
+    renderBoard();
+    renderProgress();
+  }
 
-            submitBtn.addEventListener('click', submitQuiz);
+  /* ══════════════════════════════════════════
+     PLACING LETTERS
+     ══════════════════════════════════════════ */
+  function onTileClick(tile) {
+    const w = WORDS[current];
+    const placed = placedOf(current);
+    if (placed.length >= w.a.length) return;
+    if (tile.textContent !== w.a[placed.length]) { wrong(); return; }
+    place(tile, tile.textContent);
+  }
 
-            retryBtn.addEventListener('click', () => {
-                answers = new Array(TOTAL_QUESTIONS).fill(null);
-                currentIndex = 0;
-                quizCompleted = false;
-                localStorage.removeItem(STORAGE_KEY);
-                localStorage.removeItem(RESULT_KEY);
+  function place(tileEl, letter) {
+    const w = WORDS[current];
+    const placed = placedOf(current);
+    const slotIndex = placed.length;
+    const slotEl = answerRow.querySelector('[data-slot="' + slotIndex + '"]');
+    if (!slotEl || !tileEl) return;
 
-                quizArea.classList.remove('hidden');
-                quizIntro.classList.remove('hidden');
-                progressBar.classList.remove('hidden');
-                resultScreen.classList.remove('active');
-                footerNote.textContent = 'day 08 · 21 questions · good luck 💕';
+    const tileIdx = parseInt(tileEl.dataset.index, 10);
 
-                renderQuestion();
-                updateProgress();
-                updateNavButtons();
-            });
+    const tr = tileEl.getBoundingClientRect();
+    const sr = slotEl.getBoundingClientRect();
+    const cs = window.getComputedStyle(tileEl);
 
-            document.addEventListener('click', function(e) {
-                const tag = e.target.tagName.toLowerCase();
-                if (tag === 'a' || tag === 'button' || e.target.closest('.sparkle-burst')) return;
-                if (Math.random() > 0.25) return;
-                sparkleBurst(e.clientX, e.clientY, 6);
-            });
+    /* build the flying ghost */
+    const ghost = document.createElement('div');
+    ghost.className = 'flying-tile';
+    ghost.textContent = letter;
+    ghost.style.left = tr.left + 'px';
+    ghost.style.top = tr.top + 'px';
+    ghost.style.width = tr.width + 'px';
+    ghost.style.height = tr.height + 'px';
+    ghost.style.fontSize = cs.fontSize;
+    ghost.style.borderRadius = cs.borderRadius;
+    document.body.appendChild(ghost);
 
-            // ─── INIT ───
-            function init() {
-                const loaded = loadProgress();
-                const savedResult = loadResult();
+    /* the pool closes up immediately */
+    tileEl.remove();
 
-                if (savedResult) {
-                    quizCompleted = true;
-                    hideIntro();
-                    showResult();
-                    return;
-                }
+    /* update + persist state right away */
+    placed.push(tileIdx);
+    state[current] = placed;
+    save();
 
-                if (loaded && quizCompleted) {
-                    let correct = 0;
-                    for (let i = 0; i < TOTAL_QUESTIONS; i++) {
-                        if (answers[i] === QUESTIONS[i].correct) correct++;
-                    }
-                    const percentage = Math.round((correct / TOTAL_QUESTIONS) * 100);
-                    const passed = percentage >= PASS_PERCENTAGE;
-                    const result = {
-                        correct, percentage, passed,
-                        emoji: passed ? '🎉' : '🌸',
-                        title: passed ? 'You did it!' : 'Good try!'
-                    };
-                    saveResult(result);
-                    hideIntro();
-                    showResult();
-                    return;
-                }
+    /* fly */
+    requestAnimationFrame(function () {
+      ghost.style.transform =
+        'translate(' + (sr.left - tr.left) + 'px,' + (sr.top - tr.top) + 'px)';
+      ghost.style.opacity = '0.9';
+    });
 
-                if (answers.length !== TOTAL_QUESTIONS) {
-                    answers = new Array(TOTAL_QUESTIONS).fill(null);
-                }
+    setTimeout(function () {
+      ghost.remove();
+      if (slotEl) {
+        slotEl.classList.remove('peek');
+        slotEl.classList.add('filled');
+        slotEl.textContent = letter;
+      }
+      afterPlace();
+    }, 400);
+  }
 
-                // Show intro only if not seen before
-                if (!hasSeenIntro()) {
-                    showIntro();
-                } else {
-                    hideIntro();
-                }
+  function afterPlace() {
+    if (!isSolved(current)) return;
 
-                renderQuestion();
-                updateProgress();
-                updateNavButtons();
-            }
+    const r = answerRow.getBoundingClientRect();
+    sparkleBurst(r.left + r.width / 2, r.top + r.height / 2, 20);
 
-            init();
+    renderChips();
+    renderProgress();
 
-            console.log('🌸 Day 8 · 21 Questions · Birthday Trivia 💖');
-        })();
-    </script>
+    const c = solvedCount();
+
+    if (c === TOTAL) {
+      showToast('all 21 words found ✦');
+      setTimeout(revealLetter, 950);
+      return;
+    }
+
+    showToast('solved ✦ next word');
+    if (busyAdvancing) return;
+    busyAdvancing = true;
+
+    setTimeout(function () {
+      let nxt = -1;
+      for (let k = 1; k <= TOTAL; k++) {
+        const j = (current + k) % TOTAL;
+        if (!isSolved(j)) { nxt = j; break; }
+      }
+      if (nxt !== -1) { current = nxt; renderAll(); }
+      busyAdvancing = false;
+    }, 780);
+  }
+
+  function wrong() {
+    answerRow.classList.remove('shake');
+    void answerRow.offsetWidth;
+    answerRow.classList.add('shake');
+  }
+
+  function undo() {
+    const placed = placedOf(current);
+    if (!placed.length) return;
+    placed.pop();
+    state[current] = placed;
+    save();
+    renderAll();
+  }
+
+  /* ══════════════════════════════════════════
+     INPUT
+     ══════════════════════════════════════════ */
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (letterOverlay.classList.contains('show')) return;
+    if (introOverlay.classList.contains('show')) return;
+
+    if (e.key === 'Backspace') { e.preventDefault(); undo(); return; }
+    if (e.key === 'Escape') { if (document.activeElement) document.activeElement.blur(); return; }
+
+    if (!/^[a-zA-Z]$/.test(e.key)) return;
+    e.preventDefault();
+
+    const w = WORDS[current];
+    const placed = placedOf(current);
+    if (placed.length >= w.a.length) return;
+
+    const L = e.key.toUpperCase();
+    if (w.a[placed.length] !== L) { wrong(); return; }
+
+    const tiles = Array.prototype.slice.call(poolRow.querySelectorAll('.tile'));
+    const tile = tiles.find(function (t) { return t.textContent === L; });
+    if (tile) place(tile, L);
+    else wrong();
+  });
+
+  /* ══════════════════════════════════════════
+     HINT + RESET
+     ══════════════════════════════════════════ */
+  hintBtn.addEventListener('click', function () {
+    const w = WORDS[current];
+    const placed = placedOf(current);
+    if (placed.length >= w.a.length) return;
+    const slot = answerRow.querySelector('[data-slot="' + placed.length + '"]');
+    if (!slot) return;
+    slot.classList.add('peek');
+    slot.textContent = w.a[placed.length];
+    setTimeout(function () {
+      if (!slot.classList.contains('filled')) {
+        slot.textContent = '';
+        slot.classList.remove('peek');
+      }
+    }, 950);
+  });
+
+  resetBtn.addEventListener('click', function () {
+    if (!window.confirm('Start the anagram over? All your solved words will be cleared.')) return;
+    state = {};
+    save();
+    current = 0;
+    renderAll();
+    showToast('fresh start ✦');
+  });
+
+  /* ══════════════════════════════════════════
+     TOAST
+     ══════════════════════════════════════════ */
+  let toastTimer = null;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove('show');
+    }, 2200);
+  }
+
+  /* ══════════════════════════════════════════
+     OVERLAYS
+     ══════════════════════════════════════════ */
+  startBtn.addEventListener('click', function () {
+    introOverlay.classList.remove('show');
+  });
+
+  function revealLetter() {
+    /* stagger the highlighted words */
+    const kws = letterOverlay.querySelectorAll('.kw');
+    kws.forEach(function (el, i) {
+      el.style.animationDelay = (0.2 + i * 0.06) + 's';
+    });
+
+    letterOverlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+
+    /* celebration */
+    sparkleBurst(window.innerWidth / 2, window.innerHeight * 0.35, 34);
+    confettiBurst(window.innerWidth / 2, window.innerHeight * 0.3);
+    setTimeout(function () {
+      confettiBurst(window.innerWidth * 0.25, window.innerHeight * 0.25);
+      confettiBurst(window.innerWidth * 0.75, window.innerHeight * 0.25);
+    }, 350);
+  }
+
+  closeLetter.addEventListener('click', function () {
+    letterOverlay.classList.remove('show');
+    document.body.style.overflow = '';
+  });
+
+  letterBtn.addEventListener('click', revealLetter);
+
+  /* ══════════════════════════════════════════
+     EFFECTS
+     ══════════════════════════════════════════ */
+  function sparkleBurst(cx, cy, count) {
+    const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
+    const total = count || 24 + Math.floor(Math.random() * 16);
+    for (let i = 0; i < total; i++) {
+      const spark = document.createElement('div');
+      spark.className = 'sparkle-burst';
+      spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      const angle = Math.random() * 2 * Math.PI;
+      const dist = 60 + Math.random() * 180;
+      spark.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+      spark.style.setProperty('--ty', Math.sin(angle) * dist - 50 + 'px');
+      spark.style.left = (cx || window.innerWidth / 2) + 'px';
+      spark.style.top = (cy || window.innerHeight / 2) + 'px';
+      spark.style.fontSize = (1 + Math.random() * 1.8) + 'rem';
+      spark.style.animationDuration = (0.4 + Math.random() * 0.6) + 's';
+      document.body.appendChild(spark);
+      setTimeout(function () { spark.remove(); }, 1200);
+    }
+  }
+
+  function confettiBurst(cx, cy) {
+    const colors = ['#f8a4b8', '#c78bdb', '#f5c6a0', '#ffd6d6', '#d4b8e0', '#fce7f3', '#ffb3c6', '#b8d4e3'];
+    const count = 40 + Math.floor(Math.random() * 30);
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = (cx || window.innerWidth / 2) + 'px';
+      piece.style.top = (cy || window.innerHeight / 2) + 'px';
+      piece.style.width = (4 + Math.random() * 7) + 'px';
+      piece.style.height = (4 + Math.random() * 7) + 'px';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      const angle = Math.random() * 2 * Math.PI;
+      const dist = 60 + Math.random() * 300;
+      piece.style.animationDuration = (1.0 + Math.random() * 1.6) + 's';
+      piece.style.animationDelay = (Math.random() * 0.5) + 's';
+      piece.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+      document.body.appendChild(piece);
+      setTimeout(function () { piece.remove(); }, 3000);
+    }
+  }
+
+  /* gentle ambient sparkles on stray clicks */
+  document.addEventListener('click', function (e) {
+    if (letterOverlay.classList.contains('show')) return;
+    if (introOverlay.classList.contains('show')) return;
+    const tag = e.target.tagName.toLowerCase();
+    if (tag === 'a' || tag === 'button' || e.target.closest('.sparkle-burst')) return;
+    if (Math.random() > 0.25) return;
+    sparkleBurst(e.clientX, e.clientY, 6);
+  });
+
+  /* ══════════════════════════════════════════
+     INIT
+     ══════════════════════════════════════════ */
+  load();
+
+  let start = 0;
+  for (let i = 0; i < TOTAL; i++) {
+    if (!isSolved(i)) { start = i; break; }
+  }
+  current = start;
+
+  renderAll();
+
+  console.log('🌸 Day 06 · 21 words, one hidden letter 💌');
+})();
+</script>
 
 </body>
 </html>
