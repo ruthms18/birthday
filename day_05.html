@@ -1,735 +1,1222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Day XX · Ruth's 21st</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
-    <style>
-        /* ─── RESET ─── */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Day 05 · Ruth's 21st</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        :root {
-            --pink: #f5a0b8;
-            --purple: #c78bdb;
-            --peach: #f5c6a0;
-            --cream: #fcf6f0;
-            --text: #2d2a3a;
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
-            --radius: 16px;
-        }
+  :root {
+    --pink: #f8a4b8;
+    --purple: #c78bdb;
+    --ink: #ece6fa;
+    --muted: #a99cc7;
+  }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--cream);
-            color: var(--text);
-            min-height: 100vh;
-            padding: 20px;
-            line-height: 1.5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+  html, body { height: 100%; }
 
-        .bg {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            background:
-                radial-gradient(ellipse at 20% 30%, rgba(248, 164, 184, 0.25) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 70%, rgba(199, 139, 219, 0.20) 0%, transparent 60%),
-                radial-gradient(ellipse at 50% 50%, rgba(245, 198, 160, 0.15) 0%, transparent 50%);
-            pointer-events: none;
-        }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #05040c;
+    color: var(--ink);
+    min-height: 100dvh;
+    overflow: hidden;
+    line-height: 1.5;
+    -webkit-tap-highlight-color: transparent;
+  }
 
-        .placeholder {
-            position: relative;
-            z-index: 1;
-            max-width: 720px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 30px 20px 40px;
-            background: rgba(255, 255, 255, 0.55);
-            backdrop-filter: blur(16px);
-            border-radius: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
-            text-align: center;
-        }
+  /* ─── NIGHT SKY CANVAS ─── */
+  #scene {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    display: block;
+    pointer-events: none;
+  }
 
-        .header .name {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(2.4rem, 8vw, 4rem);
-            font-weight: 700;
-            line-height: 1.1;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 1px;
-        }
+  /* ─── TOP RIGHT TIMER ─── */
+  .hud-timer {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 10;
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(10, 7, 24, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+    pointer-events: auto;
+  }
 
-        .header .sub {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.1rem;
-            color: #b8a6c9;
-            margin-top: -2px;
-            letter-spacing: 0.08em;
-        }
+  .hud-timer .cell {
+    text-align: center;
+    min-width: 38px;
+  }
 
-        .header .day-badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(8px);
-            padding: 6px 24px;
-            border-radius: 60px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #c27b9e;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 4px 20px rgba(194, 123, 158, 0.08);
-            margin-top: 12px;
-            transition: 0.3s ease;
-        }
+  .hud-timer .cell .num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #ffb3c9, #c78bdb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    display: block;
+  }
 
-        .header .day-badge strong {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            background: linear-gradient(135deg, #f5b8b8, #c78bdb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+  .hud-timer .cell .lbl {
+    font-size: 0.44rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #9c8fc0;
+    font-weight: 600;
+    margin-top: 3px;
+    display: block;
+  }
 
-        .day-display {
-            margin: 24px 0 12px;
-        }
+  .hud-timer .sep {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: rgba(199, 139, 219, 0.45);
+    align-self: center;
+    line-height: 1;
+    padding-bottom: 8px;
+  }
 
-        .day-display .big-day {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(5rem, 18vw, 9rem);
-            font-weight: 700;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1;
-            letter-spacing: 2px;
-            text-shadow: 0 4px 40px rgba(199, 139, 219, 0.15);
-        }
+  /* ─── BOTTOM BACK BUTTON ─── */
+  .hud-back {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 34px;
+    border-radius: 60px;
+    border: none;
+    background: rgba(10, 7, 24, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f0d5ec;
+    font-weight: 600;
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+    transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    pointer-events: auto;
+  }
 
-        .day-display .day-label {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.2rem;
-            color: #b8a6c9;
-            letter-spacing: 0.12em;
-            margin-top: -4px;
-        }
+  .hud-back:hover {
+    transform: translateX(-50%) translateY(-3px) scale(1.03);
+    border-color: rgba(199, 139, 219, 0.35);
+    background: rgba(20, 14, 44, 0.75);
+  }
 
-        .coming-soon {
-            margin: 18px 0 24px;
-            padding: 14px 20px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 60px;
-            display: inline-block;
-            border: 1px solid rgba(199, 139, 219, 0.15);
-            backdrop-filter: blur(4px);
-        }
+  .hud-back:active { transform: translateX(-50%) scale(0.95); }
 
-        .coming-soon .badge {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.4rem;
-            color: #c27b9e;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+  /* ─── START OVERLAY ─── */
+  .start-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5, 4, 12, 0.78);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+    cursor: pointer;
+  }
 
-        .coming-soon .badge .day-emoji {
-            font-size: 1.8rem;
-            line-height: 1;
-        }
+  .start-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
 
-        .day-countdown {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin: 18px 0 28px;
-        }
+  .start-overlay .heart {
+    font-size: 3.6rem;
+    margin-bottom: 8px;
+    animation: pulse 1.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 30px rgba(248, 164, 184, 0.5));
+  }
 
-        .day-countdown .item {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(8px);
-            padding: 8px 14px 6px;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            text-align: center;
-            min-width: 56px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-        }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.12); }
+  }
 
-        .day-countdown .item .num {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1;
-            display: block;
-        }
+  .start-overlay .name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 9vw, 3.6rem);
+    font-weight: 700;
+    background: linear-gradient(135deg, #ffb3c9, #c78bdb, #ffd6a0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    letter-spacing: 1px;
+    text-align: center;
+  }
 
-        .day-countdown .item .label {
-            font-size: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #a392b0;
-            font-weight: 600;
-            margin-top: 2px;
-        }
+  .start-overlay .sub {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.15rem;
+    color: #b9a8d8;
+    margin-top: 2px;
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
 
-        .message-box {
-            margin: 12px 0 28px;
-            padding: 20px 24px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: var(--radius);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 4px 16px rgba(199, 139, 219, 0.04);
-            transition: 0.3s ease;
-        }
+  .start-overlay .start-btn {
+    margin-top: 32px;
+    padding: 16px 44px;
+    border-radius: 60px;
+    border: none;
+    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.05rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 8px 40px rgba(199, 139, 219, 0.40);
+    transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-        .message-box .message-content {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.1rem;
-            color: #3d344a;
-            line-height: 1.7;
-        }
+  .start-btn:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 16px 56px rgba(199, 139, 219, 0.60);
+  }
 
-        .message-box .message-content .highlight-emoji {
-            font-size: 2rem;
-            display: block;
-            margin-bottom: 6px;
-        }
+  .start-btn:active { transform: scale(0.96); }
 
-        .message-box .message-content .day-date {
-            font-family: 'Inter', sans-serif;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #b8a6c9;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            margin-top: 10px;
-            display: block;
-        }
+  .start-overlay .hint {
+    margin-top: 18px;
+    font-size: 0.78rem;
+    color: #7a6f9a;
+    letter-spacing: 0.04em;
+    text-align: center;
+    max-width: 280px;
+    line-height: 1.5;
+  }
 
-        .back-btn {
-            display: inline-block;
-            padding: 12px 36px;
-            border-radius: 60px;
-            border: none;
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            color: #fff;
-            font-weight: 600;
-            font-size: 0.95rem;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            box-shadow: 0 8px 32px rgba(199, 139, 219, 0.18);
-            transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            text-decoration: none;
-            letter-spacing: 0.02em;
-        }
+  /* ─── HIDDEN YOUTUBE PLAYER ─── */
+  #yt-holder {
+    position: fixed;
+    left: -9999px;
+    top: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
 
-        .back-btn:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 14px 44px rgba(199, 139, 219, 0.28);
-        }
+  /* ─── DOM SPARKLES / CONFETTI ─── */
+  .sparkle-burst {
+    position: fixed;
+    pointer-events: none;
+    font-size: 1.4rem;
+    animation: burst 0.8s ease-out forwards;
+    z-index: 999;
+  }
 
-        .back-btn:active {
-            transform: scale(0.95);
-        }
+  @keyframes burst {
+    0%   { opacity: 1; transform: translate(0, 0) scale(0.2) rotate(0deg); }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg); }
+  }
 
-        .back-btn span {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+  .confetti-piece {
+    position: fixed;
+    pointer-events: none;
+    z-index: 998;
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+  }
 
-        .wish-mini {
-            margin-top: 16px;
-        }
+  @keyframes confettiFall {
+    0%   { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(720deg) scale(0.2); }
+  }
 
-        .wish-mini button {
-            background: none;
-            border: none;
-            font-family: 'Patrick Hand', cursive;
-            font-size: 0.95rem;
-            color: #b8a6c9;
-            cursor: pointer;
-            transition: 0.3s ease;
-            padding: 4px 12px;
-            border-radius: 20px;
-        }
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 600px) {
+    .hud-timer { top: 12px; right: 12px; padding: 6px 10px; gap: 4px; }
+    .hud-timer .cell { min-width: 32px; }
+    .hud-timer .cell .num { font-size: 1rem; }
+    .hud-timer .cell .lbl { font-size: 0.38rem; }
+    .hud-back { bottom: 18px; padding: 10px 28px; font-size: 0.82rem; }
+    .start-overlay .heart { font-size: 3rem; }
+    .start-overlay .name { font-size: 2.4rem; }
+    .start-overlay .sub { font-size: 1rem; }
+    .start-btn { padding: 14px 34px; font-size: 0.95rem; }
+  }
 
-        .wish-mini button:hover {
-            color: #c27b9e;
-            background: rgba(199, 139, 219, 0.06);
-        }
-
-        .wish-mini .wish-response {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1rem;
-            color: #c27b9e;
-            min-height: 1.8rem;
-            opacity: 0;
-            transition: 0.5s ease;
-            transform: translateY(6px);
-            margin-top: 4px;
-        }
-
-        .wish-mini .wish-response.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .sparkle-burst {
-            position: fixed;
-            pointer-events: none;
-            font-size: 1.4rem;
-            animation: burst 0.8s ease-out forwards;
-            z-index: 999;
-        }
-
-        @keyframes burst {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(0.2) rotate(0deg);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg);
-            }
-        }
-
-        .confetti-piece {
-            position: fixed;
-            pointer-events: none;
-            z-index: 998;
-            width: 7px;
-            height: 7px;
-            border-radius: 2px;
-            animation: confettiFall linear forwards;
-        }
-
-        @keyframes confettiFall {
-            0% {
-                opacity: 1;
-                transform: translateY(0) rotate(0deg) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(100vh) rotate(720deg) scale(0.2);
-            }
-        }
-
-        @media (max-width: 600px) {
-            .placeholder {
-                padding: 20px 16px 30px;
-                border-radius: 24px;
-            }
-            .header .name {
-                font-size: 2.8rem;
-            }
-            .header .sub {
-                font-size: 0.9rem;
-            }
-            .day-display .big-day {
-                font-size: 5rem;
-            }
-            .day-countdown .item {
-                min-width: 44px;
-                padding: 6px 10px 4px;
-            }
-            .day-countdown .item .num {
-                font-size: 1.4rem;
-            }
-            .coming-soon .badge {
-                font-size: 1.1rem;
-            }
-            .back-btn {
-                padding: 10px 28px;
-                font-size: 0.85rem;
-            }
-            .message-box .message-content {
-                font-size: 0.95rem;
-            }
-            .message-box {
-                padding: 16px 16px;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .header .name {
-                font-size: 2.2rem;
-            }
-            .day-display .big-day {
-                font-size: 3.8rem;
-            }
-            .day-countdown {
-                gap: 6px;
-            }
-            .day-countdown .item {
-                min-width: 36px;
-                padding: 4px 6px 3px;
-            }
-            .day-countdown .item .num {
-                font-size: 1.1rem;
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--cream);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-            border-radius: 10px;
-        }
-    </style>
+  @media (max-width: 400px) {
+    .hud-timer .cell { min-width: 28px; }
+    .hud-timer .cell .num { font-size: 0.88rem; }
+    .start-overlay .name { font-size: 2rem; }
+  }
+</style>
 </head>
 <body>
 
-    <div class="bg" aria-hidden="true"></div>
+<canvas id="scene" aria-hidden="true"></canvas>
 
-    <div class="placeholder" id="app">
+<!-- ─── TOP RIGHT TIMER ─── -->
+<div class="hud-timer" id="hudTimer" role="timer" aria-label="Countdown">
+  <div class="cell"><span class="num" id="cdDays">00</span><span class="lbl">days</span></div>
+  <div class="sep">:</div>
+  <div class="cell"><span class="num" id="cdHours">00</span><span class="lbl">hrs</span></div>
+  <div class="sep">:</div>
+  <div class="cell"><span class="num" id="cdMinutes">00</span><span class="lbl">min</span></div>
+  <div class="sep">:</div>
+  <div class="cell"><span class="num" id="cdSeconds">00</span><span class="lbl">sec</span></div>
+</div>
 
-        <header class="header">
-            <div class="name">Ruth</div>
-            <div class="sub">twenty‑one · a celebration</div>
-            <div class="day-badge" id="dayBadge">
-                day <strong id="dayNumber">—</strong> · countdown
-            </div>
-        </header>
+<!-- ─── BOTTOM BACK BUTTON ─── -->
+<a href="index.html" class="hud-back" id="backBtn">
+  ← back to home
+</a>
 
-        <div class="day-display">
-            <div class="big-day" id="bigDay">—</div>
-            <div class="day-label" id="dayLabel">days to go ✦</div>
-        </div>
+<!-- ─── START OVERLAY ─── -->
+<div class="start-overlay" id="startOverlay">
+  <div class="heart">🎆</div>
+  <div class="name">Ruth</div>
+  <div class="sub">twenty‑one · a celebration</div>
+  <button class="start-btn" id="startBtn">▶ start fireworks show</button>
+  <div class="hint">Tap to begin your fireworks show<br /> ✨</div>
+</div>
 
-        <div class="coming-soon">
-            <div class="badge">
-                <span class="day-emoji" id="dayEmoji">🌸</span>
-                coming soon · check back
-                <span class="day-emoji" id="dayEmoji2">🌸</span>
-            </div>
-        </div>
+<!-- ─── HIDDEN YOUTUBE PLAYER ─── -->
+<div id="yt-holder"><div id="yt-player"></div></div>
 
-        <div class="day-countdown" id="dayCountdown" role="timer" aria-label="Countdown to this day">
-            <div class="item">
-                <span class="num" id="cdDays">00</span>
-                <span class="label">days</span>
-            </div>
-            <div class="item">
-                <span class="num" id="cdHours">00</span>
-                <span class="label">hours</span>
-            </div>
-            <div class="item">
-                <span class="num" id="cdMinutes">00</span>
-                <span class="label">mins</span>
-            </div>
-            <div class="item">
-                <span class="num" id="cdSeconds">00</span>
-                <span class="label">secs</span>
-            </div>
-        </div>
+<script>
+(function () {
+  'use strict';
 
-        <div class="message-box" id="messageBox">
-            <div class="message-content" id="messageContent">
-                <span class="highlight-emoji" id="msgEmoji">✨</span>
-                <span id="msgText">This day of the countdown hasn't arrived yet.</span>
-                <span class="day-date" id="msgDate"></span>
-            </div>
-        </div>
+  /* ═══════════════════════════════════════════════════════════════
+     🎆  WORD FIREWORKS — add as many words / short sentences as you like
+     ═══════════════════════════════════════════════════════════════ */
+  const FIREWORK_WORDS = [
+    'Ruth',
+    'Happy 21st',
+    'My Love',
+    'My Baby Girl!',
+    'You are magic',
+    'A Beautiful soul',
+    'My everything',
+    'I adore you',
+    'Shine bright',
+    'You are Loved!',
+    'Happy Birthday',
+    'The Worlds is Yours',
+    'My star',
+    'Sweetheart',
+    'Sunshine',
+    'Always & Always',
+    'Till Infinity',
+    'My heart',
+    'Twenty One',
+    'My World'
+  ];
 
-        <a href="index.html" class="back-btn" id="backBtn">
-            <span>← back to celebration</span>
-        </a>
+  const WORD_EVERY_MIN = 8.5;
+  const WORD_EVERY_MAX = 11.5;
+  const NORMAL_EVERY_MIN = 0.85;
+  const NORMAL_EVERY_MAX = 1.6;
+  /* ═══════════════════════════════════════════════════════════════ */
 
-        <div class="wish-mini">
-            <button id="wishMiniBtn">💫 send a little love</button>
-            <div class="wish-response" id="wishResponse"></div>
-        </div>
 
-    </div>
+  /* ───────────────────────── CANVAS SETUP ───────────────────────── */
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d');
 
-    <script>
-        (function() {
-            'use strict';
+  let W = 0, H = 0, DPR = 1;
+  let time = 0;
 
-            const BIRTHDAY = new Date(2026, 8, 18, 0, 0, 0).getTime();
+  const bgCanvas = document.createElement('canvas');
 
-            // ─── ROMANTIC MESSAGES WITH SIMPLE, PUNCHY LABELS ───
-            const DAY_DETAILS = {
-                1: {
-                    emoji: '🌅',
-                    label: 'Tomorrow is the day!',
-                    message: 'My heart is already bursting with love for you. Tomorrow, the world gets to celebrate the most beautiful soul I know. You are my dawn, my light, my everything. See you at 21, my love.'
-                },
-                2: {
-                    emoji: '💫',
-                    label: 'Two days left!',
-                    message: 'Every moment without you feels like a lifetime, but knowing you\'re about to step into the most magnificent year yet fills me with such joy. You are the star that guides me home, Ruth.'
-                },
-                3: {
-                    emoji: '🌙',
-                    label: 'Three days to go!',
-                    message: 'I close my eyes and I see your smile—it\'s the only thing I need. These last few days are a gentle reminder of how deeply I cherish you. You are my moon, my tide, my constant.'
-                },
-                4: {
-                    emoji: '🕊️',
-                    label: 'Four days!',
-                    message: 'My soul is already dancing at the thought of celebrating you. You\'ve filled my life with so much tenderness and grace. I can\'t wait to hold you and whisper how much you mean to me.'
-                },
-                5: {
-                    emoji: '🌺',
-                    label: 'Five days!',
-                    message: 'You are the most exquisite flower in my garden. With every passing day, I fall more in love with the person you are. Your 21st will be as radiant as your heart.'
-                },
-                6: {
-                    emoji: '✨',
-                    label: 'Six days!',
-                    message: 'My greatest blessing is you, Ruth. Every heartbeat brings me closer to the day I get to see you shine even brighter. You are my miracle, my forever, my home.'
-                },
-                7: {
-                    emoji: '🌈',
-                    label: 'One week to go!',
-                    message: 'A week from today, I\'ll be looking into your eyes, celebrating the most incredible person I\'ve ever known. You are my rainbow after every storm, my hope, my love.'
-                },
-                8: {
-                    emoji: '🌅',
-                    label: 'Eight days!',
-                    message: 'The anticipation is like golden honey, sweet and slow. You are the warmth I wake up for, the tenderness I hold onto. I\'m counting every second until I can hold you close.'
-                },
-                9: {
-                    emoji: '🎈',
-                    label: 'Nine days!',
-                    message: 'If I could write you a thousand love letters, they still wouldn\'t capture how much you mean to me. You are poetry in motion, and I\'m so ready to celebrate every beautiful part of you.'
-                },
-                10: {
-                    emoji: '🥂',
-                    label: 'Ten days!',
-                    message: 'Here we are, my love—the final stretch. Ten days until I get to toast to you, to us, to everything you are and everything you\'ll become. You are my greatest adventure, and I\'m so grateful to walk this path with you.'
-                }
-            };
+  let stars = [];
+  let cityTwinkles = [];
+  let moon = { x: 0, y: 0, r: 30 };
+  let shootingStars = [];
 
-            function getDayFromURL() {
-                const path = window.location.pathname;
-                const match = path.match(/day_(\d{2})\.html/i);
-                if (match) return parseInt(match[1], 10);
-                const params = new URLSearchParams(window.location.search);
-                const q = params.get('day');
-                if (q) return parseInt(q, 10);
-                return null;
+  const rand = (a, b) => a + Math.random() * (b - a);
+
+  const MOON_CRATERS = [
+    { dx: -0.30, dy: -0.22, r: 0.18 },
+    { dx:  0.22, dy: -0.36, r: 0.12 },
+    { dx:  0.34, dy:  0.18, r: 0.16 },
+    { dx: -0.12, dy:  0.40, r: 0.13 },
+    { dx: -0.46, dy:  0.16, r: 0.09 },
+    { dx:  0.06, dy: -0.02, r: 0.07 }
+  ];
+
+  /* ───────────────────────── WORD → POINTS ───────────────────────── */
+  const wordCache = new Map();
+
+  function getWordPoints(text) {
+    if (wordCache.has(text)) return wordCache.get(text);
+
+    const maxW = Math.min(W * 0.78, 880);
+    const maxH = Math.min(H * 0.22, 230);
+    const fontStr = s => `700 ${s}px "Playfair Display", Georgia, serif`;
+
+    const probe = document.createElement('canvas').getContext('2d');
+    probe.font = fontStr(150);
+    const w0 = probe.measureText(text).width;
+
+    let size = 150;
+    if (w0 > maxW) size = 150 * maxW / w0;
+    if (size * 1.25 > maxH) size = maxH / 1.25;
+    size = Math.max(20, Math.floor(size));
+
+    probe.font = fontStr(size);
+    const tw = Math.ceil(probe.measureText(text).width);
+    const pad = Math.ceil(size * 0.35);
+
+    const off = document.createElement('canvas');
+    off.width = tw + pad * 2;
+    off.height = Math.ceil(size * 1.45) + pad * 2;
+
+    const o = off.getContext('2d');
+    o.font = fontStr(size);
+    o.textAlign = 'center';
+    o.textBaseline = 'middle';
+    o.fillStyle = '#fff';
+    o.fillText(text, off.width / 2, off.height / 2);
+
+    const data = o.getImageData(0, 0, off.width, off.height).data;
+
+    const sample = (gap) => {
+      const out = [];
+      for (let y = 0; y < off.height; y += gap) {
+        for (let x = 0; x < off.width; x += gap) {
+          if (data[(y * off.width + x) * 4 + 3] > 128) {
+            out.push({ x: x - off.width / 2, y: y - off.height / 2 });
+          }
+        }
+      }
+      return out;
+    };
+
+    let gap = Math.max(3, Math.round(size / 20));
+    let pts = sample(gap);
+    while (pts.length > 560 && gap < 26) { gap++; pts = sample(gap); }
+
+    const result = { points: pts, halfW: off.width / 2, halfH: off.height / 2 };
+    wordCache.set(text, result);
+    return result;
+  }
+
+  /* ───────────────────────── BACKGROUND ───────────────────────── */
+  function buildBackground() {
+    bgCanvas.width = Math.max(1, Math.floor(W * DPR));
+    bgCanvas.height = Math.max(1, Math.floor(H * DPR));
+    const b = bgCanvas.getContext('2d');
+    b.setTransform(DPR, 0, 0, DPR, 0, 0);
+    b.clearRect(0, 0, W, H);
+
+    const sky = b.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0.00, '#04030c');
+    sky.addColorStop(0.25, '#0b0820');
+    sky.addColorStop(0.50, '#181030');
+    sky.addColorStop(0.72, '#281a45');
+    sky.addColorStop(0.88, '#3a2350');
+    sky.addColorStop(1.00, '#4b2d53');
+    b.fillStyle = sky;
+    b.fillRect(0, 0, W, H);
+
+    const hg = b.createRadialGradient(
+      W * 0.5, H * 0.92, 0,
+      W * 0.5, H * 0.92, Math.max(W, H) * 0.65
+    );
+    hg.addColorStop(0.00, 'rgba(255, 186, 138, 0.20)');
+    hg.addColorStop(0.35, 'rgba(206, 132, 186, 0.09)');
+    hg.addColorStop(1.00, 'rgba(120, 80, 160, 0)');
+    b.fillStyle = hg;
+    b.fillRect(0, 0, W, H);
+
+    drawMoon(b);
+
+    const p1 = [rand(0, 6.3), rand(0, 6.3), rand(0, 6.3)];
+    const p2 = [rand(0, 6.3), rand(0, 6.3), rand(0, 6.3)];
+    const p3 = [rand(0, 6.3), rand(0, 6.3), rand(0, 6.3)];
+
+    fillRidge(b, makeRidge(H * 0.735, H * 0.135, p1), '#1c1639');
+    fillRidge(b, makeRidge(H * 0.830, H * 0.100, p2), '#120d2a');
+    fillRidge(b, makeRidge(H * 0.915, H * 0.070, p3), '#090618');
+
+    buildCity(b);
+  }
+
+  function makeRidge(baseY, amp, ph) {
+    const pts = [];
+    const step = Math.max(8, W / 90);
+    for (let x = -step; x <= W + step; x += step) {
+      const t = x / W;
+      const n =
+        0.55 * Math.sin(t * 4.2 + ph[0]) +
+        0.28 * Math.sin(t * 9.7 + ph[1]) +
+        0.17 * Math.sin(t * 21.3 + ph[2]);
+      pts.push({ x, y: baseY - amp * (0.5 + 0.5 * n) });
+    }
+    return pts;
+  }
+
+  function fillRidge(b, pts, color) {
+    b.beginPath();
+    b.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) b.lineTo(pts[i].x, pts[i].y);
+    b.lineTo(W + 40, H + 40);
+    b.lineTo(-40, H + 40);
+    b.closePath();
+    b.fillStyle = color;
+    b.fill();
+  }
+
+  function buildCity(b) {
+    cityTwinkles = [];
+    let x = -20;
+    const baseY = H + 10;
+
+    while (x < W + 20) {
+      const w = rand(W * 0.024, W * 0.068);
+      const h = rand(H * 0.045, H * 0.135);
+      const topY = H * 0.995 - h;
+
+      b.fillStyle = '#06040e';
+      b.fillRect(x, topY, w, baseY - topY);
+
+      const cols = Math.max(1, Math.floor(w / 7));
+      const rows = Math.max(1, Math.floor(h / 9));
+
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+          if (Math.random() > 0.74) {
+            const warm = Math.random() > 0.45;
+            b.fillStyle = warm
+              ? 'rgba(255, 214, 150, 0.78)'
+              : 'rgba(255, 244, 208, 0.55)';
+            b.fillRect(x + 3 + c * 7, topY + 4 + r * 9, 2.2, 3);
+
+            if (Math.random() > 0.86) {
+              cityTwinkles.push({
+                x: x + 3 + c * 7,
+                y: topY + 4 + r * 9,
+                a: rand(0.4, 1),
+                sp: rand(0.6, 2.4),
+                ph: rand(0, 6.3)
+              });
             }
+          }
+        }
+      }
+      x += w + rand(2, 9);
+    }
+  }
 
-            const day = getDayFromURL();
+  function drawMoon(b) {
+    const { x, y, r } = moon;
 
-            const dayNumberEl = document.getElementById('dayNumber');
-            const bigDayEl = document.getElementById('bigDay');
-            const dayLabelEl = document.getElementById('dayLabel');
-            const dayEmoji = document.getElementById('dayEmoji');
-            const dayEmoji2 = document.getElementById('dayEmoji2');
-            const cdDays = document.getElementById('cdDays');
-            const cdHours = document.getElementById('cdHours');
-            const cdMinutes = document.getElementById('cdMinutes');
-            const cdSeconds = document.getElementById('cdSeconds');
-            const msgEmoji = document.getElementById('msgEmoji');
-            const msgText = document.getElementById('msgText');
-            const msgDate = document.getElementById('msgDate');
-            const wishMiniBtn = document.getElementById('wishMiniBtn');
-            const wishResponse = document.getElementById('wishResponse');
-            const backBtn = document.getElementById('backBtn');
-            const dayBadge = document.getElementById('dayBadge');
+    const g = b.createRadialGradient(x, y, r * 0.7, x, y, r * 8);
+    g.addColorStop(0.00, 'rgba(255, 248, 225, 0.20)');
+    g.addColorStop(0.22, 'rgba(220, 205, 255, 0.09)');
+    g.addColorStop(0.55, 'rgba(170, 150, 255, 0.035)');
+    g.addColorStop(1.00, 'rgba(120, 100, 200, 0)');
+    b.fillStyle = g;
+    b.beginPath(); b.arc(x, y, r * 8, 0, Math.PI * 2); b.fill();
 
-            const WISHES = [
-                'Ruth, you are pure magic ✨', '21 looks stunning on you 💖',
-                'Every moment with you is a gift 🌟', 'Can’t wait to celebrate you! 🥳',
-                'You make the world brighter ❤️', 'Forever and always, Ruth 💫',
-                'So grateful for you 🌸', 'You deserve all the joy in the world 🦋',
-                'Happy 21st, beautiful soul 💗', 'Here’s to you and all your dreams 🌙',
-                'Sending you the biggest hug 🤗', 'You are so loved 💕',
-                'Your light shines so bright ⭐', 'Cheers to 21 years of you 🥂',
-                'Ruth, you are one of a kind 🌺', 'My heart beats for you ❤️‍🔥',
-                'You are my everything 💖', 'Forever yours, always and truly 💞'
-            ];
+    const mg = b.createRadialGradient(
+      x - r * 0.35, y - r * 0.35, r * 0.05,
+      x, y, r * 1.05
+    );
+    mg.addColorStop(0.00, '#fffdf6');
+    mg.addColorStop(0.55, '#f7eedb');
+    mg.addColorStop(1.00, '#dccfb6');
+    b.fillStyle = mg;
+    b.beginPath(); b.arc(x, y, r, 0, Math.PI * 2); b.fill();
 
-            if (day !== null && day >= 1 && day <= 10) {
-                const details = DAY_DETAILS[day] || DAY_DETAILS[10];
+    b.save();
+    b.beginPath(); b.arc(x, y, r, 0, Math.PI * 2); b.clip();
+    b.fillStyle = 'rgba(203, 188, 163, 0.32)';
+    for (const c of MOON_CRATERS) {
+      b.beginPath();
+      b.arc(x + c.dx * r, y + c.dy * r, c.r * r, 0, Math.PI * 2);
+      b.fill();
+    }
+    b.restore();
+  }
 
-                dayNumberEl.textContent = String(day).padStart(2, '0');
-                bigDayEl.textContent = String(day).padStart(2, '0');
-                dayEmoji.textContent = details.emoji;
-                dayEmoji2.textContent = details.emoji;
+  /* ───────────────────────── STARS ───────────────────────── */
+  function buildStars() {
+    stars = [];
+    const count = Math.min(280, Math.floor((W * H) / 6200));
+    for (let i = 0; i < count; i++) {
+      const x = Math.random() * W;
+      const y = Math.random() * H * 0.80;
+      const dx = x - moon.x, dy = y - moon.y;
+      if (Math.sqrt(dx * dx + dy * dy) < moon.r * 3.4) continue;
 
-                const dayDate = new Date(BIRTHDAY);
-                dayDate.setDate(dayDate.getDate() - day);
-                const dateStr = dayDate.toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric'
-                });
+      const big = Math.random() > 0.86;
+      stars.push({
+        x, y,
+        r: big ? rand(1.05, 1.9) : rand(0.4, 1.0),
+        a: rand(0.25, 0.95),
+        sp: rand(0.4, 2.4),
+        ph: Math.random() * Math.PI * 2,
+        tint: Math.random() < 0.18 ? 'rgba(190,215,255,' : 'rgba(255,255,255,'
+      });
+    }
+  }
 
-                // Keep the romantic full message, but use the simple label in the badge
-                msgEmoji.textContent = details.emoji;
-                msgText.innerHTML = `<strong>${details.label}</strong><br />${details.message}`;
-                msgDate.textContent = `📅 ${dateStr} · ${day} days to go`;
+  function drawStars() {
+    for (let i = 0; i < stars.length; i++) {
+      const s = stars[i];
+      const a = s.a * (0.55 + 0.45 * Math.sin(time * s.sp + s.ph));
+      if (a <= 0.02) continue;
 
-                // Simple badge
-                dayBadge.innerHTML =
-                    `💕 day <strong>${String(day).padStart(2, '0')}</strong> · ${details.label}`;
+      if (s.r > 1.05) {
+        ctx.globalAlpha = a * 0.22;
+        ctx.fillStyle = s.tint + '1)';
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 3.2, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = a;
+      ctx.fillStyle = s.tint + '1)';
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
 
-                window._targetTime = dayDate.getTime();
-                backBtn.href = 'index.html';
-                document.title = `Day ${String(day).padStart(2, '0')} · ${details.label}`;
+  function drawCityTwinkles() {
+    for (let i = 0; i < cityTwinkles.length; i++) {
+      const c = cityTwinkles[i];
+      const a = c.a * (0.5 + 0.5 * Math.sin(time * c.sp + c.ph));
+      ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgba(255, 226, 168, 1)';
+      ctx.fillRect(c.x, c.y, 2.2, 3);
+    }
+    ctx.globalAlpha = 1;
+  }
 
-            } else {
-                dayNumberEl.textContent = '—';
-                bigDayEl.textContent = '?';
-                dayEmoji.textContent = '💕';
-                dayEmoji2.textContent = '💕';
-                msgEmoji.textContent = '✨';
-                msgText.innerHTML =
-                    'This page is part of Ruth\'s 21st countdown. Please visit the <a href="index.html" style="color:#c78bdb;text-decoration:none;font-weight:600;">main celebration</a> to follow along.';
-                msgDate.textContent = '';
-                window._targetTime = BIRTHDAY;
-                document.title = 'Countdown · Ruth\'s 21st';
+  /* ───────────────────────── SHOOTING STARS ───────────────────────── */
+  let shootTimer = rand(4, 10);
+
+  function updateShootingStars(dt) {
+    shootTimer -= dt;
+    if (shootTimer <= 0) {
+      shootTimer = rand(9, 20);
+      const dir = Math.random() < 0.5 ? 1 : -1;
+      const ang = rand(0.22, 0.55);
+      const spd = rand(620, 1150);
+      shootingStars.push({
+        x: dir === 1 ? rand(-W * 0.1, W * 0.7) : rand(W * 0.3, W * 1.1),
+        y: rand(H * 0.04, H * 0.35),
+        vx: dir * Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        life: rand(0.55, 0.95),
+        max: 0.95
+      });
+    }
+
+    for (let i = shootingStars.length - 1; i >= 0; i--) {
+      const s = shootingStars[i];
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      s.life -= dt;
+      if (s.life <= 0) shootingStars.splice(i, 1);
+    }
+  }
+
+  function drawShootingStars() {
+    ctx.globalCompositeOperation = 'lighter';
+    for (const s of shootingStars) {
+      const a = Math.max(0, s.life / s.max);
+      const tailX = s.x - s.vx * 0.13;
+      const tailY = s.y - s.vy * 0.13;
+
+      const g = ctx.createLinearGradient(s.x, s.y, tailX, tailY);
+      g.addColorStop(0, `rgba(255,255,255,${a * 0.95})`);
+      g.addColorStop(0.4, `rgba(200,215,255,${a * 0.35})`);
+      g.addColorStop(1, 'rgba(180,200,255,0)');
+
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(tailX, tailY);
+      ctx.stroke();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /* ───────────────────────── FIREWORKS ENGINE ───────────────────────── */
+  const rockets = [];
+  const particles = [];
+  const flashes = [];
+  const MAX_PARTICLES = 2600;
+
+  const PALETTES = [
+    ['#ff8fb1', '#ffc2d6', '#ff5c8a', '#ffb3c9'],
+    ['#c78bdb', '#e3b6f5', '#a45fd6', '#d9a3f0'],
+    ['#ffd6a0', '#ffe9c4', '#ffb347', '#ffcf8a'],
+    ['#9fd8ff', '#c9ecff', '#6fc4ff', '#b8e6ff'],
+    ['#ffffff', '#ffd9e8', '#ffe8b8', '#e6d4ff']
+  ];
+
+  let wordIndex = 0;
+  let nextWordIn = 1.8;
+  let nextNormalIn = 0.6;
+
+  function launchRocket(isWord) {
+    if (particles.length > MAX_PARTICLES) return;
+
+    const x = rand(W * 0.12, W * 0.88);
+    const targetY = isWord ? rand(H * 0.16, H * 0.30) : rand(H * 0.09, H * 0.40);
+    const y0 = H + 12;
+    const g = 620;
+    const vy = -Math.sqrt(2 * g * Math.max(40, y0 - targetY));
+
+    rockets.push({
+      x, y: y0, px: x, py: y0,
+      vx: rand(-28, 28),
+      vy, g,
+      isWord,
+      word: isWord ? FIREWORK_WORDS[wordIndex++ % FIREWORK_WORDS.length] : null,
+      color: pickColor()
+    });
+  }
+
+  function pickColor() {
+    const p = PALETTES[(Math.random() * PALETTES.length) | 0];
+    return p[(Math.random() * p.length) | 0];
+  }
+
+  function updateRockets(dt) {
+    for (let i = rockets.length - 1; i >= 0; i--) {
+      const r = rockets[i];
+      r.px = r.x; r.py = r.y;
+      r.vy += r.g * dt;
+      r.x += r.vx * dt;
+      r.y += r.vy * dt;
+
+      if (r.vy >= -50) {
+        if (r.isWord) explodeWord(r.x, r.y, r.word);
+        else explodeNormal(r.x, r.y);
+        rockets.splice(i, 1);
+      }
+    }
+  }
+
+  function explodeNormal(x, y) {
+    const palette = PALETTES[(Math.random() * PALETTES.length) | 0];
+    const count = 70 + ((Math.random() * 55) | 0);
+    const speed = rand(130, 280);
+
+    flashes.push({ x, y, r: 4, max: 90, life: 1 });
+
+    for (let i = 0; i < count; i++) {
+      const ang = (i / count) * Math.PI * 2 + rand(-0.06, 0.06);
+      const spd = speed * rand(0.5, 1.15);
+      const col = palette[(Math.random() * palette.length) | 0];
+
+      particles.push({
+        x, y, px: x, py: y,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        tx: 0, ty: 0,
+        color: col,
+        size: rand(1.2, 2.5),
+        alpha: 1,
+        age: 0,
+        hold: rand(0.30, 0.75),
+        decay: rand(0.75, 1.25),
+        mode: 'normal',
+        seed: Math.random() * 6.28
+      });
+    }
+  }
+
+  function explodeWord(cx, cy, word) {
+    const { points, halfW, halfH } = getWordPoints(word);
+    if (!points.length) return;
+
+    const marginX = 14, marginTop = 12;
+    const horizon = H * 0.62;
+
+    cx = Math.min(Math.max(cx, halfW + marginX), Math.max(halfW + marginX, W - halfW - marginX));
+    cy = Math.min(Math.max(cy, halfH + marginTop), Math.max(halfH + marginTop, horizon - halfH));
+
+    const palette = PALETTES[(Math.random() * PALETTES.length) | 0];
+    const n = points.length;
+
+    flashes.push({ x: cx, y: cy, r: 6, max: Math.min(halfW, halfH) * 1.4, life: 1 });
+
+    for (let i = 0; i < n; i++) {
+      const p = points[i];
+      const ang = Math.random() * Math.PI * 2;
+      const spd = rand(40, 165);
+
+      const t = (p.x + halfW) / (halfW * 2);
+      const col = palette[Math.min(palette.length - 1, (t * palette.length) | 0)];
+
+      particles.push({
+        x: cx, y: cy, px: cx, py: cy,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        tx: cx + p.x,
+        ty: cy + p.y,
+        color: col,
+        size: rand(1.1, 2.2),
+        alpha: 1,
+        age: 0,
+        hold: rand(1.7, 2.4),
+        decay: rand(0.38, 0.62),
+        mode: 'word',
+        seed: Math.random() * 6.28
+      });
+    }
+  }
+
+  function updateParticles(dt) {
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.px = p.x;
+      p.py = p.y;
+      p.age += dt;
+
+      if (p.mode === 'word') {
+        if (p.age < p.hold) {
+          const ease = 1 - Math.pow(0.0004, dt);
+          p.x += (p.tx - p.x) * ease + p.vx * dt;
+          p.y += (p.ty - p.y) * ease + p.vy * dt;
+          const vd = Math.pow(0.0002, dt);
+          p.vx *= vd;
+          p.vy *= vd;
+        } else {
+          p.vy += 95 * dt;
+          const d = Math.pow(0.35, dt);
+          p.vx *= d;
+          p.vy *= d;
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.alpha -= p.decay * dt;
+        }
+      } else {
+        const d = Math.pow(0.28, dt);
+        p.vx *= d;
+        p.vy *= d;
+        p.vy += 135 * dt;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+
+        if (p.age > p.hold) p.alpha -= p.decay * dt;
+      }
+
+      if (p.alpha <= 0) particles.splice(i, 1);
+    }
+
+    for (let i = flashes.length - 1; i >= 0; i--) {
+      const f = flashes[i];
+      f.life -= dt * 3.2;
+      f.r += (f.max - f.r) * Math.min(1, dt * 9);
+      if (f.life <= 0) flashes.splice(i, 1);
+    }
+  }
+
+  function drawFlashes() {
+    ctx.globalCompositeOperation = 'lighter';
+    for (const f of flashes) {
+      const a = Math.max(0, f.life);
+      const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r);
+      g.addColorStop(0, `rgba(255,245,225,${a * 0.35})`);
+      g.addColorStop(0.5, `rgba(255,210,235,${a * 0.12})`);
+      g.addColorStop(1, 'rgba(200,170,255,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function drawRockets() {
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.lineCap = 'round';
+    for (const r of rockets) {
+      ctx.globalAlpha = 0.9;
+      ctx.strokeStyle = r.color;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(r.px, r.py);
+      ctx.lineTo(r.x, r.y);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function drawFireworks() {
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.lineCap = 'round';
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      let a = p.alpha;
+
+      if (p.mode === 'word' && p.age < p.hold) {
+        a *= 0.82 + 0.18 * Math.sin(time * 9 + p.seed);
+      }
+      if (a <= 0.015) continue;
+
+      ctx.globalAlpha = a;
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = p.size;
+      ctx.beginPath();
+      ctx.moveTo(p.px, p.py);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+
+      if (p.mode === 'word' && p.age < p.hold) {
+        ctx.globalAlpha = a * 0.55;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /* ───────────────────────── RESIZE ───────────────────────── */
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    moon = {
+      x: W * 0.80,
+      y: H * 0.14,
+      r: Math.max(24, Math.min(W, H) * 0.055)
+    };
+
+    wordCache.clear();
+    particles.length = 0;
+    rockets.length = 0;
+
+    buildBackground();
+    buildStars();
+  }
+
+  /* ───────────────────────── MAIN LOOP ───────────────────────── */
+  let last = performance.now();
+
+  function frame(now) {
+    const dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
+    time += dt;
+
+    nextNormalIn -= dt;
+    if (nextNormalIn <= 0) {
+      launchRocket(false);
+      nextNormalIn = rand(NORMAL_EVERY_MIN, NORMAL_EVERY_MAX);
+    }
+
+    nextWordIn -= dt;
+    if (nextWordIn <= 0) {
+      launchRocket(true);
+      nextWordIn = rand(WORD_EVERY_MIN, WORD_EVERY_MAX);
+    }
+
+    updateShootingStars(dt);
+    updateRockets(dt);
+    updateParticles(dt);
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.drawImage(bgCanvas, 0, 0, W, H);
+    drawStars();
+    drawCityTwinkles();
+    drawShootingStars();
+    drawFlashes();
+    drawRockets();
+    drawFireworks();
+
+    requestAnimationFrame(frame);
+  }
+
+  /* ───────────────────────── BOOT ───────────────────────── */
+  resize();
+  window.addEventListener('resize', resize);
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => wordCache.clear());
+  }
+
+  requestAnimationFrame(frame);
+
+
+  /* ═══════════════════════════════════════════════════════════════
+     COUNTDOWN
+     ═══════════════════════════════════════════════════════════════ */
+  const BIRTHDAY = new Date(2026, 8, 18, 0, 0, 0).getTime();
+  window._targetTime = BIRTHDAY;
+
+  const cdDays = document.getElementById('cdDays');
+  const cdHours = document.getElementById('cdHours');
+  const cdMinutes = document.getElementById('cdMinutes');
+  const cdSeconds = document.getElementById('cdSeconds');
+
+  function updateCountdown() {
+    const now = Date.now();
+    const diff = Math.max(0, BIRTHDAY - now);
+
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+
+    cdDays.textContent = String(d).padStart(2, '0');
+    cdHours.textContent = String(h).padStart(2, '0');
+    cdMinutes.textContent = String(m).padStart(2, '0');
+    cdSeconds.textContent = String(s).padStart(2, '0');
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+
+    /* ═══════════════════════════════════════════════════════════════
+    YOUTUBE AUDIO + START OVERLAY  (FIXED)
+    ═══════════════════════════════════════════════════════════════ */
+    const YT_VIDEO_ID = 'nzE8eUlseRM';
+
+    let ytPlayer = null;
+    let ytReady = false;
+    let audioStarted = false;
+
+    const overlay = document.getElementById('startOverlay');
+    const startBtn = document.getElementById('startBtn');
+
+    /* Load the YouTube IFrame API */
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+
+    /* Global callback required by the YouTube API */
+    window.onYouTubeIframeAPIReady = function () {
+    ytPlayer = new YT.Player('yt-player', {
+        width: '1',
+        height: '1',
+        videoId: YT_VIDEO_ID,
+        playerVars: {
+        autoplay: 0,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        modestbranding: 1,
+        playsinline: 1,
+        rel: 0,
+        origin: window.location.origin      // ← ADD THIS
+        },
+        events: {
+        onReady: function (event) {
+            ytReady = true;
+            event.target.setVolume(60);       // sets default level on desktop
+            // Do NOT unmute here — wait for the user gesture
+        },
+        onStateChange: function (event) {
+            // If the video ends, loop it back to the start
+            if (event.data === YT.PlayerState.ENDED) {
+            event.target.seekTo(0);
+            event.target.playVideo();
             }
+        }
+        }
+    });
+    };
 
-            function updateCountdown() {
-                const now = Date.now();
-                const target = window._targetTime || BIRTHDAY;
-                let diff = Math.max(0, target - now);
+    function startShow() {
+    if (audioStarted) return;
 
-                if (diff === 0) {
-                    cdDays.textContent = '00';
-                    cdHours.textContent = '00';
-                    cdMinutes.textContent = '00';
-                    cdSeconds.textContent = '00';
-                    return;
-                }
+    // ── Play + unmute ──
+    if (ytPlayer && ytReady && typeof ytPlayer.playVideo === 'function') {
+        ytPlayer.playVideo();
+        // Give the player a moment, then unmute
+        setTimeout(function () {
+        if (ytPlayer && typeof ytPlayer.unMute === 'function') {
+            ytPlayer.unMute();
+            ytPlayer.setVolume(60);           // re-apply after unmute
+        }
+        }, 250);
+    } else {
+        // Player not ready yet — retry once
+        setTimeout(function () {
+        if (ytPlayer && ytReady) {
+            ytPlayer.playVideo();
+            setTimeout(function () {
+            ytPlayer.unMute();
+            ytPlayer.setVolume(60);
+            }, 250);
+        }
+        }, 600);
+    }
 
-                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((diff % (1000 * 60)) / 1000);
+    // Fade out and remove the overlay
+    overlay.classList.add('hidden');
+    setTimeout(function () {
+        overlay.style.display = 'none';
+    }, 900);
 
-                cdDays.textContent = String(d).padStart(2, '0');
-                cdHours.textContent = String(h).padStart(2, '0');
-                cdMinutes.textContent = String(m).padStart(2, '0');
-                cdSeconds.textContent = String(s).padStart(2, '0');
-            }
+    // Little celebratory burst
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    sparkleBurst(cx, cy, 30);
+    confettiBurst(cx, cy);
 
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
+    audioStarted = true;
+    }
 
-            function sparkleBurst(cx, cy, count) {
-                const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
-                const total = count || 24 + Math.floor(Math.random() * 16);
-                for (let i = 0; i < total; i++) {
-                    const spark = document.createElement('div');
-                    spark.className = 'sparkle-burst';
-                    spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-                    const angle = Math.random() * 2 * Math.PI;
-                    const dist = 60 + Math.random() * 180;
-                    const tx = Math.cos(angle) * dist;
-                    const ty = Math.sin(angle) * dist - 50;
-                    spark.style.setProperty('--tx', tx + 'px');
-                    spark.style.setProperty('--ty', ty + 'px');
-                    spark.style.left = (cx || window.innerWidth / 2) + 'px';
-                    spark.style.top = (cy || window.innerHeight / 2) + 'px';
-                    spark.style.fontSize = 1 + Math.random() * 1.8 + 'rem';
-                    spark.style.animationDuration = 0.4 + Math.random() * 0.6 + 's';
-                    document.body.appendChild(spark);
-                    setTimeout(() => spark.remove(), 1200);
-                }
-            }
+    /* Click anywhere on the overlay to start */
+    overlay.addEventListener('click', startShow);
+    startBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    startShow();
+    });
 
-            function confettiBurst(cx, cy) {
-                const colors = ['#f8a4b8', '#c78bdb', '#f5c6a0', '#ffd6d6', '#d4b8e0', '#fce7f3', '#ffb3c6', '#b8d4e3'];
-                const count = 40 + Math.floor(Math.random() * 30);
-                for (let i = 0; i < count; i++) {
-                    const piece = document.createElement('div');
-                    piece.className = 'confetti-piece';
-                    piece.style.left = (cx || window.innerWidth / 2) + 'px';
-                    piece.style.top = (cy || window.innerHeight / 2) + 'px';
-                    piece.style.width = (4 + Math.random() * 7) + 'px';
-                    piece.style.height = (4 + Math.random() * 7) + 'px';
-                    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-                    const angle = Math.random() * 2 * Math.PI;
-                    const dist = 60 + Math.random() * 300;
-                    piece.style.animationDuration = (1.0 + Math.random() * 1.6) + 's';
-                    piece.style.animationDelay = (Math.random() * 0.5) + 's';
-                    piece.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-                    piece.style.setProperty('--ty', Math.sin(angle) * dist - 140 + 'px');
-                    document.body.appendChild(piece);
-                    setTimeout(() => piece.remove(), 2800);
-                }
-            }
 
-            wishMiniBtn.addEventListener('click', function(e) {
-                const cx = e.clientX || window.innerWidth / 2;
-                const cy = e.clientY || window.innerHeight / 2;
-                sparkleBurst(cx, cy, 30);
-                confettiBurst(cx, cy);
+  /* ═══════════════════════════════════════════════════════════════
+     DOM SPARKLES / CONFETTI (used by the start burst)
+     ═══════════════════════════════════════════════════════════════ */
+  function sparkleBurst(cx, cy, count) {
+    const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
+    const total = count || 24 + Math.floor(Math.random() * 16);
+    for (let i = 0; i < total; i++) {
+      const spark = document.createElement('div');
+      spark.className = 'sparkle-burst';
+      spark.textContent = emojis[(Math.random() * emojis.length) | 0];
+      const angle = Math.random() * 2 * Math.PI;
+      const dist = 60 + Math.random() * 180;
+      spark.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+      spark.style.setProperty('--ty', (Math.sin(angle) * dist - 50) + 'px');
+      spark.style.left = (cx || window.innerWidth / 2) + 'px';
+      spark.style.top = (cy || window.innerHeight / 2) + 'px';
+      spark.style.fontSize = (1 + Math.random() * 1.8) + 'rem';
+      spark.style.animationDuration = (0.4 + Math.random() * 0.6) + 's';
+      document.body.appendChild(spark);
+      setTimeout(() => spark.remove(), 1200);
+    }
+  }
 
-                const msg = WISHES[Math.floor(Math.random() * WISHES.length)];
-                wishResponse.textContent = msg;
-                wishResponse.className = 'wish-response show';
+  function confettiBurst(cx, cy) {
+    const colors = ['#f8a4b8', '#c78bdb', '#f5c6a0', '#ffd6d6', '#d4b8e0', '#fce7f3', '#ffb3c6', '#b8d4e3'];
+    const count = 40 + Math.floor(Math.random() * 30);
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = (cx || window.innerWidth / 2) + 'px';
+      piece.style.top = (cy || window.innerHeight / 2) + 'px';
+      piece.style.width = (4 + Math.random() * 7) + 'px';
+      piece.style.height = (4 + Math.random() * 7) + 'px';
+      piece.style.background = colors[(Math.random() * colors.length) | 0];
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      const angle = Math.random() * 2 * Math.PI;
+      const dist = 70 + Math.random() * 300;
+      piece.style.animationDuration = (1.0 + Math.random() * 1.6) + 's';
+      piece.style.animationDelay = (Math.random() * 0.4) + 's';
+      piece.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+      piece.style.setProperty('--ty', (Math.sin(angle) * dist - 140) + 'px');
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 3000);
+    }
+  }
 
-                const badge = document.querySelector('.day-badge');
-                if (badge) {
-                    const orig = badge.innerHTML;
-                    badge.innerHTML = '💫 ' + msg;
-                    badge.style.background = 'rgba(252, 231, 243, 0.8)';
-                    setTimeout(() => {
-                        badge.innerHTML = orig;
-                        badge.style.background = '';
-                    }, 3000);
-                }
 
-                setTimeout(() => {
-                    wishResponse.className = 'wish-response';
-                }, 4200);
-            });
+  /* ═══════════════════════════════════════════════════════════════
+     INTERACTIONS (click sky → firework)
+     ═══════════════════════════════════════════════════════════════ */
+  document.addEventListener('click', function (e) {
+    const tag = e.target.tagName.toLowerCase();
+    if (tag === 'a' || tag === 'button' || e.target.closest('.sparkle-burst')) return;
+    /* Ignore clicks on the start overlay */
+    if (e.target.closest('.start-overlay')) return;
 
-            document.addEventListener('click', function(e) {
-                const tag = e.target.tagName.toLowerCase();
-                if (tag === 'a' || tag === 'button' || e.target.closest('.sparkle-burst')) return;
-                if (Math.random() > 0.25) return;
-                sparkleBurst(e.clientX, e.clientY, 6);
-            });
+    const x = e.clientX;
+    const y = e.clientY;
 
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    const el = document.activeElement;
-                    if (el) el.blur();
-                }
-                if (e.key === 'h' || e.key === 'H') {
-                    window.location.href = 'index.html';
-                }
-            });
+    const r = Math.min(W * 0.28, H * 0.22);
+    flashes.push({ x, y, r: 4, max: r * 0.8, life: 1 });
 
-            console.log(`🌸 Day ${day || '?'} · Romantic message with simple label 💖`);
-        })();
-    </script>
+    const palette = PALETTES[(Math.random() * PALETTES.length) | 0];
+    const count = 50 + ((Math.random() * 40) | 0);
+    for (let i = 0; i < count; i++) {
+      const ang = (i / count) * Math.PI * 2 + rand(-0.08, 0.08);
+      const spd = rand(90, 300);
+      particles.push({
+        x, y, px: x, py: y,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        tx: 0, ty: 0,
+        color: palette[(Math.random() * palette.length) | 0],
+        size: rand(1.2, 2.4),
+        alpha: 1,
+        age: 0,
+        hold: rand(0.25, 0.6),
+        decay: rand(0.8, 1.3),
+        mode: 'normal',
+        seed: Math.random() * 6.28
+      });
+    }
+
+    if (Math.random() > 0.6) sparkleBurst(x, y, 6);
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      if (document.activeElement) document.activeElement.blur();
+    }
+    if (e.key === 'h' || e.key === 'H') {
+      window.location.href = 'index.html';
+    }
+    if (e.key === 'f' || e.key === 'F') {
+      launchRocket(true);
+    }
+  });
+
+  console.log('🌙🎆 Day 05 · night sky + word fireworks + YouTube audio 💖');
+})();
+</script>
 
 </body>
 </html>

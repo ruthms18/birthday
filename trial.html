@@ -2,690 +2,239 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Day 06 · Ruth's 21st</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Day 05 · Ruth's 21st</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
 <style>
-  /* ─── RESET ─── */
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --pink: #f5a0b8;
+    --pink: #f8a4b8;
     --purple: #c78bdb;
-    --peach: #f5c6a0;
-    --cream: #fcf6f0;
-    --text: #2d2a3a;
-    --shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
-    --radius: 16px;
+    --ink: #ece6fa;
+    --muted: #a99cc7;
   }
 
-  html { -webkit-text-size-adjust: 100%; }
+  html, body { height: 100%; }
 
   body {
     font-family: 'Inter', sans-serif;
-    background: var(--cream);
-    color: var(--text);
-    min-height: 100vh;
+    background: #05040c;
+    color: var(--ink);
     min-height: 100dvh;
-    padding: 20px;
+    overflow: hidden;
     line-height: 1.5;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .bg {
+  /* ─── NIGHT SKY CANVAS ─── */
+  #scene {
     position: fixed;
     inset: 0;
+    width: 100%;
+    height: 100%;
     z-index: 0;
-    background:
-      radial-gradient(ellipse at 20% 30%, rgba(248, 164, 184, 0.25) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 70%, rgba(199, 139, 219, 0.20) 0%, transparent 60%),
-      radial-gradient(ellipse at 50% 50%, rgba(245, 198, 160, 0.15) 0%, transparent 50%);
+    display: block;
     pointer-events: none;
   }
 
-  /* ─── HIDDEN INPUT (mobile keyboard trigger) ─── */
-  .hidden-input {
+  /* ─── TOP RIGHT TIMER ─── */
+  .hud-timer {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: 0;
-    border: 0;
-    outline: none;
-    opacity: 0.01;
-    color: transparent;
-    background: transparent;
-    caret-color: transparent;
-    font-size: 16px; /* prevents iOS auto-zoom */
-    z-index: 1;
+    top: 18px;
+    right: 18px;
+    z-index: 10;
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(10, 7, 24, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+    pointer-events: auto;
   }
 
-  .placeholder {
-    position: relative;
-    z-index: 2;
-    max-width: 720px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 30px 20px 40px;
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-radius: 32px;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
+  .hud-timer .cell {
     text-align: center;
+    min-width: 38px;
   }
 
-  /* ─── HEADER ─── */
-  .header .name {
+  .hud-timer .cell .num {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(2.4rem, 8vw, 3.6rem);
+    font-size: 1.15rem;
     font-weight: 700;
-    line-height: 1.1;
-    background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: 1px;
-  }
-
-  .header .sub {
-    font-family: 'Patrick Hand', cursive;
-    font-size: 1.1rem;
-    color: #b8a6c9;
-    margin-top: -2px;
-    letter-spacing: 0.08em;
-  }
-
-  .header .day-badge {
-    display: inline-block;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    padding: 6px 22px;
-    border-radius: 60px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #c27b9e;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 4px 20px rgba(194, 123, 158, 0.08);
-    margin-top: 12px;
-    transition: 0.3s ease;
-  }
-
-  .header .day-badge strong {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-    background: linear-gradient(135deg, #f5b8b8, #c78bdb);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .day-display { margin: 18px 0 4px; }
-
-  .day-display .big-day {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(3.4rem, 12vw, 5.2rem);
-    font-weight: 700;
-    background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
+    background: linear-gradient(135deg, #ffb3c9, #c78bdb);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     line-height: 1;
-    letter-spacing: 2px;
+    display: block;
   }
 
-  .day-display .day-label {
-    font-family: 'Patrick Hand', cursive;
-    font-size: 1.1rem;
-    color: #b8a6c9;
+  .hud-timer .cell .lbl {
+    font-size: 0.44rem;
+    text-transform: uppercase;
     letter-spacing: 0.12em;
-    margin-top: -2px;
-  }
-
-  /* ─── GAME ─── */
-  .game-wrap { margin: 22px 0 6px; }
-
-  .progress-line {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    font-family: 'Patrick Hand', cursive;
-    color: #b8a6c9;
-    font-size: 1rem;
-    margin-bottom: 14px;
-  }
-
-  .progress-bar {
-    flex: 1;
-    max-width: 170px;
-    height: 7px;
-    border-radius: 99px;
-    background: rgba(199, 139, 219, 0.15);
-    overflow: hidden;
-  }
-
-  .progress-bar i {
+    color: #9c8fc0;
+    font-weight: 600;
+    margin-top: 3px;
     display: block;
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #f8a4b8, #c78bdb, #f5c6a0);
-    border-radius: 99px;
-    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
-    margin-bottom: 18px;
-  }
-
-  .chip {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    border: 1px solid rgba(199, 139, 219, 0.18);
-    background: rgba(255, 255, 255, 0.6);
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    font-size: 0.7rem;
-    color: #b8a6c9;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    padding: 0;
-  }
-
-  .chip.active {
-    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-    color: #fff;
-    border-color: transparent;
-    box-shadow: 0 6px 18px rgba(199, 139, 219, 0.32);
-    transform: translateY(-2px) scale(1.07);
-  }
-
-  .chip.done {
-    background: rgba(199, 139, 219, 0.13);
-    color: #c78bdb;
-    border-color: rgba(199, 139, 219, 0.32);
-    font-size: 0.85rem;
-  }
-
-  .chip.done.active {
-    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-    color: #fff;
-  }
-
-  .play-card {
-    background: rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 24px;
-    padding: 22px 14px 18px;
-    box-shadow: 0 12px 36px rgba(199, 139, 219, 0.08);
-    cursor: text;
-  }
-
-  .word-meta {
-    font-family: 'Patrick Hand', cursive;
-    font-size: 0.9rem;
-    color: #b8a6c9;
-    letter-spacing: 0.06em;
-    margin-bottom: 14px;
-  }
-
-  .answer-row,
-  .pool-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    min-height: 52px;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-
-  .answer-row { margin-bottom: 22px; }
-
-  .slot {
-    width: 44px;
-    height: 52px;
-    border-radius: 12px;
-    border: 2px dashed rgba(199, 139, 219, 0.28);
-    background: rgba(255, 255, 255, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .hud-timer .sep {
     font-family: 'Playfair Display', serif;
-    font-weight: 700;
-    font-size: 1.45rem;
-    color: #c27b9e;
-    transition: border-color 0.25s ease, background 0.25s ease, color 0.25s ease;
-  }
-
-  .slot.filled {
-    border-style: solid;
-    border-color: transparent;
-    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-    color: #fff;
-    box-shadow: 0 8px 22px rgba(199, 139, 219, 0.28);
-    animation: slotPop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  .slot.peek {
-    border-color: rgba(199, 139, 219, 0.6);
-    background: rgba(199, 139, 219, 0.1);
-    color: rgba(194, 123, 158, 0.6);
-  }
-
-  @keyframes slotPop {
-    0% { transform: scale(0.6); opacity: 0.3; }
-    60% { transform: scale(1.12); }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
-  .tile {
-    width: 44px;
-    height: 52px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.88);
-    border: 1px solid rgba(199, 139, 219, 0.2);
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-    font-size: 1.45rem;
-    color: #5a4a68;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(199, 139, 219, 0.12);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
-    padding: 0;
-  }
-
-  .tile:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(199, 139, 219, 0.22); }
-  .tile:active { transform: scale(0.94); }
-
-  .flying-tile {
-    position: fixed;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-    color: #fff;
-    border-radius: 12px;
-    z-index: 900;
-    pointer-events: none;
-    box-shadow: 0 10px 28px rgba(199, 139, 219, 0.4);
-    transition: transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.4s ease;
-  }
-
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-9px); }
-    40% { transform: translateX(9px); }
-    60% { transform: translateX(-6px); }
-    80% { transform: translateX(6px); }
-  }
-
-  .shake { animation: shake 0.4s ease; }
-
-  .type-hint {
-    font-family: 'Patrick Hand', cursive;
-    font-size: 0.9rem;
-    color: #c9b8d4;
-    margin-top: 16px;
-    letter-spacing: 0.05em;
-    transition: opacity 0.6s ease;
-  }
-
-  .type-hint.hide { opacity: 0; }
-
-  .game-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 20px;
-    flex-wrap: wrap;
-  }
-
-  .mini-btn {
-    background: rgba(255, 255, 255, 0.75);
-    border: 1px solid rgba(199, 139, 219, 0.22);
-    color: #b18bc4;
-    font-family: 'Patrick Hand', cursive;
-    font-size: 0.95rem;
-    padding: 9px 18px;
-    border-radius: 60px;
-    cursor: pointer;
-    transition: 0.3s ease;
-    touch-action: manipulation;
-  }
-
-  .mini-btn:hover {
-    color: #c27b9e;
-    background: rgba(255, 255, 255, 0.95);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(199, 139, 219, 0.14);
-  }
-
-  .mini-btn:active { transform: scale(0.95); }
-
-  .letter-btn {
-    display: none;
-    margin: 20px auto 0;
-    padding: 13px 32px;
-    border-radius: 60px;
-    border: none;
-    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-    color: #fff;
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    box-shadow: 0 10px 30px rgba(199, 139, 219, 0.3);
-    transition: 0.3s ease;
-    align-items: center;
-    gap: 8px;
-    touch-action: manipulation;
-  }
-
-  .letter-btn.show { display: inline-flex; animation: slotPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
-  .letter-btn:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(199, 139, 219, 0.36); }
-  .letter-btn:active { transform: scale(0.96); }
-
-  /* ─── MESSAGE ─── */
-  .message-box {
-    margin: 26px 0 22px;
-    padding: 20px 24px;
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: var(--radius);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 4px 16px rgba(199, 139, 219, 0.04);
-  }
-
-  .message-box .message-content {
-    font-family: 'Patrick Hand', cursive;
-    font-size: 1.05rem;
-    color: #3d344a;
-    line-height: 1.7;
-  }
-
-  .message-box .highlight-emoji {
-    font-size: 1.8rem;
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  /* ─── BACK BUTTON ─── */
-  .back-btn {
-    display: inline-block;
-    padding: 12px 36px;
-    border-radius: 60px;
-    border: none;
-    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-    color: #fff;
-    font-weight: 600;
-    font-size: 0.95rem;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    box-shadow: 0 8px 32px rgba(199, 139, 219, 0.18);
-    transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    text-decoration: none;
-    letter-spacing: 0.02em;
-    touch-action: manipulation;
-  }
-
-  .back-btn:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 14px 44px rgba(199, 139, 219, 0.28); }
-  .back-btn:active { transform: scale(0.95); }
-
-  /* ─── OVERLAYS ─── */
-  .overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    background: rgba(252, 246, 240, 0.78);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.45s ease;
-  }
-
-  .overlay.show { opacity: 1; pointer-events: auto; }
-
-  .overlay-card {
-    width: 100%;
-    max-width: 440px;
-    max-height: calc(100dvh - 40px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    background: rgba(255, 255, 255, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    border-radius: 28px;
-    padding: 34px 28px 30px;
-    box-shadow: 0 30px 80px rgba(199, 139, 219, 0.16);
-    text-align: center;
-    transform: translateY(16px) scale(0.97);
-    transition: transform 0.5s cubic-bezier(0.34, 1.4, 0.64, 1);
-  }
-
-  .overlay.show .overlay-card { transform: translateY(0) scale(1); }
-
-  .overlay-card .ov-emoji { font-size: 2.6rem; display: block; margin-bottom: 8px; }
-
-  .overlay-card h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.7rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 6px;
-    line-height: 1.25;
-  }
-
-  .overlay-card .ov-sub {
-    font-family: 'Patrick Hand', cursive;
     font-size: 1rem;
-    color: #b8a6c9;
-    letter-spacing: 0.08em;
-    margin-bottom: 18px;
+    color: rgba(199, 139, 219, 0.45);
+    align-self: center;
+    line-height: 1;
+    padding-bottom: 8px;
   }
 
-  .overlay-card p {
-    font-size: 0.95rem;
-    color: #4a4056;
-    line-height: 1.75;
-    margin-bottom: 14px;
-  }
-
-  .overlay-card .hint-line {
-    font-family: 'Patrick Hand', cursive;
-    font-size: 0.95rem;
-    color: #c27b9e;
-    background: rgba(248, 164, 184, 0.1);
-    border-radius: 60px;
-    padding: 8px 16px;
-    display: inline-block;
-    margin-bottom: 20px;
-  }
-
-  .primary-btn {
+  /* ─── BOTTOM BACK BUTTON ─── */
+  .hud-back {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 13px 34px;
+    padding: 12px 34px;
+    border-radius: 60px;
+    border: none;
+    background: rgba(10, 7, 24, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f0d5ec;
+    font-weight: 600;
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+    transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    pointer-events: auto;
+  }
+
+  .hud-back:hover {
+    transform: translateX(-50%) translateY(-3px) scale(1.03);
+    border-color: rgba(199, 139, 219, 0.35);
+    background: rgba(20, 14, 44, 0.75);
+  }
+
+  .hud-back:active { transform: translateX(-50%) scale(0.95); }
+
+  /* ─── START OVERLAY ─── */
+  .start-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5, 4, 12, 0.78);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+    cursor: pointer;
+  }
+
+  .start-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .start-overlay .heart {
+    font-size: 3.6rem;
+    margin-bottom: 8px;
+    animation: pulse 1.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 30px rgba(248, 164, 184, 0.5));
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.12); }
+  }
+
+  .start-overlay .name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 9vw, 3.6rem);
+    font-weight: 700;
+    background: linear-gradient(135deg, #ffb3c9, #c78bdb, #ffd6a0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+
+  .start-overlay .sub {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.15rem;
+    color: #b9a8d8;
+    margin-top: 2px;
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+
+  .start-overlay .start-btn {
+    margin-top: 32px;
+    padding: 16px 44px;
     border-radius: 60px;
     border: none;
     background: linear-gradient(135deg, #f8a4b8, #c78bdb);
     color: #fff;
+    font-weight: 700;
+    font-size: 1.05rem;
     font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    font-size: 0.95rem;
     cursor: pointer;
-    box-shadow: 0 10px 30px rgba(199, 139, 219, 0.3);
-    transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    touch-action: manipulation;
+    box-shadow: 0 8px 40px rgba(199, 139, 219, 0.40);
+    transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
-  .primary-btn:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 16px 40px rgba(199, 139, 219, 0.36); }
-  .primary-btn:active { transform: scale(0.95); }
-
-  /* ─── LETTER ─── */
-  .letter-overlay { background: rgba(250, 242, 245, 0.9); }
-
-  .letter-card {
-    width: 100%;
-    max-width: 600px;
-    max-height: calc(100dvh - 40px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    background: linear-gradient(180deg, #fffdfb 0%, #fdf5f8 100%);
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    border-radius: 28px;
-    padding: 36px 30px 34px;
-    box-shadow: 0 30px 90px rgba(199, 139, 219, 0.2);
-    text-align: left;
-    transform: translateY(20px) scale(0.97);
-    transition: transform 0.6s cubic-bezier(0.34, 1.3, 0.64, 1);
+  .start-btn:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 16px 56px rgba(199, 139, 219, 0.60);
   }
 
-  .letter-overlay.show .letter-card { transform: translateY(0) scale(1); }
+  .start-btn:active { transform: scale(0.96); }
 
-  .letter-seal {
-    font-size: 2.4rem;
+  .start-overlay .hint {
+    margin-top: 18px;
+    font-size: 0.78rem;
+    color: #7a6f9a;
+    letter-spacing: 0.04em;
     text-align: center;
-    display: block;
-    margin-bottom: 10px;
-    animation: sealFloat 3.5s ease-in-out infinite;
+    max-width: 280px;
+    line-height: 1.5;
   }
 
-  @keyframes sealFloat {
-    0%, 100% { transform: translateY(0) rotate(-4deg); }
-    50% { transform: translateY(-8px) rotate(4deg); }
-  }
-
-  .letter-card h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.55rem;
-    text-align: center;
-    background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 4px;
-    line-height: 1.3;
-  }
-
-  .letter-card .letter-sub {
-    text-align: center;
-    font-family: 'Patrick Hand', cursive;
-    font-size: 0.98rem;
-    color: #b8a6c9;
-    letter-spacing: 0.06em;
-    margin-bottom: 22px;
-  }
-
-  .letter-divider {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(199, 139, 219, 0.3), transparent);
-    margin: 0 0 22px;
-  }
-
-  .letter-body {
-    font-family: 'Patrick Hand', cursive;
-    font-size: 1.06rem;
-    line-height: 1.9;
-    color: #3d344a;
-  }
-
-  .letter-body p { margin-bottom: 15px; }
-
-  .letter-body .greet {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: #c27b9e;
-    margin-bottom: 18px;
-  }
-
-  .letter-body .signoff {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: #c27b9e;
-    margin-top: 22px;
-    text-align: right;
-  }
-
-  .kw {
-    font-family: 'Inter', sans-serif;
-    font-weight: 700;
-    font-size: 0.86em;
-    letter-spacing: 0.03em;
-    background: linear-gradient(135deg, #f8a4b8, #c78bdb, #f5c6a0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    opacity: 0;
-    padding: 0 1px;
-    text-shadow: 0 0 22px rgba(199, 139, 219, 0.25);
-  }
-
-  .letter-overlay.show .kw { animation: kwIn 0.7s ease forwards; }
-
-  @keyframes kwIn {
-    from { opacity: 0; filter: blur(7px); transform: translateY(4px); }
-    to { opacity: 1; filter: blur(0); transform: translateY(0); }
-  }
-
-  .letter-close-row { text-align: center; margin-top: 26px; }
-
-  /* ─── TOAST ─── */
-  .toast {
+  /* ─── HIDDEN YOUTUBE PLAYER ─── */
+  #yt-holder {
     position: fixed;
-    left: 50%;
-    bottom: 26px;
-    bottom: calc(26px + env(safe-area-inset-bottom, 0px));
-    transform: translate(-50%, 20px);
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(199, 139, 219, 0.22);
-    color: #c27b9e;
-    font-family: 'Patrick Hand', cursive;
-    font-size: 1rem;
-    padding: 10px 24px;
-    border-radius: 60px;
-    box-shadow: 0 12px 34px rgba(199, 139, 219, 0.18);
+    left: -9999px;
+    top: -9999px;
+    width: 1px;
+    height: 1px;
     opacity: 0;
     pointer-events: none;
-    transition: 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
-    z-index: 950;
-    white-space: nowrap;
-    max-width: 90vw;
   }
 
-  .toast.show { opacity: 1; transform: translate(-50%, 0); }
-
-  /* ─── EFFECTS ─── */
+  /* ─── DOM SPARKLES / CONFETTI ─── */
   .sparkle-burst {
     position: fixed;
     pointer-events: none;
@@ -695,7 +244,7 @@
   }
 
   @keyframes burst {
-    0% { opacity: 1; transform: translate(0, 0) scale(0.2) rotate(0deg); }
+    0%   { opacity: 1; transform: translate(0, 0) scale(0.2) rotate(0deg); }
     100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.6) rotate(400deg); }
   }
 
@@ -710,681 +259,883 @@
   }
 
   @keyframes confettiFall {
-    0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
-    100% { opacity: 0; transform: translate(var(--tx), 110vh) rotate(720deg) scale(0.2); }
+    0%   { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(720deg) scale(0.2); }
   }
 
   /* ─── RESPONSIVE ─── */
   @media (max-width: 600px) {
-    body { padding: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
-    .placeholder { padding: 22px 14px 30px; border-radius: 24px; }
-    .header .name { font-size: 2.6rem; }
-    .header .sub { font-size: 0.9rem; }
-    .slot, .tile { width: 38px; height: 46px; font-size: 1.2rem; border-radius: 10px; }
-    .answer-row, .pool-row { gap: 6px; }
-    .answer-row { margin-bottom: 18px; }
-    .chip { width: 31px; height: 31px; font-size: 0.65rem; border-radius: 9px; }
-    .chip.done { font-size: 0.8rem; }
-    .play-card { padding: 18px 10px 16px; border-radius: 20px; }
-    .overlay-card { padding: 28px 20px 26px; }
-    .letter-card { padding: 28px 20px 26px; }
-    .letter-body { font-size: 1rem; }
-    .message-box { padding: 16px; }
-    .message-box .message-content { font-size: 0.95rem; }
-    .back-btn { padding: 11px 28px; font-size: 0.85rem; }
-    .mini-btn { font-size: 0.9rem; padding: 9px 16px; }
-    .letter-btn { padding: 12px 26px; font-size: 0.9rem; }
-    .type-hint { font-size: 0.85rem; }
+    .hud-timer { top: 12px; right: 12px; padding: 6px 10px; gap: 4px; }
+    .hud-timer .cell { min-width: 32px; }
+    .hud-timer .cell .num { font-size: 1rem; }
+    .hud-timer .cell .lbl { font-size: 0.38rem; }
+    .hud-back { bottom: 18px; padding: 10px 28px; font-size: 0.82rem; }
+    .start-overlay .heart { font-size: 3rem; }
+    .start-overlay .name { font-size: 2.4rem; }
+    .start-overlay .sub { font-size: 1rem; }
+    .start-btn { padding: 14px 34px; font-size: 0.95rem; }
   }
 
-  @media (max-width: 380px) {
-    .slot, .tile { width: 32px; height: 40px; font-size: 1rem; }
-    .answer-row, .pool-row { gap: 5px; }
-    .chip { width: 27px; height: 27px; font-size: 0.6rem; }
-  }
-
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-    border-radius: 10px;
+  @media (max-width: 400px) {
+    .hud-timer .cell { min-width: 28px; }
+    .hud-timer .cell .num { font-size: 0.88rem; }
+    .start-overlay .name { font-size: 2rem; }
   }
 </style>
 </head>
 <body>
 
-<div class="bg" aria-hidden="true"></div>
+<canvas id="scene" aria-hidden="true"></canvas>
 
-<!-- Hidden input: the mobile keyboard hooks into this -->
-<input
-  id="hiddenInput"
-  class="hidden-input"
-  type="text"
-  name="anagram-answer"
-  autocomplete="off"
-  autocorrect="off"
-  autocapitalize="characters"
-  spellcheck="false"
-  inputmode="text"
-  aria-label="Type the letters of the word"
-  tabindex="-1"
-/>
-
-<div class="placeholder" id="app">
-
-  <header class="header">
-    <div class="name">Ruth</div>
-    <div class="sub">twenty‑one · a celebration</div>
-    <div class="day-badge" id="dayBadge">
-      💕 day <strong>06</strong> · six days!
-    </div>
-  </header>
-
-  <div class="day-display">
-    <div class="big-day">06</div>
-    <div class="day-label">days to go ✦</div>
-  </div>
-
-  <!-- ─── GAME ─── -->
-  <div class="game-wrap">
-
-    <div class="progress-line">
-      <span id="progressText">0 / 21 words</span>
-      <span class="progress-bar"><i id="progressFill"></i></span>
-    </div>
-
-    <div class="chips" id="chips"></div>
-
-    <div class="play-card" id="playCard">
-      <div class="word-meta" id="wordMeta">word 01 of 21</div>
-
-      <div class="answer-row" id="answerRow" aria-label="Your answer"></div>
-      <div class="pool-row" id="poolRow" aria-label="Scrambled letters"></div>
-
-      <div class="type-hint" id="typeHint">✍️ tap here to type · or tap the letters</div>
-    </div>
-
-    <div class="game-actions">
-      <button class="mini-btn" id="hintBtn" type="button">👀 peek</button>
-      <button class="mini-btn" id="undoBtn" type="button">⌫ undo</button>
-      <button class="mini-btn" id="resetBtn" type="button">↺ start over</button>
-    </div>
-
-    <button class="letter-btn" id="letterBtn" type="button">💌 read the letter</button>
-
-  </div>
-
-  <!-- ─── DAY MESSAGE ─── -->
-  <div class="message-box">
-    <div class="message-content">
-      <span class="highlight-emoji">✨</span>
-      <strong>Six days!</strong><br />
-      My baby girl is turning a Whole 21!
-    </div>
-  </div>
-
-  <a href="index.html" class="back-btn">← back to home</a>
-
+<!-- ─── TOP RIGHT TIMER ─── -->
+<div class="hud-timer" id="hudTimer" role="timer" aria-label="Countdown">
+  <div class="cell"><span class="num" id="cdDays">00</span><span class="lbl">days</span></div>
+  <div class="sep">:</div>
+  <div class="cell"><span class="num" id="cdHours">00</span><span class="lbl">hrs</span></div>
+  <div class="sep">:</div>
+  <div class="cell"><span class="num" id="cdMinutes">00</span><span class="lbl">min</span></div>
+  <div class="sep">:</div>
+  <div class="cell"><span class="num" id="cdSeconds">00</span><span class="lbl">sec</span></div>
 </div>
 
-<!-- ─── INTRO OVERLAY ─── -->
-<div class="overlay show" id="introOverlay">
-  <div class="overlay-card">
-    <span class="ov-emoji">🔤</span>
-    <h2>21 words</h2>
-    <div class="ov-sub">day 06 · a little anagram for you</div>
-    <p>
-      Try to unscramble the words...
-    </p>
-    <p>
-      You are always at heart. 💗
-    </p>
-    <div class="hint-line">✦ letters only fall into place when they're the right ones ✦</div>
-    <div><button class="primary-btn" id="startBtn" type="button">start unscrambling</button></div>
-  </div>
+<!-- ─── BOTTOM BACK BUTTON ─── -->
+<a href="index.html" class="hud-back" id="backBtn">
+  ← back to home
+</a>
+
+<!-- ─── START OVERLAY ─── -->
+<div class="start-overlay" id="startOverlay">
+  <div class="heart">🎆</div>
+  <div class="name">Ruth</div>
+  <div class="sub">twenty‑one · a celebration</div>
+  <button class="start-btn" id="startBtn">▶ start fireworks show</button>
+  <div class="hint">Tap to begin your fireworks show<br /> ✨</div>
 </div>
 
-<!-- ─── LETTER OVERLAY ─── -->
-<div class="overlay letter-overlay" id="letterOverlay">
-  <div class="letter-card">
-    <span class="letter-seal">💌</span>
-    <h2>Only 06 Days to go!</h2>
-    <div class="letter-sub">21 words · 21 pieces of how I feel about you</div>
-    <div class="letter-divider"></div>
-
-    <div class="letter-body" id="letterBody">
-      <p class="greet">Hey Baby Girl,</p>
-
-      <p>We're now counting down to 6 days since someone decided they no longer wanted to be just a bunch of molecules.</p>
-
-      <p>Looking back at the past few months, I honestly can't begin to explain how <span class="kw">lucky</span> I feel to have you in my <span class="kw">life</span>.</p>
-
-      <p>You make my world have more <span class="kw">colour</span>. You make me <span class="kw">smile</span>, like, a lot. Every <span class="kw">moment</span> with you feels special, even the little ones that probably don't seem like much at the time.</p>
-
-      <p>And I'm genuinely <span class="kw">grateful</span> that somehow, out of everyone in this <span class="kw">world</span>, I found you.</p>
-
-      <p>But more than anything, I really value our <span class="kw">friendship</span>. I love how <span class="kw">natural</span> it feels to <span class="kw">talk</span> to you. Nothing ever feels forced. I can just be <span class="kw">myself</span> around you, talk about the most <span class="kw">random</span> things, <span class="kw">laugh</span> about stupid things, and somehow still feel like I could talk to you for <span class="kw">hours</span>.</p>
-
-      <p>I don't think I tell you enough how much that means to me.</p>
-
-      <p>You've become such a <span class="kw">beautiful</span> <span class="kw">part</span> of my life, and I'm really <span class="kw">happy</span> that I get to know you, grow with you, annoy you, make you laugh, and hopefully make your life a little more <span class="kw">colourful</span> too.</p>
-
-      <p>So, 6 days until your birthday, Baby Girl — and I can't wait to celebrate <span class="kw">together</span>.</p>
-
-      <p>And somehow, I'm still trying to find the right words to explain just how <span class="kw">special</span> you are to me.</p>
-
-      <p class="signoff">I <span class="kw">love</span> you ❤️</p>
-    </div>
-
-    <div class="letter-close-row">
-      <button class="primary-btn" id="closeLetter" type="button">back to the anagram</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
+<!-- ─── HIDDEN YOUTUBE PLAYER ─── -->
+<div id="yt-holder"><div id="yt-player"></div></div>
 
 <script>
 (function () {
   'use strict';
 
-  /* ══════════════════════════════════════════
-     WORDS  (answer · scrambled)
-     ══════════════════════════════════════════ */
-  const WORDS = [
-    { a: 'LUCKY',      s: 'KYLUC'      },
-    { a: 'LIFE',       s: 'EFIL'       },
-    { a: 'COLOUR',     s: 'OULROC'     },
-    { a: 'SMILE',      s: 'EILMS'      },
-    { a: 'SPECIAL',    s: 'CPEISAL'    },
-    { a: 'GRATEFUL',   s: 'TFLAERGU'   },
-    { a: 'FRIENDSHIP', s: 'PISFRENHDI' },
-    { a: 'NATURAL',    s: 'TRANULA'    },
-    { a: 'TALK',       s: 'LKTA'       },
-    { a: 'HOURS',      s: 'RUSHO'      },
-    { a: 'BEAUTIFUL',  s: 'TIFULBEAU'  },
-    { a: 'PART',       s: 'RTPA'       },
-    { a: 'WORLD',      s: 'RLDWO'      },
-    { a: 'MOMENT',     s: 'NTOEMM'     },
-    { a: 'HAPPY',      s: 'YAPHP'      },
-    { a: 'LAUGH',      s: 'HGUAL'      },
-    { a: 'RANDOM',     s: 'ODMARN'     },
-    { a: 'MYSELF',     s: 'LFYSEM'     },
-    { a: 'TOGETHER',   s: 'GETHERTO'   },
-    { a: 'COLOURFUL',  s: 'LOUFRCOUL'  },
-    { a: 'LOVE',       s: 'VELO'       }
+  /* ═══════════════════════════════════════════════════════════════
+     🎆  WORD FIREWORKS — add as many words / short sentences as you like
+     ═══════════════════════════════════════════════════════════════ */
+  const FIREWORK_WORDS = [
+    'Ruth',
+    'Happy 21st',
+    'My Love',
+    'My Baby Girl!',
+    'You are magic',
+    'A Beautiful soul',
+    'My everything',
+    'I adore you',
+    'Shine bright',
+    'You are Loved!',
+    'Happy Birthday',
+    'The Worlds is Yours',
+    'My star',
+    'Sweetheart',
+    'Sunshine',
+    'Always & Always',
+    'Till Infinity',
+    'My heart',
+    'Twenty One',
+    'My World'
   ];
 
-  const STORE_KEY = 'ruth21_day6_anagram_v1';
-  const TOTAL = WORDS.length;
+  const WORD_EVERY_MIN = 8.5;
+  const WORD_EVERY_MAX = 11.5;
+  const NORMAL_EVERY_MIN = 0.85;
+  const NORMAL_EVERY_MAX = 1.6;
+  /* ═══════════════════════════════════════════════════════════════ */
 
-  /* ══════════════════════════════════════════
-     DOM
-     ══════════════════════════════════════════ */
-  const hiddenInput = document.getElementById('hiddenInput');
-  const answerRow   = document.getElementById('answerRow');
-  const poolRow     = document.getElementById('poolRow');
-  const chipsEl     = document.getElementById('chips');
-  const wordMeta    = document.getElementById('wordMeta');
-  const progressText= document.getElementById('progressText');
-  const progressFill= document.getElementById('progressFill');
-  const hintBtn     = document.getElementById('hintBtn');
-  const undoBtn     = document.getElementById('undoBtn');
-  const resetBtn    = document.getElementById('resetBtn');
-  const letterBtn   = document.getElementById('letterBtn');
-  const toastEl     = document.getElementById('toast');
-  const introOverlay= document.getElementById('introOverlay');
-  const letterOverlay = document.getElementById('letterOverlay');
-  const startBtn    = document.getElementById('startBtn');
-  const closeLetter = document.getElementById('closeLetter');
-  const playCard    = document.getElementById('playCard');
-  const typeHint    = document.getElementById('typeHint');
 
-  /* ══════════════════════════════════════════
-     STATE
-     ══════════════════════════════════════════ */
-  let state = {};       // { wordIndex: [scrambleIndices placed in order] }
-  let current = 0;
-  let busyAdvancing = false;
+  /* ───────────────────────── CANVAS SETUP ───────────────────────── */
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d');
 
-  /* ── storage ── */
-  function validatePlaced(i, arr) {
-    const w = WORDS[i];
-    if (!Array.isArray(arr)) return [];
-    const used = new Set();
-    const out = [];
-    for (let k = 0; k < arr.length; k++) {
-      const n = arr[k];
-      if (!Number.isInteger(n) || n < 0 || n >= w.s.length) break;
-      if (used.has(n)) break;
-      if (w.s[n] !== w.a[out.length]) break;
-      used.add(n);
-      out.push(n);
-    }
-    return out;
+  let W = 0, H = 0, DPR = 1;
+  let time = 0;
+
+  const bgCanvas = document.createElement('canvas');
+
+  let stars = [];
+  let cityTwinkles = [];
+  let moon = { x: 0, y: 0, r: 30 };
+  let shootingStars = [];
+
+  const rand = (a, b) => a + Math.random() * (b - a);
+
+  const MOON_CRATERS = [
+    { dx: -0.30, dy: -0.22, r: 0.18 },
+    { dx:  0.22, dy: -0.36, r: 0.12 },
+    { dx:  0.34, dy:  0.18, r: 0.16 },
+    { dx: -0.12, dy:  0.40, r: 0.13 },
+    { dx: -0.46, dy:  0.16, r: 0.09 },
+    { dx:  0.06, dy: -0.02, r: 0.07 }
+  ];
+
+  /* ───────────────────────── WORD → POINTS ───────────────────────── */
+  const wordCache = new Map();
+
+  function getWordPoints(text) {
+    if (wordCache.has(text)) return wordCache.get(text);
+
+    const maxW = Math.min(W * 0.78, 880);
+    const maxH = Math.min(H * 0.22, 230);
+    const fontStr = s => `700 ${s}px "Playfair Display", Georgia, serif`;
+
+    const probe = document.createElement('canvas').getContext('2d');
+    probe.font = fontStr(150);
+    const w0 = probe.measureText(text).width;
+
+    let size = 150;
+    if (w0 > maxW) size = 150 * maxW / w0;
+    if (size * 1.25 > maxH) size = maxH / 1.25;
+    size = Math.max(20, Math.floor(size));
+
+    probe.font = fontStr(size);
+    const tw = Math.ceil(probe.measureText(text).width);
+    const pad = Math.ceil(size * 0.35);
+
+    const off = document.createElement('canvas');
+    off.width = tw + pad * 2;
+    off.height = Math.ceil(size * 1.45) + pad * 2;
+
+    const o = off.getContext('2d');
+    o.font = fontStr(size);
+    o.textAlign = 'center';
+    o.textBaseline = 'middle';
+    o.fillStyle = '#fff';
+    o.fillText(text, off.width / 2, off.height / 2);
+
+    const data = o.getImageData(0, 0, off.width, off.height).data;
+
+    const sample = (gap) => {
+      const out = [];
+      for (let y = 0; y < off.height; y += gap) {
+        for (let x = 0; x < off.width; x += gap) {
+          if (data[(y * off.width + x) * 4 + 3] > 128) {
+            out.push({ x: x - off.width / 2, y: y - off.height / 2 });
+          }
+        }
+      }
+      return out;
+    };
+
+    let gap = Math.max(3, Math.round(size / 20));
+    let pts = sample(gap);
+    while (pts.length > 560 && gap < 26) { gap++; pts = sample(gap); }
+
+    const result = { points: pts, halfW: off.width / 2, halfH: off.height / 2 };
+    wordCache.set(text, result);
+    return result;
   }
 
-  function load() {
-    state = {};
-    try {
-      const raw = localStorage.getItem(STORE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== 'object') return;
-      Object.keys(parsed).forEach(function (key) {
-        const i = parseInt(key, 10);
-        if (!(i >= 0 && i < TOTAL)) return;
-        const clean = validatePlaced(i, parsed[key]);
-        if (clean.length) state[i] = clean;
+  /* ───────────────────────── BACKGROUND ───────────────────────── */
+  function buildBackground() {
+    bgCanvas.width = Math.max(1, Math.floor(W * DPR));
+    bgCanvas.height = Math.max(1, Math.floor(H * DPR));
+    const b = bgCanvas.getContext('2d');
+    b.setTransform(DPR, 0, 0, DPR, 0, 0);
+    b.clearRect(0, 0, W, H);
+
+    const sky = b.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0.00, '#04030c');
+    sky.addColorStop(0.25, '#0b0820');
+    sky.addColorStop(0.50, '#181030');
+    sky.addColorStop(0.72, '#281a45');
+    sky.addColorStop(0.88, '#3a2350');
+    sky.addColorStop(1.00, '#4b2d53');
+    b.fillStyle = sky;
+    b.fillRect(0, 0, W, H);
+
+    const hg = b.createRadialGradient(
+      W * 0.5, H * 0.92, 0,
+      W * 0.5, H * 0.92, Math.max(W, H) * 0.65
+    );
+    hg.addColorStop(0.00, 'rgba(255, 186, 138, 0.20)');
+    hg.addColorStop(0.35, 'rgba(206, 132, 186, 0.09)');
+    hg.addColorStop(1.00, 'rgba(120, 80, 160, 0)');
+    b.fillStyle = hg;
+    b.fillRect(0, 0, W, H);
+
+    drawMoon(b);
+
+    const p1 = [rand(0, 6.3), rand(0, 6.3), rand(0, 6.3)];
+    const p2 = [rand(0, 6.3), rand(0, 6.3), rand(0, 6.3)];
+    const p3 = [rand(0, 6.3), rand(0, 6.3), rand(0, 6.3)];
+
+    fillRidge(b, makeRidge(H * 0.735, H * 0.135, p1), '#1c1639');
+    fillRidge(b, makeRidge(H * 0.830, H * 0.100, p2), '#120d2a');
+    fillRidge(b, makeRidge(H * 0.915, H * 0.070, p3), '#090618');
+
+    buildCity(b);
+  }
+
+  function makeRidge(baseY, amp, ph) {
+    const pts = [];
+    const step = Math.max(8, W / 90);
+    for (let x = -step; x <= W + step; x += step) {
+      const t = x / W;
+      const n =
+        0.55 * Math.sin(t * 4.2 + ph[0]) +
+        0.28 * Math.sin(t * 9.7 + ph[1]) +
+        0.17 * Math.sin(t * 21.3 + ph[2]);
+      pts.push({ x, y: baseY - amp * (0.5 + 0.5 * n) });
+    }
+    return pts;
+  }
+
+  function fillRidge(b, pts, color) {
+    b.beginPath();
+    b.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) b.lineTo(pts[i].x, pts[i].y);
+    b.lineTo(W + 40, H + 40);
+    b.lineTo(-40, H + 40);
+    b.closePath();
+    b.fillStyle = color;
+    b.fill();
+  }
+
+  function buildCity(b) {
+    cityTwinkles = [];
+    let x = -20;
+    const baseY = H + 10;
+
+    while (x < W + 20) {
+      const w = rand(W * 0.024, W * 0.068);
+      const h = rand(H * 0.045, H * 0.135);
+      const topY = H * 0.995 - h;
+
+      b.fillStyle = '#06040e';
+      b.fillRect(x, topY, w, baseY - topY);
+
+      const cols = Math.max(1, Math.floor(w / 7));
+      const rows = Math.max(1, Math.floor(h / 9));
+
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+          if (Math.random() > 0.74) {
+            const warm = Math.random() > 0.45;
+            b.fillStyle = warm
+              ? 'rgba(255, 214, 150, 0.78)'
+              : 'rgba(255, 244, 208, 0.55)';
+            b.fillRect(x + 3 + c * 7, topY + 4 + r * 9, 2.2, 3);
+
+            if (Math.random() > 0.86) {
+              cityTwinkles.push({
+                x: x + 3 + c * 7,
+                y: topY + 4 + r * 9,
+                a: rand(0.4, 1),
+                sp: rand(0.6, 2.4),
+                ph: rand(0, 6.3)
+              });
+            }
+          }
+        }
+      }
+      x += w + rand(2, 9);
+    }
+  }
+
+  function drawMoon(b) {
+    const { x, y, r } = moon;
+
+    const g = b.createRadialGradient(x, y, r * 0.7, x, y, r * 8);
+    g.addColorStop(0.00, 'rgba(255, 248, 225, 0.20)');
+    g.addColorStop(0.22, 'rgba(220, 205, 255, 0.09)');
+    g.addColorStop(0.55, 'rgba(170, 150, 255, 0.035)');
+    g.addColorStop(1.00, 'rgba(120, 100, 200, 0)');
+    b.fillStyle = g;
+    b.beginPath(); b.arc(x, y, r * 8, 0, Math.PI * 2); b.fill();
+
+    const mg = b.createRadialGradient(
+      x - r * 0.35, y - r * 0.35, r * 0.05,
+      x, y, r * 1.05
+    );
+    mg.addColorStop(0.00, '#fffdf6');
+    mg.addColorStop(0.55, '#f7eedb');
+    mg.addColorStop(1.00, '#dccfb6');
+    b.fillStyle = mg;
+    b.beginPath(); b.arc(x, y, r, 0, Math.PI * 2); b.fill();
+
+    b.save();
+    b.beginPath(); b.arc(x, y, r, 0, Math.PI * 2); b.clip();
+    b.fillStyle = 'rgba(203, 188, 163, 0.32)';
+    for (const c of MOON_CRATERS) {
+      b.beginPath();
+      b.arc(x + c.dx * r, y + c.dy * r, c.r * r, 0, Math.PI * 2);
+      b.fill();
+    }
+    b.restore();
+  }
+
+  /* ───────────────────────── STARS ───────────────────────── */
+  function buildStars() {
+    stars = [];
+    const count = Math.min(280, Math.floor((W * H) / 6200));
+    for (let i = 0; i < count; i++) {
+      const x = Math.random() * W;
+      const y = Math.random() * H * 0.80;
+      const dx = x - moon.x, dy = y - moon.y;
+      if (Math.sqrt(dx * dx + dy * dy) < moon.r * 3.4) continue;
+
+      const big = Math.random() > 0.86;
+      stars.push({
+        x, y,
+        r: big ? rand(1.05, 1.9) : rand(0.4, 1.0),
+        a: rand(0.25, 0.95),
+        sp: rand(0.4, 2.4),
+        ph: Math.random() * Math.PI * 2,
+        tint: Math.random() < 0.18 ? 'rgba(190,215,255,' : 'rgba(255,255,255,'
       });
-    } catch (e) { state = {}; }
+    }
   }
 
-  function save() {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+  function drawStars() {
+    for (let i = 0; i < stars.length; i++) {
+      const s = stars[i];
+      const a = s.a * (0.55 + 0.45 * Math.sin(time * s.sp + s.ph));
+      if (a <= 0.02) continue;
+
+      if (s.r > 1.05) {
+        ctx.globalAlpha = a * 0.22;
+        ctx.fillStyle = s.tint + '1)';
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 3.2, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = a;
+      ctx.fillStyle = s.tint + '1)';
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
   }
 
-  /* ── helpers ── */
-  function placedOf(i) { return state[i] || []; }
-  function isSolved(i) { return placedOf(i).length === WORDS[i].a.length; }
-  function solvedCount() {
-    let c = 0;
-    for (let i = 0; i < TOTAL; i++) if (isSolved(i)) c++;
-    return c;
+  function drawCityTwinkles() {
+    for (let i = 0; i < cityTwinkles.length; i++) {
+      const c = cityTwinkles[i];
+      const a = c.a * (0.5 + 0.5 * Math.sin(time * c.sp + c.ph));
+      ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgba(255, 226, 168, 1)';
+      ctx.fillRect(c.x, c.y, 2.2, 3);
+    }
+    ctx.globalAlpha = 1;
   }
 
-  /* ══════════════════════════════════════════
-     RENDER
-     ══════════════════════════════════════════ */
-  function renderChips() {
-    chipsEl.innerHTML = '';
-    for (let i = 0; i < TOTAL; i++) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'chip';
-      if (i === current) btn.classList.add('active');
-      if (isSolved(i)) {
-        btn.classList.add('done');
-        btn.textContent = '✓';
-        btn.setAttribute('aria-label', 'word ' + (i + 1) + ' solved');
+  /* ───────────────────────── SHOOTING STARS ───────────────────────── */
+  let shootTimer = rand(4, 10);
+
+  function updateShootingStars(dt) {
+    shootTimer -= dt;
+    if (shootTimer <= 0) {
+      shootTimer = rand(9, 20);
+      const dir = Math.random() < 0.5 ? 1 : -1;
+      const ang = rand(0.22, 0.55);
+      const spd = rand(620, 1150);
+      shootingStars.push({
+        x: dir === 1 ? rand(-W * 0.1, W * 0.7) : rand(W * 0.3, W * 1.1),
+        y: rand(H * 0.04, H * 0.35),
+        vx: dir * Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        life: rand(0.55, 0.95),
+        max: 0.95
+      });
+    }
+
+    for (let i = shootingStars.length - 1; i >= 0; i--) {
+      const s = shootingStars[i];
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      s.life -= dt;
+      if (s.life <= 0) shootingStars.splice(i, 1);
+    }
+  }
+
+  function drawShootingStars() {
+    ctx.globalCompositeOperation = 'lighter';
+    for (const s of shootingStars) {
+      const a = Math.max(0, s.life / s.max);
+      const tailX = s.x - s.vx * 0.13;
+      const tailY = s.y - s.vy * 0.13;
+
+      const g = ctx.createLinearGradient(s.x, s.y, tailX, tailY);
+      g.addColorStop(0, `rgba(255,255,255,${a * 0.95})`);
+      g.addColorStop(0.4, `rgba(200,215,255,${a * 0.35})`);
+      g.addColorStop(1, 'rgba(180,200,255,0)');
+
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(tailX, tailY);
+      ctx.stroke();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /* ───────────────────────── FIREWORKS ENGINE ───────────────────────── */
+  const rockets = [];
+  const particles = [];
+  const flashes = [];
+  const MAX_PARTICLES = 2600;
+
+  const PALETTES = [
+    ['#ff8fb1', '#ffc2d6', '#ff5c8a', '#ffb3c9'],
+    ['#c78bdb', '#e3b6f5', '#a45fd6', '#d9a3f0'],
+    ['#ffd6a0', '#ffe9c4', '#ffb347', '#ffcf8a'],
+    ['#9fd8ff', '#c9ecff', '#6fc4ff', '#b8e6ff'],
+    ['#ffffff', '#ffd9e8', '#ffe8b8', '#e6d4ff']
+  ];
+
+  let wordIndex = 0;
+  let nextWordIn = 1.8;
+  let nextNormalIn = 0.6;
+
+  function launchRocket(isWord) {
+    if (particles.length > MAX_PARTICLES) return;
+
+    const x = rand(W * 0.12, W * 0.88);
+    const targetY = isWord ? rand(H * 0.16, H * 0.30) : rand(H * 0.09, H * 0.40);
+    const y0 = H + 12;
+    const g = 620;
+    const vy = -Math.sqrt(2 * g * Math.max(40, y0 - targetY));
+
+    rockets.push({
+      x, y: y0, px: x, py: y0,
+      vx: rand(-28, 28),
+      vy, g,
+      isWord,
+      word: isWord ? FIREWORK_WORDS[wordIndex++ % FIREWORK_WORDS.length] : null,
+      color: pickColor()
+    });
+  }
+
+  function pickColor() {
+    const p = PALETTES[(Math.random() * PALETTES.length) | 0];
+    return p[(Math.random() * p.length) | 0];
+  }
+
+  function updateRockets(dt) {
+    for (let i = rockets.length - 1; i >= 0; i--) {
+      const r = rockets[i];
+      r.px = r.x; r.py = r.y;
+      r.vy += r.g * dt;
+      r.x += r.vx * dt;
+      r.y += r.vy * dt;
+
+      if (r.vy >= -50) {
+        if (r.isWord) explodeWord(r.x, r.y, r.word);
+        else explodeNormal(r.x, r.y);
+        rockets.splice(i, 1);
+      }
+    }
+  }
+
+  function explodeNormal(x, y) {
+    const palette = PALETTES[(Math.random() * PALETTES.length) | 0];
+    const count = 70 + ((Math.random() * 55) | 0);
+    const speed = rand(130, 280);
+
+    flashes.push({ x, y, r: 4, max: 90, life: 1 });
+
+    for (let i = 0; i < count; i++) {
+      const ang = (i / count) * Math.PI * 2 + rand(-0.06, 0.06);
+      const spd = speed * rand(0.5, 1.15);
+      const col = palette[(Math.random() * palette.length) | 0];
+
+      particles.push({
+        x, y, px: x, py: y,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        tx: 0, ty: 0,
+        color: col,
+        size: rand(1.2, 2.5),
+        alpha: 1,
+        age: 0,
+        hold: rand(0.30, 0.75),
+        decay: rand(0.75, 1.25),
+        mode: 'normal',
+        seed: Math.random() * 6.28
+      });
+    }
+  }
+
+  function explodeWord(cx, cy, word) {
+    const { points, halfW, halfH } = getWordPoints(word);
+    if (!points.length) return;
+
+    const marginX = 14, marginTop = 12;
+    const horizon = H * 0.62;
+
+    cx = Math.min(Math.max(cx, halfW + marginX), Math.max(halfW + marginX, W - halfW - marginX));
+    cy = Math.min(Math.max(cy, halfH + marginTop), Math.max(halfH + marginTop, horizon - halfH));
+
+    const palette = PALETTES[(Math.random() * PALETTES.length) | 0];
+    const n = points.length;
+
+    flashes.push({ x: cx, y: cy, r: 6, max: Math.min(halfW, halfH) * 1.4, life: 1 });
+
+    for (let i = 0; i < n; i++) {
+      const p = points[i];
+      const ang = Math.random() * Math.PI * 2;
+      const spd = rand(40, 165);
+
+      const t = (p.x + halfW) / (halfW * 2);
+      const col = palette[Math.min(palette.length - 1, (t * palette.length) | 0)];
+
+      particles.push({
+        x: cx, y: cy, px: cx, py: cy,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        tx: cx + p.x,
+        ty: cy + p.y,
+        color: col,
+        size: rand(1.1, 2.2),
+        alpha: 1,
+        age: 0,
+        hold: rand(1.7, 2.4),
+        decay: rand(0.38, 0.62),
+        mode: 'word',
+        seed: Math.random() * 6.28
+      });
+    }
+  }
+
+  function updateParticles(dt) {
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.px = p.x;
+      p.py = p.y;
+      p.age += dt;
+
+      if (p.mode === 'word') {
+        if (p.age < p.hold) {
+          const ease = 1 - Math.pow(0.0004, dt);
+          p.x += (p.tx - p.x) * ease + p.vx * dt;
+          p.y += (p.ty - p.y) * ease + p.vy * dt;
+          const vd = Math.pow(0.0002, dt);
+          p.vx *= vd;
+          p.vy *= vd;
+        } else {
+          p.vy += 95 * dt;
+          const d = Math.pow(0.35, dt);
+          p.vx *= d;
+          p.vy *= d;
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.alpha -= p.decay * dt;
+        }
       } else {
-        btn.textContent = String(i + 1).padStart(2, '0');
-        btn.setAttribute('aria-label', 'go to word ' + (i + 1));
+        const d = Math.pow(0.28, dt);
+        p.vx *= d;
+        p.vy *= d;
+        p.vy += 135 * dt;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+
+        if (p.age > p.hold) p.alpha -= p.decay * dt;
       }
-      btn.addEventListener('click', (function (idx) {
-        return function () {
-          switchWord(idx);
-        };
-      })(i));
-      chipsEl.appendChild(btn);
+
+      if (p.alpha <= 0) particles.splice(i, 1);
+    }
+
+    for (let i = flashes.length - 1; i >= 0; i--) {
+      const f = flashes[i];
+      f.life -= dt * 3.2;
+      f.r += (f.max - f.r) * Math.min(1, dt * 9);
+      if (f.life <= 0) flashes.splice(i, 1);
     }
   }
 
-  function renderProgress() {
-    const c = solvedCount();
-    progressText.textContent = c + ' / ' + TOTAL + ' words';
-    progressFill.style.width = (c / TOTAL * 100) + '%';
-    letterBtn.classList.toggle('show', c === TOTAL);
+  function drawFlashes() {
+    ctx.globalCompositeOperation = 'lighter';
+    for (const f of flashes) {
+      const a = Math.max(0, f.life);
+      const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r);
+      g.addColorStop(0, `rgba(255,245,225,${a * 0.35})`);
+      g.addColorStop(0.5, `rgba(255,210,235,${a * 0.12})`);
+      g.addColorStop(1, 'rgba(200,170,255,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
   }
 
-  function renderBoard() {
-    const w = WORDS[current];
-    const placed = placedOf(current);
-    const usedSet = new Set(placed);
+  function drawRockets() {
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.lineCap = 'round';
+    for (const r of rockets) {
+      ctx.globalAlpha = 0.9;
+      ctx.strokeStyle = r.color;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(r.px, r.py);
+      ctx.lineTo(r.x, r.y);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
 
-    /* answer slots */
-    answerRow.innerHTML = '';
-    for (let i = 0; i < w.a.length; i++) {
-      const slot = document.createElement('div');
-      slot.className = 'slot';
-      slot.dataset.slot = i;
-      if (i < placed.length) {
-        slot.classList.add('filled');
-        slot.textContent = w.a[i];
+  function drawFireworks() {
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.lineCap = 'round';
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      let a = p.alpha;
+
+      if (p.mode === 'word' && p.age < p.hold) {
+        a *= 0.82 + 0.18 * Math.sin(time * 9 + p.seed);
       }
-      answerRow.appendChild(slot);
-    }
+      if (a <= 0.015) continue;
 
-    /* scrambled pool */
-    poolRow.innerHTML = '';
-    for (let i = 0; i < w.s.length; i++) {
-      if (usedSet.has(i)) continue;
-      const t = document.createElement('button');
-      t.type = 'button';
-      t.className = 'tile';
-      t.dataset.index = i;
-      t.textContent = w.s[i];
-      t.addEventListener('click', function () { onTileClick(t); });
-      poolRow.appendChild(t);
-    }
+      ctx.globalAlpha = a;
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = p.size;
+      ctx.beginPath();
+      ctx.moveTo(p.px, p.py);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
 
-    wordMeta.textContent =
-      'word ' + String(current + 1).padStart(2, '0') + ' of ' + TOTAL +
-      ' · ' + w.a.length + ' letters';
-  }
-
-  function renderAll() {
-    renderChips();
-    renderBoard();
-    renderProgress();
-  }
-
-  /* ══════════════════════════════════════════
-     INPUT BUFFER (mobile keyboard bridge)
-     ══════════════════════════════════════════ */
-  const SENTINEL = ' ';
-
-  function resetInputBuffer() {
-    hiddenInput.value = SENTINEL;
-    try {
-      hiddenInput.setSelectionRange(SENTINEL.length, SENTINEL.length);
-    } catch (e) {}
-  }
-
-  function focusTyping() {
-    if (introOverlay.classList.contains('show')) return;
-    if (letterOverlay.classList.contains('show')) return;
-    try { hiddenInput.focus({ preventScroll: true }); } catch (e) { hiddenInput.focus(); }
-    resetInputBuffer();
-  }
-
-  hiddenInput.addEventListener('focus', resetInputBuffer);
-  hiddenInput.addEventListener('click', resetInputBuffer);
-  hiddenInput.addEventListener('select', resetInputBuffer);
-
-  hiddenInput.addEventListener('input', function () {
-    const val = hiddenInput.value;
-
-    if (val.length > SENTINEL.length && val.indexOf(SENTINEL) === 0) {
-      /* added characters */
-      const added = val.slice(SENTINEL.length);
-      for (let i = 0; i < added.length; i++) processChar(added[i]);
-    } else if (val.length < SENTINEL.length && SENTINEL.indexOf(val) === 0) {
-      /* sentinel was deleted → backspace */
-      undo();
-    } else if (val !== SENTINEL) {
-      /* fallback: replacement / paste / swipe */
-      for (let i = 0; i < val.length; i++) {
-        if (val[i] !== ' ') processChar(val[i]);
+      if (p.mode === 'word' && p.age < p.hold) {
+        ctx.globalAlpha = a * 0.55;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * 0.7, 0, Math.PI * 2);
+        ctx.fill();
       }
     }
 
-    resetInputBuffer();
-  });
-
-  /* ══════════════════════════════════════════
-     PLACING LETTERS
-     ══════════════════════════════════════════ */
-  function processChar(ch) {
-    if (!/[a-zA-Z]/.test(ch)) return;
-
-    const L = ch.toUpperCase();
-    const w = WORDS[current];
-    const placed = placedOf(current);
-
-    if (placed.length >= w.a.length) return;
-    if (w.a[placed.length] !== L) { wrong(); return; }
-
-    const tiles = Array.prototype.slice.call(poolRow.querySelectorAll('.tile'));
-    const tile = tiles.find(function (t) { return t.textContent === L; });
-
-    if (tile) place(tile, L);
-    else wrong();
-
-    typeHint.classList.add('hide');
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
   }
 
-  function onTileClick(tile) {
-    const w = WORDS[current];
-    const placed = placedOf(current);
-    if (placed.length >= w.a.length) return;
-    if (tile.textContent !== w.a[placed.length]) { wrong(); return; }
-    place(tile, tile.textContent);
-    typeHint.classList.add('hide');
+  /* ───────────────────────── RESIZE ───────────────────────── */
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    moon = {
+      x: W * 0.80,
+      y: H * 0.14,
+      r: Math.max(24, Math.min(W, H) * 0.055)
+    };
+
+    wordCache.clear();
+    particles.length = 0;
+    rockets.length = 0;
+
+    buildBackground();
+    buildStars();
   }
 
-  function place(tileEl, letter) {
-    const w = WORDS[current];
-    const placed = placedOf(current);
-    const slotIndex = placed.length;
-    const slotEl = answerRow.querySelector('[data-slot="' + slotIndex + '"]');
-    if (!slotEl || !tileEl) return;
+  /* ───────────────────────── MAIN LOOP ───────────────────────── */
+  let last = performance.now();
 
-    const tileIdx = parseInt(tileEl.dataset.index, 10);
+  function frame(now) {
+    const dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
+    time += dt;
 
-    const tr = tileEl.getBoundingClientRect();
-    const sr = slotEl.getBoundingClientRect();
-    const cs = window.getComputedStyle(tileEl);
+    nextNormalIn -= dt;
+    if (nextNormalIn <= 0) {
+      launchRocket(false);
+      nextNormalIn = rand(NORMAL_EVERY_MIN, NORMAL_EVERY_MAX);
+    }
 
-    /* build the flying ghost */
-    const ghost = document.createElement('div');
-    ghost.className = 'flying-tile';
-    ghost.textContent = letter;
-    ghost.style.left = tr.left + 'px';
-    ghost.style.top = tr.top + 'px';
-    ghost.style.width = tr.width + 'px';
-    ghost.style.height = tr.height + 'px';
-    ghost.style.fontSize = cs.fontSize;
-    ghost.style.borderRadius = cs.borderRadius;
-    document.body.appendChild(ghost);
+    nextWordIn -= dt;
+    if (nextWordIn <= 0) {
+      launchRocket(true);
+      nextWordIn = rand(WORD_EVERY_MIN, WORD_EVERY_MAX);
+    }
 
-    /* the pool closes up immediately */
-    tileEl.remove();
+    updateShootingStars(dt);
+    updateRockets(dt);
+    updateParticles(dt);
 
-    /* update + persist state right away */
-    placed.push(tileIdx);
-    state[current] = placed;
-    save();
+    ctx.clearRect(0, 0, W, H);
+    ctx.drawImage(bgCanvas, 0, 0, W, H);
+    drawStars();
+    drawCityTwinkles();
+    drawShootingStars();
+    drawFlashes();
+    drawRockets();
+    drawFireworks();
 
-    /* fly */
-    requestAnimationFrame(function () {
-      ghost.style.transform =
-        'translate(' + (sr.left - tr.left) + 'px,' + (sr.top - tr.top) + 'px)';
-      ghost.style.opacity = '0.9';
+    requestAnimationFrame(frame);
+  }
+
+  /* ───────────────────────── BOOT ───────────────────────── */
+  resize();
+  window.addEventListener('resize', resize);
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => wordCache.clear());
+  }
+
+  requestAnimationFrame(frame);
+
+
+  /* ═══════════════════════════════════════════════════════════════
+     COUNTDOWN
+     ═══════════════════════════════════════════════════════════════ */
+  const BIRTHDAY = new Date(2026, 8, 18, 0, 0, 0).getTime();
+  window._targetTime = BIRTHDAY;
+
+  const cdDays = document.getElementById('cdDays');
+  const cdHours = document.getElementById('cdHours');
+  const cdMinutes = document.getElementById('cdMinutes');
+  const cdSeconds = document.getElementById('cdSeconds');
+
+  function updateCountdown() {
+    const now = Date.now();
+    const diff = Math.max(0, BIRTHDAY - now);
+
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+
+    cdDays.textContent = String(d).padStart(2, '0');
+    cdHours.textContent = String(h).padStart(2, '0');
+    cdMinutes.textContent = String(m).padStart(2, '0');
+    cdSeconds.textContent = String(s).padStart(2, '0');
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+
+    /* ═══════════════════════════════════════════════════════════════
+    YOUTUBE AUDIO + START OVERLAY  (FIXED)
+    ═══════════════════════════════════════════════════════════════ */
+    const YT_VIDEO_ID = 'nzE8eUlseRM';
+
+    let ytPlayer = null;
+    let ytReady = false;
+    let audioStarted = false;
+
+    const overlay = document.getElementById('startOverlay');
+    const startBtn = document.getElementById('startBtn');
+
+    /* Load the YouTube IFrame API */
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+
+    /* Global callback required by the YouTube API */
+    window.onYouTubeIframeAPIReady = function () {
+    ytPlayer = new YT.Player('yt-player', {
+        width: '1',
+        height: '1',
+        videoId: YT_VIDEO_ID,
+        playerVars: {
+        autoplay: 0,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        modestbranding: 1,
+        playsinline: 1,
+        rel: 0,
+        origin: window.location.origin      // ← ADD THIS
+        },
+        events: {
+        onReady: function (event) {
+            ytReady = true;
+            event.target.setVolume(60);       // sets default level on desktop
+            // Do NOT unmute here — wait for the user gesture
+        },
+        onStateChange: function (event) {
+            // If the video ends, loop it back to the start
+            if (event.data === YT.PlayerState.ENDED) {
+            event.target.seekTo(0);
+            event.target.playVideo();
+            }
+        }
+        }
+    });
+    };
+
+    function startShow() {
+    if (audioStarted) return;
+
+    // ── Play + unmute ──
+    if (ytPlayer && ytReady && typeof ytPlayer.playVideo === 'function') {
+        ytPlayer.playVideo();
+        // Give the player a moment, then unmute
+        setTimeout(function () {
+        if (ytPlayer && typeof ytPlayer.unMute === 'function') {
+            ytPlayer.unMute();
+            ytPlayer.setVolume(60);           // re-apply after unmute
+        }
+        }, 250);
+    } else {
+        // Player not ready yet — retry once
+        setTimeout(function () {
+        if (ytPlayer && ytReady) {
+            ytPlayer.playVideo();
+            setTimeout(function () {
+            ytPlayer.unMute();
+            ytPlayer.setVolume(60);
+            }, 250);
+        }
+        }, 600);
+    }
+
+    // Fade out and remove the overlay
+    overlay.classList.add('hidden');
+    setTimeout(function () {
+        overlay.style.display = 'none';
+    }, 900);
+
+    // Little celebratory burst
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    sparkleBurst(cx, cy, 30);
+    confettiBurst(cx, cy);
+
+    audioStarted = true;
+    }
+
+    /* Click anywhere on the overlay to start */
+    overlay.addEventListener('click', startShow);
+    startBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    startShow();
     });
 
-    setTimeout(function () {
-      ghost.remove();
-      if (slotEl) {
-        slotEl.classList.remove('peek');
-        slotEl.classList.add('filled');
-        slotEl.textContent = letter;
-      }
-      afterPlace();
-    }, 400);
-  }
 
-  function afterPlace() {
-    if (!isSolved(current)) return;
-
-    const r = answerRow.getBoundingClientRect();
-    sparkleBurst(r.left + r.width / 2, r.top + r.height / 2, 20);
-
-    renderChips();
-    renderProgress();
-
-    const c = solvedCount();
-
-    if (c === TOTAL) {
-      showToast('all 21 words found ✦');
-      setTimeout(revealLetter, 950);
-      return;
-    }
-
-    showToast('solved ✦ next word');
-    if (busyAdvancing) return;
-    busyAdvancing = true;
-
-    setTimeout(function () {
-      let nxt = -1;
-      for (let k = 1; k <= TOTAL; k++) {
-        const j = (current + k) % TOTAL;
-        if (!isSolved(j)) { nxt = j; break; }
-      }
-      if (nxt !== -1) switchWord(nxt);
-      busyAdvancing = false;
-    }, 780);
-  }
-
-  function wrong() {
-    answerRow.classList.remove('shake');
-    void answerRow.offsetWidth;
-    answerRow.classList.add('shake');
-  }
-
-  function undo() {
-    const placed = placedOf(current);
-    if (!placed.length) return;
-    placed.pop();
-    state[current] = placed;
-    save();
-    renderAll();
-  }
-
-  function switchWord(idx) {
-    if (idx === current) {
-      focusTyping();
-      return;
-    }
-    current = idx;
-    resetInputBuffer();
-    renderAll();
-    focusTyping();
-  }
-
-  /* ══════════════════════════════════════════
-     KEYBOARD FOCUS HANDLERS
-     ══════════════════════════════════════════ */
-
-  /* Tap the play area (but not a tile) → open keyboard */
-  playCard.addEventListener('pointerdown', function (e) {
-    if (e.target.closest('.tile')) return;
-    focusTyping();
-  }, { passive: true });
-
-  /* Tapping any button also keeps the keyboard up */
-  document.addEventListener('click', function (e) {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    if (btn.id === 'startBtn' || btn.id === 'closeLetter') return;
-    if (introOverlay.classList.contains('show')) return;
-    if (letterOverlay.classList.contains('show')) return;
-    focusTyping();
-  });
-
-  /* Backspace fallback (desktop + some Android) */
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') {
-      if (document.activeElement === hiddenInput) hiddenInput.blur();
-      return;
-    }
-  });
-
-  /* ══════════════════════════════════════════
-     HINT + RESET
-     ══════════════════════════════════════════ */
-  hintBtn.addEventListener('click', function () {
-    const w = WORDS[current];
-    const placed = placedOf(current);
-    if (placed.length >= w.a.length) return;
-    const slot = answerRow.querySelector('[data-slot="' + placed.length + '"]');
-    if (!slot) return;
-    slot.classList.add('peek');
-    slot.textContent = w.a[placed.length];
-    setTimeout(function () {
-      if (!slot.classList.contains('filled')) {
-        slot.textContent = '';
-        slot.classList.remove('peek');
-      }
-    }, 950);
-  });
-
-  undoBtn.addEventListener('click', function () {
-    undo();
-  });
-
-  resetBtn.addEventListener('click', function () {
-    if (!window.confirm('Start the anagram over? All your solved words will be cleared.')) return;
-    state = {};
-    save();
-    current = 0;
-    resetInputBuffer();
-    renderAll();
-    focusTyping();
-    showToast('fresh start ✦');
-  });
-
-  /* ══════════════════════════════════════════
-     TOAST
-     ══════════════════════════════════════════ */
-  let toastTimer = null;
-  function showToast(msg) {
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () {
-      toastEl.classList.remove('show');
-    }, 2200);
-  }
-
-  /* ══════════════════════════════════════════
-     OVERLAYS
-     ══════════════════════════════════════════ */
-  startBtn.addEventListener('click', function () {
-    introOverlay.classList.remove('show');
-    /* focus immediately while still inside the user gesture,
-       so the mobile keyboard is allowed to open */
-    focusTyping();
-  });
-
-  function revealLetter() {
-    if (document.activeElement === hiddenInput) hiddenInput.blur();
-
-    /* stagger the highlighted words */
-    const kws = letterOverlay.querySelectorAll('.kw');
-    kws.forEach(function (el, i) {
-      el.style.animationDelay = (0.2 + i * 0.06) + 's';
-    });
-
-    letterOverlay.classList.add('show');
-    document.body.style.overflow = 'hidden';
-
-    /* celebration */
-    sparkleBurst(window.innerWidth / 2, window.innerHeight * 0.35, 34);
-    confettiBurst(window.innerWidth / 2, window.innerHeight * 0.3);
-    setTimeout(function () {
-      confettiBurst(window.innerWidth * 0.25, window.innerHeight * 0.25);
-      confettiBurst(window.innerWidth * 0.75, window.innerHeight * 0.25);
-    }, 350);
-  }
-
-  closeLetter.addEventListener('click', function () {
-    letterOverlay.classList.remove('show');
-    document.body.style.overflow = '';
-  });
-
-  letterBtn.addEventListener('click', revealLetter);
-
-  /* ══════════════════════════════════════════
-     EFFECTS
-     ══════════════════════════════════════════ */
+  /* ═══════════════════════════════════════════════════════════════
+     DOM SPARKLES / CONFETTI (used by the start burst)
+     ═══════════════════════════════════════════════════════════════ */
   function sparkleBurst(cx, cy, count) {
     const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
     const total = count || 24 + Math.floor(Math.random() * 16);
     for (let i = 0; i < total; i++) {
       const spark = document.createElement('div');
       spark.className = 'sparkle-burst';
-      spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      spark.textContent = emojis[(Math.random() * emojis.length) | 0];
       const angle = Math.random() * 2 * Math.PI;
       const dist = 60 + Math.random() * 180;
       spark.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-      spark.style.setProperty('--ty', Math.sin(angle) * dist - 50 + 'px');
+      spark.style.setProperty('--ty', (Math.sin(angle) * dist - 50) + 'px');
       spark.style.left = (cx || window.innerWidth / 2) + 'px';
       spark.style.top = (cy || window.innerHeight / 2) + 'px';
       spark.style.fontSize = (1 + Math.random() * 1.8) + 'rem';
       spark.style.animationDuration = (0.4 + Math.random() * 0.6) + 's';
       document.body.appendChild(spark);
-      setTimeout(function () { spark.remove(); }, 1200);
+      setTimeout(() => spark.remove(), 1200);
     }
   }
 
@@ -1398,43 +1149,72 @@
       piece.style.top = (cy || window.innerHeight / 2) + 'px';
       piece.style.width = (4 + Math.random() * 7) + 'px';
       piece.style.height = (4 + Math.random() * 7) + 'px';
-      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.background = colors[(Math.random() * colors.length) | 0];
       piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
       const angle = Math.random() * 2 * Math.PI;
-      const dist = 60 + Math.random() * 300;
+      const dist = 70 + Math.random() * 300;
       piece.style.animationDuration = (1.0 + Math.random() * 1.6) + 's';
-      piece.style.animationDelay = (Math.random() * 0.5) + 's';
+      piece.style.animationDelay = (Math.random() * 0.4) + 's';
       piece.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+      piece.style.setProperty('--ty', (Math.sin(angle) * dist - 140) + 'px');
       document.body.appendChild(piece);
-      setTimeout(function () { piece.remove(); }, 3000);
+      setTimeout(() => piece.remove(), 3000);
     }
   }
 
-  /* gentle ambient sparkles on stray clicks */
+
+  /* ═══════════════════════════════════════════════════════════════
+     INTERACTIONS (click sky → firework)
+     ═══════════════════════════════════════════════════════════════ */
   document.addEventListener('click', function (e) {
-    if (letterOverlay.classList.contains('show')) return;
-    if (introOverlay.classList.contains('show')) return;
     const tag = e.target.tagName.toLowerCase();
     if (tag === 'a' || tag === 'button' || e.target.closest('.sparkle-burst')) return;
-    if (Math.random() > 0.25) return;
-    sparkleBurst(e.clientX, e.clientY, 6);
+    /* Ignore clicks on the start overlay */
+    if (e.target.closest('.start-overlay')) return;
+
+    const x = e.clientX;
+    const y = e.clientY;
+
+    const r = Math.min(W * 0.28, H * 0.22);
+    flashes.push({ x, y, r: 4, max: r * 0.8, life: 1 });
+
+    const palette = PALETTES[(Math.random() * PALETTES.length) | 0];
+    const count = 50 + ((Math.random() * 40) | 0);
+    for (let i = 0; i < count; i++) {
+      const ang = (i / count) * Math.PI * 2 + rand(-0.08, 0.08);
+      const spd = rand(90, 300);
+      particles.push({
+        x, y, px: x, py: y,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        tx: 0, ty: 0,
+        color: palette[(Math.random() * palette.length) | 0],
+        size: rand(1.2, 2.4),
+        alpha: 1,
+        age: 0,
+        hold: rand(0.25, 0.6),
+        decay: rand(0.8, 1.3),
+        mode: 'normal',
+        seed: Math.random() * 6.28
+      });
+    }
+
+    if (Math.random() > 0.6) sparkleBurst(x, y, 6);
   });
 
-  /* ══════════════════════════════════════════
-     INIT
-     ══════════════════════════════════════════ */
-  load();
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      if (document.activeElement) document.activeElement.blur();
+    }
+    if (e.key === 'h' || e.key === 'H') {
+      window.location.href = 'index.html';
+    }
+    if (e.key === 'f' || e.key === 'F') {
+      launchRocket(true);
+    }
+  });
 
-  let start = 0;
-  for (let i = 0; i < TOTAL; i++) {
-    if (!isSolved(i)) { start = i; break; }
-  }
-  current = start;
-
-  resetInputBuffer();
-  renderAll();
-
-  console.log('🌸 Day 06 · 21 words, one hidden letter 💌 (mobile-ready)');
+  console.log('🌙🎆 Day 05 · night sky + word fireworks + YouTube audio 💖');
 })();
 </script>
 
