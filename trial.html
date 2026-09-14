@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Day 05 · Ruth's 21st</title>
+<title>Ruth's 21st</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Patrick+Hand&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
@@ -94,135 +94,6 @@
     padding-bottom: 8px;
   }
 
-  /* ─── BOTTOM BACK BUTTON ─── */
-  .hud-back {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 34px;
-    border-radius: 60px;
-    border: none;
-    background: rgba(10, 7, 24, 0.55);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #f0d5ec;
-    font-weight: 600;
-    font-size: 0.9rem;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
-    transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    text-decoration: none;
-    letter-spacing: 0.02em;
-    pointer-events: auto;
-  }
-
-  .hud-back:hover {
-    transform: translateX(-50%) translateY(-3px) scale(1.03);
-    border-color: rgba(199, 139, 219, 0.35);
-    background: rgba(20, 14, 44, 0.75);
-  }
-
-  .hud-back:active { transform: translateX(-50%) scale(0.95); }
-
-  /* ─── START OVERLAY ─── */
-  .start-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: rgba(5, 4, 12, 0.78);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    transition: opacity 0.8s ease, visibility 0.8s ease;
-    cursor: pointer;
-  }
-
-  .start-overlay.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  .start-overlay .heart {
-    font-size: 3.6rem;
-    margin-bottom: 8px;
-    animation: pulse 1.8s ease-in-out infinite;
-    filter: drop-shadow(0 0 30px rgba(248, 164, 184, 0.5));
-  }
-
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.12); }
-  }
-
-  .start-overlay .name {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.2rem, 9vw, 3.6rem);
-    font-weight: 700;
-    background: linear-gradient(135deg, #ffb3c9, #c78bdb, #ffd6a0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1.1;
-    letter-spacing: 1px;
-    text-align: center;
-  }
-
-  .start-overlay .sub {
-    font-family: 'Patrick Hand', cursive;
-    font-size: 1.15rem;
-    color: #b9a8d8;
-    margin-top: 2px;
-    letter-spacing: 0.08em;
-    text-align: center;
-  }
-
-  .start-overlay .start-btn {
-    margin-top: 32px;
-    padding: 16px 44px;
-    border-radius: 60px;
-    border: none;
-    background: linear-gradient(135deg, #f8a4b8, #c78bdb);
-    color: #fff;
-    font-weight: 700;
-    font-size: 1.05rem;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    box-shadow: 0 8px 40px rgba(199, 139, 219, 0.40);
-    transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    letter-spacing: 0.02em;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .start-btn:hover {
-    transform: translateY(-3px) scale(1.04);
-    box-shadow: 0 16px 56px rgba(199, 139, 219, 0.60);
-  }
-
-  .start-btn:active { transform: scale(0.96); }
-
-  .start-overlay .hint {
-    margin-top: 18px;
-    font-size: 0.78rem;
-    color: #7a6f9a;
-    letter-spacing: 0.04em;
-    text-align: center;
-    max-width: 280px;
-    line-height: 1.5;
-  }
-
   /* ─── HIDDEN YOUTUBE PLAYER ─── */
   #yt-holder {
     position: fixed;
@@ -263,23 +134,44 @@
     100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(720deg) scale(0.2); }
   }
 
+  /* ─── PHOTO FIREWORKS ─── */
+  .firework-photo {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -50%) scale(0.2) rotate(-8deg);
+    width: clamp(130px, 24vw, 240px);
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 3px solid rgba(255, 255, 255, 0.85);
+    box-shadow:
+      0 0 0 1px rgba(199, 139, 219, 0.35),
+      0 20px 60px rgba(0, 0, 0, 0.5),
+      0 0 50px rgba(248, 164, 184, 0.45);
+    pointer-events: none;
+    z-index: 500;
+    animation: photoPop 4.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes photoPop {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.2) rotate(-8deg); }
+    12%  { opacity: 1; transform: translate(-50%, -50%) scale(1.06) rotate(3deg); }
+    20%  { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+    78%  { opacity: 1; transform: translate(-50%, -55%) scale(1) rotate(0deg); }
+    100% { opacity: 0; transform: translate(-50%, -72%) scale(0.85) rotate(-3deg); }
+  }
+
   /* ─── RESPONSIVE ─── */
   @media (max-width: 600px) {
     .hud-timer { top: 12px; right: 12px; padding: 6px 10px; gap: 4px; }
     .hud-timer .cell { min-width: 32px; }
     .hud-timer .cell .num { font-size: 1rem; }
     .hud-timer .cell .lbl { font-size: 0.38rem; }
-    .hud-back { bottom: 18px; padding: 10px 28px; font-size: 0.82rem; }
-    .start-overlay .heart { font-size: 3rem; }
-    .start-overlay .name { font-size: 2.4rem; }
-    .start-overlay .sub { font-size: 1rem; }
-    .start-btn { padding: 14px 34px; font-size: 0.95rem; }
   }
 
   @media (max-width: 400px) {
     .hud-timer .cell { min-width: 28px; }
-    .hud-timer .cell .num { font-size: 0.88rem; }
-    .start-overlay .name { font-size: 2rem; }
   }
 </style>
 </head>
@@ -296,20 +188,6 @@
   <div class="cell"><span class="num" id="cdMinutes">00</span><span class="lbl">min</span></div>
   <div class="sep">:</div>
   <div class="cell"><span class="num" id="cdSeconds">00</span><span class="lbl">sec</span></div>
-</div>
-
-<!-- ─── BOTTOM BACK BUTTON ─── -->
-<a href="index.html" class="hud-back" id="backBtn">
-  ← back to home
-</a>
-
-<!-- ─── START OVERLAY ─── -->
-<div class="start-overlay" id="startOverlay">
-  <div class="heart">🎆</div>
-  <div class="name">Ruth</div>
-  <div class="sub">twenty‑one · a celebration</div>
-  <button class="start-btn" id="startBtn">▶ start fireworks show</button>
-  <div class="hint">Tap to begin your fireworks show<br /> ✨</div>
 </div>
 
 <!-- ─── HIDDEN YOUTUBE PLAYER ─── -->
@@ -345,8 +223,21 @@
     'My World'
   ];
 
+  /* ═══════════════════════════════════════════════════════════════
+     📸  PHOTO FIREWORKS — drop ruth1.jpg … ruth5.jpg next to this file
+     ═══════════════════════════════════════════════════════════════ */
+  const FIREWORK_PHOTOS = [
+    'ruth1.jpg',
+    'ruth2.jpg',
+    'ruth3.jpg',
+    'ruth4.jpg',
+    'ruth5.jpg'
+  ];
+
   const WORD_EVERY_MIN = 8.5;
   const WORD_EVERY_MAX = 11.5;
+  const PHOTO_EVERY_MIN = 11;
+  const PHOTO_EVERY_MAX = 16;
   const NORMAL_EVERY_MIN = 0.85;
   const NORMAL_EVERY_MAX = 1.6;
   /* ═══════════════════════════════════════════════════════════════ */
@@ -691,14 +582,23 @@
   ];
 
   let wordIndex = 0;
-  let nextWordIn = 1.8;
+  let photoIndex = 0;
+  let nextWordIn = 3.5;
+  let nextPhotoIn = rand(6, 9);
   let nextNormalIn = 0.6;
 
-  function launchRocket(isWord) {
+  function launchRocket(kind) {
     if (particles.length > MAX_PARTICLES) return;
 
-    const x = rand(W * 0.12, W * 0.88);
-    const targetY = isWord ? rand(H * 0.16, H * 0.30) : rand(H * 0.09, H * 0.40);
+    let targetY;
+    if (kind === 'word') targetY = rand(H * 0.16, H * 0.30);
+    else if (kind === 'photo') targetY = rand(H * 0.22, H * 0.40);
+    else targetY = rand(H * 0.09, H * 0.40);
+
+    let x;
+    if (kind === 'photo') x = rand(W * 0.24, W * 0.76);
+    else x = rand(W * 0.12, W * 0.88);
+
     const y0 = H + 12;
     const g = 620;
     const vy = -Math.sqrt(2 * g * Math.max(40, y0 - targetY));
@@ -707,8 +607,9 @@
       x, y: y0, px: x, py: y0,
       vx: rand(-28, 28),
       vy, g,
-      isWord,
-      word: isWord ? FIREWORK_WORDS[wordIndex++ % FIREWORK_WORDS.length] : null,
+      kind,
+      word: kind === 'word' ? FIREWORK_WORDS[wordIndex++ % FIREWORK_WORDS.length] : null,
+      photoSrc: kind === 'photo' ? FIREWORK_PHOTOS[photoIndex++ % FIREWORK_PHOTOS.length] : null,
       color: pickColor()
     });
   }
@@ -727,7 +628,8 @@
       r.y += r.vy * dt;
 
       if (r.vy >= -50) {
-        if (r.isWord) explodeWord(r.x, r.y, r.word);
+        if (r.kind === 'word') explodeWord(r.x, r.y, r.word);
+        else if (r.kind === 'photo') explodePhoto(r.x, r.y, r.photoSrc);
         else explodeNormal(r.x, r.y);
         rockets.splice(i, 1);
       }
@@ -802,6 +704,34 @@
         seed: Math.random() * 6.28
       });
     }
+  }
+
+  /* ─── PHOTO EXPLOSION: sparkle burst + the actual photo popping in ─── */
+  function explodePhoto(x, y, src) {
+    explodeNormal(x, y);
+    showPhoto(x, y, src);
+  }
+
+  function showPhoto(x, y, src) {
+    // Preload first — if we start the CSS animation before the image has
+    // actually downloaded, the animation can finish (and fade out) before
+    // the photo ever becomes visible. Waiting for load/error fixes that.
+    const pre = new Image();
+
+    const reveal = function () {
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = 'Ruth';
+      img.className = 'firework-photo';
+      img.style.left = x + 'px';
+      img.style.top = y + 'px';
+      document.body.appendChild(img);
+      setTimeout(() => img.remove(), 4300);
+    };
+
+    pre.onload = reveal;
+    pre.onerror = reveal; // still show something (and log) rather than silently skip
+    pre.src = src;
   }
 
   function updateParticles(dt) {
@@ -950,14 +880,20 @@
 
     nextNormalIn -= dt;
     if (nextNormalIn <= 0) {
-      launchRocket(false);
+      launchRocket('normal');
       nextNormalIn = rand(NORMAL_EVERY_MIN, NORMAL_EVERY_MAX);
     }
 
     nextWordIn -= dt;
     if (nextWordIn <= 0) {
-      launchRocket(true);
+      launchRocket('word');
       nextWordIn = rand(WORD_EVERY_MIN, WORD_EVERY_MAX);
+    }
+
+    nextPhotoIn -= dt;
+    if (nextPhotoIn <= 0) {
+      launchRocket('photo');
+      nextPhotoIn = rand(PHOTO_EVERY_MIN, PHOTO_EVERY_MAX);
     }
 
     updateShootingStars(dt);
@@ -985,6 +921,12 @@
   }
 
   requestAnimationFrame(frame);
+
+  /* Little celebratory burst right on load */
+  setTimeout(function () {
+    sparkleBurst(W / 2, H / 2, 30);
+    confettiBurst(W / 2, H / 2);
+  }, 400);
 
 
   /* ═══════════════════════════════════════════════════════════════
@@ -1017,107 +959,75 @@
   setInterval(updateCountdown, 1000);
 
 
-    /* ═══════════════════════════════════════════════════════════════
-    YOUTUBE AUDIO + START OVERLAY  (FIXED)
-    ═══════════════════════════════════════════════════════════════ */
-    const YT_VIDEO_ID = 'nzE8eUlseRM';
+  /* ═══════════════════════════════════════════════════════════════
+     YOUTUBE AUDIO — muted autoplay, unmutes on first interaction
+     (browsers block unmuted autoplay without a user gesture)
+     ═══════════════════════════════════════════════════════════════ */
+  const YT_VIDEO_ID = 'nzE8eUlseRM';
 
-    let ytPlayer = null;
-    let ytReady = false;
-    let audioStarted = false;
+  let ytPlayer = null;
+  let ytReady = false;
+  let audioUnmuted = false;
 
-    const overlay = document.getElementById('startOverlay');
-    const startBtn = document.getElementById('startBtn');
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
 
-    /* Load the YouTube IFrame API */
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(tag);
-
-    /* Global callback required by the YouTube API */
-    window.onYouTubeIframeAPIReady = function () {
+  window.onYouTubeIframeAPIReady = function () {
     ytPlayer = new YT.Player('yt-player', {
-        width: '1',
-        height: '1',
-        videoId: YT_VIDEO_ID,
-        playerVars: {
-        autoplay: 0,
+      width: '1',
+      height: '1',
+      videoId: YT_VIDEO_ID,
+      playerVars: {
+        autoplay: 1,
+        mute: 1,
         controls: 0,
         disablekb: 1,
         fs: 0,
         modestbranding: 1,
         playsinline: 1,
         rel: 0,
-        origin: window.location.origin      // ← ADD THIS
-        },
-        events: {
+        origin: window.location.origin
+      },
+      events: {
         onReady: function (event) {
-            ytReady = true;
-            event.target.setVolume(60);       // sets default level on desktop
-            // Do NOT unmute here — wait for the user gesture
+          ytReady = true;
+          event.target.setVolume(60);
+          event.target.playVideo();
         },
         onStateChange: function (event) {
-            // If the video ends, loop it back to the start
-            if (event.data === YT.PlayerState.ENDED) {
+          if (event.data === YT.PlayerState.ENDED) {
             event.target.seekTo(0);
             event.target.playVideo();
-            }
+          }
         }
-        }
+      }
     });
+  };
+
+  function unmuteAudio() {
+    if (audioUnmuted) return;
+    audioUnmuted = true;
+
+    const doUnmute = function () {
+      if (ytPlayer && typeof ytPlayer.unMute === 'function') {
+        ytPlayer.unMute();
+        ytPlayer.setVolume(60);
+        ytPlayer.playVideo();
+      }
     };
 
-    function startShow() {
-    if (audioStarted) return;
+    if (ytPlayer && ytReady) doUnmute();
+    else setTimeout(doUnmute, 700);
+  }
 
-    // ── Play + unmute ──
-    if (ytPlayer && ytReady && typeof ytPlayer.playVideo === 'function') {
-        ytPlayer.playVideo();
-        // Give the player a moment, then unmute
-        setTimeout(function () {
-        if (ytPlayer && typeof ytPlayer.unMute === 'function') {
-            ytPlayer.unMute();
-            ytPlayer.setVolume(60);           // re-apply after unmute
-        }
-        }, 250);
-    } else {
-        // Player not ready yet — retry once
-        setTimeout(function () {
-        if (ytPlayer && ytReady) {
-            ytPlayer.playVideo();
-            setTimeout(function () {
-            ytPlayer.unMute();
-            ytPlayer.setVolume(60);
-            }, 250);
-        }
-        }, 600);
-    }
-
-    // Fade out and remove the overlay
-    overlay.classList.add('hidden');
-    setTimeout(function () {
-        overlay.style.display = 'none';
-    }, 900);
-
-    // Little celebratory burst
-    const cx = window.innerWidth / 2;
-    const cy = window.innerHeight / 2;
-    sparkleBurst(cx, cy, 30);
-    confettiBurst(cx, cy);
-
-    audioStarted = true;
-    }
-
-    /* Click anywhere on the overlay to start */
-    overlay.addEventListener('click', startShow);
-    startBtn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    startShow();
-    });
+  document.addEventListener('click', unmuteAudio, { once: true });
+  document.addEventListener('touchstart', unmuteAudio, { once: true });
+  document.addEventListener('keydown', unmuteAudio, { once: true });
 
 
   /* ═══════════════════════════════════════════════════════════════
-     DOM SPARKLES / CONFETTI (used by the start burst)
+     DOM SPARKLES / CONFETTI
      ═══════════════════════════════════════════════════════════════ */
   function sparkleBurst(cx, cy, count) {
     const emojis = ['❤️', '💖', '✨', '🌟', '🎉', '💗', '🌸', '🌺', '🥳', '🎂', '💕', '🦋', '⭐', '💫', '🎊', '🌈'];
@@ -1168,9 +1078,7 @@
      ═══════════════════════════════════════════════════════════════ */
   document.addEventListener('click', function (e) {
     const tag = e.target.tagName.toLowerCase();
-    if (tag === 'a' || tag === 'button' || e.target.closest('.sparkle-burst')) return;
-    /* Ignore clicks on the start overlay */
-    if (e.target.closest('.start-overlay')) return;
+    if (tag === 'a' || tag === 'button' || e.target.closest('.sparkle-burst') || e.target.closest('.firework-photo')) return;
 
     const x = e.clientX;
     const y = e.clientY;
@@ -1206,15 +1114,15 @@
     if (e.key === 'Escape') {
       if (document.activeElement) document.activeElement.blur();
     }
-    if (e.key === 'h' || e.key === 'H') {
-      window.location.href = 'index.html';
-    }
     if (e.key === 'f' || e.key === 'F') {
-      launchRocket(true);
+      launchRocket('word');
+    }
+    if (e.key === 'p' || e.key === 'P') {
+      launchRocket('photo');
     }
   });
 
-  console.log('🌙🎆 Day 05 · night sky + word fireworks + YouTube audio 💖');
+  console.log('🌙🎆 index · night sky + word & photo fireworks + YouTube audio 💖');
 })();
 </script>
 
